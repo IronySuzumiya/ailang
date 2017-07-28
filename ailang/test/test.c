@@ -14,12 +14,15 @@ int main() {
     DEC_REFCNT(v2);
     v2 = int_fromlong(-56);
     PRINT_STDOUT(v2);
-    DEC_REFCNT(v1);
-    DEC_REFCNT(v2);
-    DEC_REFCNT(v3);
 
     Object *s1 = string_fromcstring("Hello World");
     PRINT_STDOUT(s1);
+
+    Object *s2 = v1->ob_type->tp_as_number->nb_add(v1, s1);
+
+    DEC_REFCNT(v1);
+    DEC_REFCNT(v2);
+    DEC_REFCNT(v3);
     DEC_REFCNT(s1);
 
     IntBlock *s = block_list;

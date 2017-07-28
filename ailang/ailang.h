@@ -9,11 +9,12 @@
 #include <string.h>
 #include <math.h>
 #include "system\utils.h"
-#include "system\gc.h"
 #include "object\object.h"
+#include "system\gc.h"
 #include "object\typeobject.h"
 #include "object\intobject.h"
 #include "object\stringobject.h"
 #include "object\dictobject.h"
+#include "object\listobject.h"
 
 #endif

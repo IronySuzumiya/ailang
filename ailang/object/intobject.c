@@ -24,6 +24,7 @@ static Object *int_shr(IntObject *lhs, IntObject *rhs);
 static Object *int_and(IntObject *lhs, IntObject *rhs);
 static Object *int_or(IntObject *lhs, IntObject *rhs);
 static Object *int_not(IntObject *ob);
+static Object *int_xor(IntObject *lhs, IntObject *rhs);
 static IntObject *fill_free_list(void);
 
 static numbermethods int_as_number = {
@@ -45,6 +46,7 @@ static numbermethods int_as_number = {
     (binaryfunc)int_and,
     (binaryfunc)int_or,
     (unaryfunc)int_not,
+    (binaryfunc)int_xor,
 
     0,
     0,
@@ -145,68 +147,169 @@ Object *int_to_string(IntObject *ob) {
 }
 
 Object *int_add(IntObject *lhs, IntObject *rhs) {
-    return INT_BINARY_WITH_CHECK(lhs, rhs, +);
+    Object *r = INT_BINARY_WITH_CHECK(lhs, rhs, +);
+    if (r) {
+        return r;
+    }
+    else {
+        UNSUPPORTED_ADD(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
+        return (Object *)none;
+    }
 }
 
 Object *int_sub(IntObject *lhs, IntObject *rhs) {
-    return INT_BINARY_WITH_CHECK(lhs, rhs, -);
+    Object *r = INT_BINARY_WITH_CHECK(lhs, rhs, -);
+    if (r) {
+        return r;
+    }
+    else {
+        UNSUPPORTED_SUB(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
+        return (Object *)none;
+    }
 }
 
 Object *int_mul(IntObject *lhs, IntObject *rhs) {
-    return INT_BINARY_WITH_CHECK(lhs, rhs, *);
+    Object *r = INT_BINARY_WITH_CHECK(lhs, rhs, *);
+    if (r) {
+        return r;
+    }
+    else {
+        UNSUPPORTED_MUL(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
+        return (Object *)none;
+    }
 }
 
 Object *int_div(IntObject *lhs, IntObject *rhs) {
-    return INT_BINARY_WITH_CHECK(lhs, rhs, /);
+    Object *r = INT_BINARY_WITH_CHECK(lhs, rhs, /);
+    if (r) {
+        return r;
+    }
+    else {
+        UNSUPPORTED_DIV(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
+        return (Object *)none;
+    }
 }
 
 Object *int_mod(IntObject *lhs, IntObject *rhs) {
-    return INT_BINARY_WITH_CHECK(lhs, rhs, %);
+    Object *r = INT_BINARY_WITH_CHECK(lhs, rhs, %);
+    if (r) {
+        return r;
+    }
+    else {
+        UNSUPPORTED_MOD(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
+        return (Object *)none;
+    }
 }
 
 Object *int_pow(IntObject *lhs, IntObject *rhs) {
-    return CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs) ?
-        int_fromlong((long)pow(lhs->ob_ival, rhs->ob_ival)) : NULL;
+    if (CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs)) {
+        return int_fromlong((long)pow(lhs->ob_ival, rhs->ob_ival));
+    }
+    else {
+        UNSUPPORTED_POW(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
+        return (Object *)none;
+    }
 }
 
 Object *int_pos(IntObject *ob) {
-    return CHECK_TYPE_INT(ob) ?
-        int_fromlong(ob->ob_ival) : NULL;
+    if (CHECK_TYPE_INT(ob)) {
+        return int_fromlong(ob->ob_ival);
+    }
+    else {
+        UNSUPPORTED_POS(OB_TYPENAME(ob));
+        return (Object *)none;
+    }
 }
 
 Object *int_neg(IntObject *ob) {
-    return CHECK_TYPE_INT(ob) ?
-        int_fromlong(-ob->ob_ival) : NULL;
+    if (CHECK_TYPE_INT(ob)) {
+        return int_fromlong(-ob->ob_ival);
+    }
+    else {
+        UNSUPPORTED_NEG(OB_TYPENAME(ob));
+        return (Object *)none;
+    }
 }
 
 Object *int_abs(IntObject *ob) {
-    return CHECK_TYPE_INT(ob) ?
-        int_fromlong(ob->ob_ival >= 0 ? ob->ob_ival : -ob->ob_ival) : NULL;
+    if (CHECK_TYPE_INT(ob)) {
+        return int_fromlong(ob->ob_ival >= 0 ? ob->ob_ival : -ob->ob_ival);
+    }
+    else {
+        UNSUPPORTED_ABS(OB_TYPENAME(ob));
+        return (Object *)none;
+    }
 }
 
 int int_nonzero(IntObject *ob) {
     return CHECK_TYPE_INT(ob) ?
-        (ob->ob_ival != 0 ? 1 : 0) : -1;
+        (ob->ob_ival != 0 ? 1 : 0) : ob->ob_type->tp_as_number->nb_nonzero((Object *)ob);
 }
 
 Object *int_shl(IntObject *lhs, IntObject *rhs) {
-    return INT_BINARY_WITH_CHECK(lhs, rhs, <<);
+    Object *r = INT_BINARY_WITH_CHECK(lhs, rhs, <<);
+    if (r) {
+        return r;
+    }
+    else {
+        UNSUPPORTED_SHL(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
+        return (Object *)none;
+    }
 }
 
 Object *int_shr(IntObject *lhs, IntObject *rhs) {
-    return INT_BINARY_WITH_CHECK(lhs, rhs, >>);
+    Object *r = INT_BINARY_WITH_CHECK(lhs, rhs, >>);
+    if (r) {
+        return r;
+    }
+    else {
+        UNSUPPORTED_SHR(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
+        return (Object *)none;
+    }
 }
 
 Object *int_and(IntObject *lhs, IntObject *rhs) {
-    return INT_BINARY_WITH_CHECK(lhs, rhs, &);
+    Object *r = INT_BINARY_WITH_CHECK(lhs, rhs, &);
+    if (r) {
+        return r;
+    }
+    else {
+        UNSUPPORTED_AND(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
+        return (Object *)none;
+    }
 }
 
 Object *int_or(IntObject *lhs, IntObject *rhs) {
-    return INT_BINARY_WITH_CHECK(lhs, rhs, |);
+    Object *r = INT_BINARY_WITH_CHECK(lhs, rhs, |);
+    if (r) {
+        return r;
+    }
+    else {
+        UNSUPPORTED_OR(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
+        return (Object *)none;
+    }
 }
 
 Object *int_not(IntObject *ob) {
-    return INT_UNARY_WITH_CHECK(ob, ~);
+    Object *r = INT_UNARY_WITH_CHECK(ob, ~);
+    if (r) {
+        return r;
+    }
+    else {
+        UNSUPPORTED_NOT(OB_TYPENAME(ob));
+        return (Object *)none;
+    }
+}
+
+Object *int_xor(IntObject *lhs, IntObject *rhs) {
+    Object *r = INT_BINARY_WITH_CHECK(lhs, rhs, ^);
+    if (r) {
+        return r;
+    }
+    else {
+        UNSUPPORTED_XOR(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
+        return (Object *)none;
+    }
 }
 
 IntObject *fill_free_list() {

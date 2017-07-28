@@ -4,8 +4,8 @@
 
 #include "../system/utils.h"
 
-#define OBJECT_HEAD     \
-    ssize_t ob_refcnt;  \
+#define OBJECT_HEAD                 \
+    ssize_t ob_refcnt;              \
     struct _typeobject *ob_type;
 
 #define OBJECT_VAR_HEAD \
@@ -15,6 +15,7 @@
 #define OB_REFCNT(ob)       (((Object*)(ob))->ob_refcnt)
 #define OB_TYPE(ob)         (((Object*)(ob))->ob_type)
 #define OB_SIZE(ob)         (((VarObject*)(ob))->ob_size)
+#define OB_TYPENAME(ob)     (OB_TYPE(ob)->tp_name)
 #define OB_DEALLOC(ob)      (OB_TYPE(ob)->tp_dealloc((Object *)(ob)))
 
 #define INIT_OBJECT_HEAD(type)              1, type,
@@ -76,6 +77,7 @@ typedef enquiry2 cmpfunc;
 typedef ssize_t(*lengthfunc)(Object*);
 typedef Object*(*ssizeargfunc)(Object*, ssize_t);
 typedef Object*(*ssize2argfunc)(Object*, ssize_t, ssize_t);
+typedef Object*(*ssizeobjargfunc)(Object*, ssize_t, Object*);
 
 typedef long(*hashfunc)(Object*);
 
@@ -98,6 +100,7 @@ typedef struct _numbermethods {
     binaryfunc nb_and;
     binaryfunc nb_or;
     unaryfunc nb_not;
+    binaryfunc nb_xor;
 
     unaryfunc nb_int;
     unaryfunc nb_long;
@@ -108,7 +111,8 @@ numbermethods;
 typedef struct _sequencemethods {
     lengthfunc sq_length;
     binaryfunc sq_concat;
-    ssizeargfunc sq_item;
+    ssizeargfunc sq_getitem;
+    ssizeobjargfunc sq_setitem;
     ssize2argfunc sq_slice;
     enquiry2 sq_contains;
 }
@@ -116,7 +120,8 @@ sequencemethods;
 
 typedef struct _mappingmethods {
     lengthfunc mp_length;
-    binaryfunc mp_item;
+    binaryfunc mp_getitem;
+    ternaryfunc sq_setitem;
 }
 mappingmethods;
 

@@ -11,14 +11,16 @@ static long string_hash(StringObject *a);
 static Object *string_to_string(StringObject *a);
 static ssize_t string_length(StringObject *a);
 static Object *string_concat(StringObject *lhs, StringObject *rhs);
-static Object *string_item(StringObject *a, ssize_t index);
+static Object *string_getitem(StringObject *a, ssize_t index);
 static Object *string_slice(StringObject *a, ssize_t start, ssize_t end);
 static int string_contains(StringObject *a, StringObject *sub);
 
+// string object is immutable
 static sequencemethods string_as_sequence = {
     (lengthfunc)string_length,
     (binaryfunc)string_concat,
-    (ssizeargfunc)string_item,
+    (ssizeargfunc)string_getitem,
+    0,
     (ssize2argfunc)string_slice,
     (enquiry2)string_contains,
 };
@@ -139,7 +141,7 @@ void string_dealloc(StringObject *a) {
 
 void string_print(StringObject *a, FILE *stream) {
     if (CHECK_TYPE_STRING(a)) {
-        fprintf(stream, "<type %s> <value '%s'> <addr %p>\n", a->ob_type->tp_name, a->ob_sval, a);
+        fprintf(stream, "<type 'string'> <value '%s'> <addr %p>\n", a->ob_sval, a);
     }
     else {
         a->ob_type->tp_print((Object *)a, stream);
@@ -206,17 +208,21 @@ Object *string_concat(StringObject *lhs, StringObject *rhs) {
     }
 }
 
-Object *string_item(StringObject *a, ssize_t index) {
+Object *string_getitem(StringObject *a, ssize_t index) {
     if (CHECK_TYPE_STRING(a)) {
+        if (index < 0) {
+            index += a->ob_size;
+        }
         if (index >= 0 && index < a->ob_size) {
             return string_fromcstring_withsize(&a->ob_sval[index], 1);
         }
         else {
+            RUNTIME_EXCEPTION("index out of range");
             return (Object *)none;
         }
     }
     else {
-        return (Object *)a->ob_type->tp_as_sequence->sq_item((Object *)a, index);
+        return (Object *)a->ob_type->tp_as_sequence->sq_getitem((Object *)a, index);
     }
 }
 

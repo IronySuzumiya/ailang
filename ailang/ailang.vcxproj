@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="object\dictobject.c" />
     <ClCompile Include="object\intobject.c" />
+    <ClCompile Include="object\listobject.c" />
     <ClCompile Include="object\object.c" />
     <ClCompile Include="object\stringobject.c" />
     <ClCompile Include="object\typeobject.c" />
@@ -151,6 +152,7 @@
     <ClInclude Include="ailang.h" />
     <ClInclude Include="object\dictobject.h" />
     <ClInclude Include="object\intobject.h" />
+    <ClInclude Include="object\listobject.h" />
     <ClInclude Include="object\object.h" />
     <ClInclude Include="object\stringobject.h" />
     <ClInclude Include="object\typeobject.h" />

@@ -10,7 +10,7 @@
 #define IS_SMALL_INTOBJECT(x)           ((x) >= -NUM_NEG_SMALL_INTOBJECT && (x) < NUM_POS_SMALL_INTOBJECT)
 #define SMALL_INTOBJECT_INDEX(x)        ((x) + NUM_NEG_SMALL_INTOBJECT)
 
-typedef struct {
+typedef struct _intobject {
     OBJECT_HEAD
     long ob_ival;
 }

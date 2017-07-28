@@ -36,6 +36,9 @@
     <ClCompile Include="test\test.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="object\listobject.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="system\gc.h">
@@ -60,6 +63,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="object\dictobject.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="object\listobject.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

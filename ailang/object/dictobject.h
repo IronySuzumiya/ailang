@@ -4,7 +4,7 @@
 
 #include "../system/utils.h"
 
-typedef struct {
+typedef struct _dictobject {
     OBJECT_HEAD
 }
 DictObject;

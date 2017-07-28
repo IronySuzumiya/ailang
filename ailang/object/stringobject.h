@@ -4,7 +4,7 @@
 
 #include "../system/utils.h"
 
-typedef struct {
+typedef struct _stringobject {
     OBJECT_VAR_HEAD
     long ob_shash;
     int ob_sstate;
