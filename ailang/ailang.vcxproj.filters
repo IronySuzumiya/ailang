@@ -14,4 +14,53 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="object\intobject.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="object\object.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="object\typeobject.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="system\gc.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="object\stringobject.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="object\dictobject.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test\test.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="system\gc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="system\utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="object\intobject.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="object\object.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="object\typeobject.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ailang.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="object\stringobject.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="object\dictobject.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
