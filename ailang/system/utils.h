@@ -136,12 +136,6 @@ AiAPI_FUNC(void) inline print_fatal_error(char *msg, ...) {
 #define UNSUPPORTED_CONTAINS(ob, el)        \
     UNSUPPORTED_2ARG_BUILTINFUNC(ob, el, "contains")
 
-#define TO_STRING(ob) ((ob)->ob_type->tp_to_string((AiObject *)(ob)))
-
-#define PRINT_STDOUT(ob) ((ob)->ob_type->tp_print((AiObject *)(ob), stdout))
-
-#define OB_FREE(ob) ((ob)->ob_type->tp_free((ob)))
-
 #define MAKE_INDEX_IN_RANGE(index, range)   \
     WRAP(                                   \
         if((index) < 0) {                   \

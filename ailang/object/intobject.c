@@ -143,7 +143,7 @@ AiObject *int_to_string_with_radix(AiIntObject *ob, int radix) {
         return string_from_cstring(buffer);
     }
     else {
-        return TO_STRING(ob);
+        return OB_TO_STRING(ob);
     }
 }
 

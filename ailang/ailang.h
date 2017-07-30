@@ -2,12 +2,15 @@
 #ifndef AI_LANG_H
 #define AI_LANG_H
 
+#define DEBUG
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
 #include <stdarg.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
 #include "system\utils.h"
 #include "object\object.h"
 #include "system\aimemory.h"

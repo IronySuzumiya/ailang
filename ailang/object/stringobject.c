@@ -229,7 +229,7 @@ AiObject *string_to_string(AiStringObject *a) {
         return (AiObject *)a;
     }
     else {
-        return TO_STRING(a);
+        return OB_TO_STRING(a);
     }
 }
 

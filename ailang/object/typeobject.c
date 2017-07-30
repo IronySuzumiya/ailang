@@ -33,7 +33,7 @@ void type_print(AiTypeObject *ob, FILE *stream) {
 }
 
 AiObject *type_to_string(AiTypeObject *ob) {
-    return OBJECT_TO_STRING_WITH_CHECK(ob, "<type 'type'>", &type_typeobject);
+    return CHECK_TYPE(ob, &type_typeobject) ? string_from_cstring("<type 'type'>") : OB_TO_STRING(ob);
 }
 
 void type_free(void *mem) {

@@ -154,7 +154,7 @@ AiObject *list_to_string(AiListObject *list) {
         return string_from_cstring("[]");
     }
     else if (LIST_SIZE(list) == 1) {
-        item = (AiStringObject *)TO_STRING(list->ob_item[0]);
+        item = (AiStringObject *)OB_TO_STRING(list->ob_item[0]);
         str = (AiStringObject *)string_from_cstring_with_size(NULL, STRING_LEN(item) + 2);
         str->ob_sval[0] = '[';
         AiMEM_COPY(&str->ob_sval[1], STRING_AS_CSTRING(item), STRING_LEN(item));
@@ -166,14 +166,14 @@ AiObject *list_to_string(AiListObject *list) {
     strlist = (AiListObject *)list_new(LIST_SIZE(list));
     ssize_t size;
 
-    item = (AiStringObject *)TO_STRING(list->ob_item[0]);
+    item = (AiStringObject *)OB_TO_STRING(list->ob_item[0]);
     size = STRING_LEN(item);
     strlist->ob_item[0] = string_from_cstring_with_size(NULL, size + 1);
     STRING_AS_CSTRING(strlist->ob_item[0])[0] = '[';
     AiMEM_COPY(&STRING_AS_CSTRING(strlist->ob_item[0])[1], STRING_AS_CSTRING(item), size);
     DEC_REFCNT(item);
 
-    item = (AiStringObject *)TO_STRING(list->ob_item[LIST_SIZE(list) - 1]);
+    item = (AiStringObject *)OB_TO_STRING(list->ob_item[LIST_SIZE(list) - 1]);
     size = STRING_LEN(item);
     strlist->ob_item[LIST_SIZE(list) - 1] = string_from_cstring_with_size(NULL, size + 1);
     STRING_AS_CSTRING(strlist->ob_item[LIST_SIZE(list) - 1])[size] = ']';
@@ -181,7 +181,7 @@ AiObject *list_to_string(AiListObject *list) {
     DEC_REFCNT(item);
 
     for (ssize_t i = 1; i < LIST_SIZE(list) - 1; ++i) {
-        strlist->ob_item[i] = TO_STRING(list->ob_item[i]);
+        strlist->ob_item[i] = OB_TO_STRING(list->ob_item[i]);
     }
     split = (AiStringObject *)string_from_cstring(", ");
     str = (AiStringObject *)string_join(split, (AiObject *)strlist);

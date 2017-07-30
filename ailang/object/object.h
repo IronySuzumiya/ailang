@@ -47,10 +47,11 @@
 #define CHECK_TYPE(ob, type)        \
     ((ob)->ob_type == (type))
 
-#define OBJECT_TO_STRING_WITH_CHECK(ob, str, type)          \
-        (CHECK_TYPE(ob, type) ?                             \
-            string_from_cstring(str) :                      \
-            TO_STRING(ob))
+#define OB_TO_STRING(ob) ((ob)->ob_type->tp_to_string((AiObject *)(ob)))
+
+#define OB_PRINT_STDOUT(ob) ((ob)->ob_type->tp_print((AiObject *)(ob), stdout))
+
+#define OB_FREE(ob) ((ob)->ob_type->tp_free((ob)))
 
 typedef struct _object {
     OBJECT_HEAD

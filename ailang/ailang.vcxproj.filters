@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="测试">
+      <UniqueIdentifier>{4e6de576-7583-4fb4-9487-a63e9a9272ff}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="object\intobject.c">
@@ -30,14 +33,14 @@
     <ClCompile Include="object\dictobject.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="test\test.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="object\listobject.c">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="system\aimemory.c">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test\test.c">
+      <Filter>测试</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
