@@ -24,9 +24,6 @@
     <ClCompile Include="object\typeobject.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="system\gc.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="object\stringobject.c">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -39,11 +36,11 @@
     <ClCompile Include="object\listobject.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="system\aimemory.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="system\gc.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="system\utils.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -66,6 +63,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="object\listobject.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="system\aimemory.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

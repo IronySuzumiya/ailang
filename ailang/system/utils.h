@@ -5,12 +5,12 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#define API_FUNC(RTYPE) RTYPE
-#define API_DATA(RTYPE) extern RTYPE
+#define AiAPI_FUNC(RTYPE) RTYPE
+#define AiAPI_DATA(RTYPE) extern RTYPE
 
 #define WRAP(x) do { x } while(0)
 
-API_FUNC(void) inline print_error_or_exception(const char *type, const char *msg, ...) {
+AiAPI_FUNC(void) inline print_error_or_exception(char *type, char *msg, ...) {
     va_list ap;
     va_start(ap, msg);
 
@@ -21,7 +21,7 @@ API_FUNC(void) inline print_error_or_exception(const char *type, const char *msg
     va_end(ap);
 }
 
-API_FUNC(void) inline print_runtime_exception(const char *msg, ...) {
+AiAPI_FUNC(void) inline print_runtime_exception(char *msg, ...) {
     va_list ap;
     va_start(ap, msg);
 
@@ -32,7 +32,7 @@ API_FUNC(void) inline print_runtime_exception(const char *msg, ...) {
     va_end(ap);
 }
 
-API_FUNC(void) inline print_type_error(const char *msg, ...) {
+AiAPI_FUNC(void) inline print_type_error(char *msg, ...) {
     va_list ap;
     va_start(ap, msg);
 
@@ -43,7 +43,7 @@ API_FUNC(void) inline print_type_error(const char *msg, ...) {
     va_end(ap);
 }
 
-API_FUNC(void) inline print_fatal_error(const char *msg, ...) {
+AiAPI_FUNC(void) inline print_fatal_error(char *msg, ...) {
     va_list ap;
     va_start(ap, msg);
 
@@ -75,10 +75,15 @@ API_FUNC(void) inline print_fatal_error(const char *msg, ...) {
     ("unsupported unary operation '%s' "    \
         "on '%s'", op, a)
 
-#define UNSUPPORTED_BUILTINFUNC(a, func)    \
-    TYPE_ERROR                              \
-    ("unsupported built-in function '%s' "  \
+#define UNSUPPORTED_1ARG_BUILTINFUNC(a, func)   \
+    TYPE_ERROR                                  \
+    ("unsupported built-in function '%s' "      \
         "on '%s'", func, a)
+
+#define UNSUPPORTED_2ARG_BUILTINFUNC(a, b, func)    \
+    TYPE_ERROR                                      \
+    ("unsupported built-in function '%s' "          \
+        "on '%s' and '%s'", func, a, b)
 
 #define UNSUPPORTED_ADD(lhs, rhs)           \
     UNSUPPORTED_BINARY(lhs, rhs, "+")
@@ -105,7 +110,7 @@ API_FUNC(void) inline print_fatal_error(const char *msg, ...) {
     UNSUPPORTED_UNARY(a, "-")
 
 #define UNSUPPORTED_ABS(a)                  \
-    UNSUPPORTED_BUILTINFUNC(a, "abs")
+    UNSUPPORTED_1ARG_BUILTINFUNC(a, "abs")
 
 #define UNSUPPORTED_SHL(lhs, rhs)           \
     UNSUPPORTED_BINARY(lhs, rhs, "<<")
@@ -125,7 +130,27 @@ API_FUNC(void) inline print_fatal_error(const char *msg, ...) {
 #define UNSUPPORTED_XOR(lhs, rhs)           \
     UNSUPPORTED_BINARY(lhs, rhs, "^")
 
-#define PRINT_STDOUT(ob) ((ob)->ob_type->tp_print(ob, stdout))
+#define UNSUPPORTED_CONCAT(fo, la)          \
+    UNSUPPORTED_2ARG_BUILTINFUNC(fo, la, "concat")
+
+#define UNSUPPORTED_CONTAINS(ob, el)        \
+    UNSUPPORTED_2ARG_BUILTINFUNC(ob, el, "contains")
+
+#define TO_STRING(ob) ((ob)->ob_type->tp_to_string((AiObject *)(ob)))
+
+#define PRINT_STDOUT(ob) ((ob)->ob_type->tp_print((AiObject *)(ob), stdout))
+
+#define OB_FREE(ob) ((ob)->ob_type->tp_free((ob)))
+
+#define MAKE_INDEX_IN_RANGE(index, range)   \
+    WRAP(                                   \
+        if((index) < 0) {                   \
+            index += (range);               \
+            if((index) < 0) {               \
+                index = 0;                  \
+            }                               \
+        }                                   \
+    )
 
 typedef __int64 ssize_t;
 

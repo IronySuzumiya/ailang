@@ -1,8 +1,8 @@
 #include "../ailang.h"
 
-static void none_print(NoneObject *ob, FILE *stream);
+static void none_print(AiNoneObject *ob, FILE *stream);
 
-TypeObject type_noneobject = {
+AiTypeObject type_noneobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
     "none",                         /* tp_name */
     0,                              /* tp_dealloc */
@@ -16,11 +16,11 @@ TypeObject type_noneobject = {
     0,                              /* tp_free */
 };
 
-NoneObject _none = {
+AiNoneObject _none = {
     INIT_OBJECT_HEAD(&type_noneobject)
 };
 
-NoneObject *none = &_none;
+AiNoneObject *none = &_none;
 
 long pointer_hash(void *p) {
     long x;
@@ -30,11 +30,11 @@ long pointer_hash(void *p) {
     return x == -1 ? -2 : x;
 }
 
-void none_print(NoneObject *ob, FILE *stream) {
+void none_print(AiNoneObject *ob, FILE *stream) {
     if (CHECK_TYPE_NONE(ob)) {
         fprintf(stream, "<type 'none'> <addr %p>\n", ob);
     }
     else {
-        ob->ob_type->tp_print((Object *)ob, stream);
+        ob->ob_type->tp_print((AiObject *)ob, stream);
     }
 }

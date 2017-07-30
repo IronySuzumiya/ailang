@@ -10,7 +10,7 @@ typedef struct _stringobject {
     int ob_sstate;
     char ob_sval[1];
 }
-StringObject;
+AiStringObject;
 
 enum stringobject_sstate {
     SSTATE_NOT_INTERNED = 0,
@@ -20,12 +20,25 @@ enum stringobject_sstate {
 
 #define CHECK_TYPE_STRING(a) CHECK_TYPE(a, &type_stringobject)
 
-#define CHECK_STRING_INTERNED(s) (((StringObject *)s)->ob_sstate)
+#define CHECK_STRING_INTERNED(s) (((AiStringObject *)s)->ob_sstate)
 
-API_DATA(TypeObject) type_stringobject;
-API_DATA(StringObject *) nullstring;
-API_FUNC(Object *) string_fromcstring(const char *sval);
-API_FUNC(void) string_intern(StringObject **a);
-API_FUNC(void) string_intern_immortal(StringObject **a);
+#define STRING_AS_CSTRING(s) (((AiStringObject *)s)->ob_sval)
+
+#define STRING_LEN OB_SIZE
+
+#define NULL_STRING (string_from_cstring(""))
+
+AiAPI_DATA(AiTypeObject) type_stringobject;
+AiAPI_DATA(AiStringObject *) nullstring;
+AiAPI_FUNC(AiObject *) string_from_cstring(char *sval);
+AiAPI_FUNC(AiObject *) string_from_cstring_with_size(char *sval, ssize_t size);
+AiAPI_FUNC(void) string_intern(AiStringObject **a);
+AiAPI_FUNC(void) string_intern_immortal(AiStringObject **a);
+AiAPI_FUNC(AiObject *) string_join(AiStringObject *internal, AiObject *iter);
+AiAPI_FUNC(long) string_hash(AiStringObject *a);
+AiAPI_FUNC(AiObject *) string_concat(AiStringObject *lhs, AiStringObject *rhs);
+AiAPI_FUNC(AiObject *) string_getitem(AiStringObject *a, ssize_t index);
+AiAPI_FUNC(AiObject *) string_slice(AiStringObject *a, ssize_t start, ssize_t end);
+AiAPI_FUNC(int) string_contains(AiStringObject *a, AiStringObject *sub);
 
 #endif

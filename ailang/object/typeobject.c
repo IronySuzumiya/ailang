@@ -1,11 +1,11 @@
 #include "../ailang.h"
 
-static void type_dealloc(TypeObject *ob);
-static void type_print(TypeObject *ob, FILE *stream);
-static Object *type_to_string(TypeObject *ob);
+static void type_dealloc(AiTypeObject *ob);
+static void type_print(AiTypeObject *ob, FILE *stream);
+static AiObject *type_to_string(AiTypeObject *ob);
 static void type_free(void *);
 
-TypeObject type_typeobject = {
+AiTypeObject type_typeobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
     "type",                         /* tp_name */
     (destructor)type_dealloc,       /* tp_dealloc */
@@ -19,20 +19,20 @@ TypeObject type_typeobject = {
     (freefunc)type_free,            /* tp_free */
 };
 
-void type_dealloc(TypeObject *ob) {
+void type_dealloc(AiTypeObject *ob) {
 
 }
 
-void type_print(TypeObject *ob, FILE *stream) {
+void type_print(AiTypeObject *ob, FILE *stream) {
     if (CHECK_TYPE_TYPE(ob)) {
-        fprintf(stream, "<type 'type'> <addr %p>\n", ob);
+        fprintf(stream, "<type 'type'>\n");
     }
     else {
-        ob->ob_type->tp_print((Object *)ob, stream);
+        ob->ob_type->tp_print((AiObject *)ob, stream);
     }
 }
 
-Object *type_to_string(TypeObject *ob) {
+AiObject *type_to_string(AiTypeObject *ob) {
     return OBJECT_TO_STRING_WITH_CHECK(ob, "<type 'type'>", &type_typeobject);
 }
 

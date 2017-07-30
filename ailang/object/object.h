@@ -12,11 +12,11 @@
     OBJECT_HEAD         \
     ssize_t ob_size;
 
-#define OB_REFCNT(ob)       (((Object*)(ob))->ob_refcnt)
-#define OB_TYPE(ob)         (((Object*)(ob))->ob_type)
-#define OB_SIZE(ob)         (((VarObject*)(ob))->ob_size)
+#define OB_REFCNT(ob)       (((AiObject*)(ob))->ob_refcnt)
+#define OB_TYPE(ob)         (((AiObject*)(ob))->ob_type)
+#define OB_SIZE(ob)         (((AiVarObject*)(ob))->ob_size)
 #define OB_TYPENAME(ob)     (OB_TYPE(ob)->tp_name)
-#define OB_DEALLOC(ob)      (OB_TYPE(ob)->tp_dealloc((Object *)(ob)))
+#define OB_DEALLOC(ob)      (OB_TYPE(ob)->tp_dealloc((AiObject *)(ob)))
 
 #define INIT_OBJECT_HEAD(type)              1, type,
 #define INIT_OBJECT_VAR_HEAD(type, size)    INIT_OBJECT_HEAD(type) size,
@@ -49,37 +49,37 @@
 
 #define OBJECT_TO_STRING_WITH_CHECK(ob, str, type)          \
         (CHECK_TYPE(ob, type) ?                             \
-            string_fromcstring(str) :                       \
-            (ob)->ob_type->tp_to_string((Object *)(ob)))
+            string_from_cstring(str) :                      \
+            TO_STRING(ob))
 
 typedef struct _object {
     OBJECT_HEAD
 }
-Object;
+AiObject;
 
 typedef struct _varobject {
     OBJECT_VAR_HEAD
 }
-VarObject;
+AiVarObject;
 
-typedef void(*destructor)(Object*);
-typedef void(*printfunc)(Object*, FILE *);
+typedef void(*destructor)(AiObject*);
+typedef void(*printfunc)(AiObject*, FILE *);
 typedef void(*freefunc)(void *);
 
-typedef int(*enquiry)(Object*);
-typedef int(*enquiry2)(Object*, Object*);
+typedef int(*enquiry)(AiObject*);
+typedef int(*enquiry2)(AiObject*, AiObject*);
 
-typedef Object*(*unaryfunc)(Object*);
-typedef Object*(*binaryfunc)(Object*, Object*);
-typedef Object*(*ternaryfunc)(Object*, Object*, Object*);
+typedef AiObject*(*unaryfunc)(AiObject*);
+typedef AiObject*(*binaryfunc)(AiObject*, AiObject*);
+typedef AiObject*(*ternaryfunc)(AiObject*, AiObject*, AiObject*);
 
 typedef enquiry2 cmpfunc;
-typedef ssize_t(*lengthfunc)(Object*);
-typedef Object*(*ssizeargfunc)(Object*, ssize_t);
-typedef Object*(*ssize2argfunc)(Object*, ssize_t, ssize_t);
-typedef Object*(*ssizeobjargfunc)(Object*, ssize_t, Object*);
+typedef ssize_t(*lengthfunc)(AiObject*);
+typedef AiObject*(*ssizeargfunc)(AiObject*, ssize_t);
+typedef AiObject*(*ssize2argfunc)(AiObject*, ssize_t, ssize_t);
+typedef AiObject*(*ssizeobjargfunc)(AiObject*, ssize_t, AiObject*);
 
-typedef long(*hashfunc)(Object*);
+typedef long(*hashfunc)(AiObject*);
 
 typedef struct _numbermethods {
     binaryfunc nb_add;
@@ -121,19 +121,22 @@ sequencemethods;
 typedef struct _mappingmethods {
     lengthfunc mp_length;
     binaryfunc mp_getitem;
-    ternaryfunc sq_setitem;
+    ternaryfunc mp_setitem;
+    enquiry2 mp_delitem;
 }
 mappingmethods;
 
 typedef struct {
     OBJECT_HEAD
 }
-NoneObject;
+AiNoneObject;
 
 #define CHECK_TYPE_NONE(a) CHECK_TYPE(a, &type_noneobject)
 
-API_DATA(struct _typeobject) type_noneobject;
-API_DATA(NoneObject *) none;
-API_FUNC(long) pointer_hash(void *p);
+#define NONE ((AiObject *)none)
+
+AiAPI_DATA(struct _typeobject) type_noneobject;
+AiAPI_DATA(AiNoneObject *) none;
+AiAPI_FUNC(long) pointer_hash(void *p);
 
 #endif

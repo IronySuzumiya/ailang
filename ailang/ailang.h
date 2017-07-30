@@ -1,6 +1,6 @@
 #pragma once
-#ifndef AILANG_H
-#define AILANG_H
+#ifndef AI_LANG_H
+#define AI_LANG_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +10,7 @@
 #include <math.h>
 #include "system\utils.h"
 #include "object\object.h"
-#include "system\gc.h"
+#include "system\aimemory.h"
 #include "object\typeobject.h"
 #include "object\intobject.h"
 #include "object\stringobject.h"

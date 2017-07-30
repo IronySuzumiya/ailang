@@ -20,10 +20,10 @@ typedef struct _typeobject {
     unaryfunc tp_to_string;
     freefunc tp_free;
 }
-TypeObject;
+AiTypeObject;
 
 #define CHECK_TYPE_TYPE(a) CHECK_TYPE(a, &type_typeobject)
 
-API_DATA(TypeObject) type_typeobject;
+AiAPI_DATA(AiTypeObject) type_typeobject;
 
 #endif

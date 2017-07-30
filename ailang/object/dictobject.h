@@ -7,12 +7,12 @@
 typedef struct _dictobject {
     OBJECT_HEAD
 }
-DictObject;
+AiDictObject;
 
-API_DATA(TypeObject) type_dictobject;
-API_FUNC(Object *) dict_new(void);
-API_FUNC(Object *) dict_getitem(Object *dict, Object *key);
-API_FUNC(void) dict_setitem(Object *dict, Object *key, Object *val);
-API_FUNC(int) dict_delitem(Object *dict, Object *key);
+AiAPI_DATA(AiTypeObject) type_dictobject;
+AiAPI_FUNC(AiObject *) dict_new(void);
+AiAPI_FUNC(AiObject *) dict_getitem(AiObject *dict, AiObject *key);
+AiAPI_FUNC(void) dict_setitem(AiObject *dict, AiObject *key, AiObject *val);
+AiAPI_FUNC(int) dict_delitem(AiObject *dict, AiObject *key);
 
 #endif

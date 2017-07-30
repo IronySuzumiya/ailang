@@ -145,7 +145,7 @@
     <ClCompile Include="object\object.c" />
     <ClCompile Include="object\stringobject.c" />
     <ClCompile Include="object\typeobject.c" />
-    <ClCompile Include="system\gc.c" />
+    <ClCompile Include="system\aimemory.c" />
     <ClCompile Include="test\test.c" />
   </ItemGroup>
   <ItemGroup>
@@ -156,7 +156,7 @@
     <ClInclude Include="object\object.h" />
     <ClInclude Include="object\stringobject.h" />
     <ClInclude Include="object\typeobject.h" />
-    <ClInclude Include="system\gc.h" />
+    <ClInclude Include="system\aimemory.h" />
     <ClInclude Include="system\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

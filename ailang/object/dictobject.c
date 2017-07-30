@@ -1,21 +1,21 @@
 #include "../ailang.h"
 
-TypeObject type_dictobject = {
+AiTypeObject type_dictobject = {
     INIT_OBJECT_HEAD(&type_typeobject)
 };
 
-Object *dict_new() {
+AiObject *dict_new() {
     return NULL;
 }
 
-Object *dict_getitem(Object *dict, Object *key) {
+AiObject *dict_getitem(AiObject *dict, AiObject *key) {
     return NULL;
 }
 
-void dict_setitem(Object *dict, Object *key, Object *val) {
+void dict_setitem(AiObject *dict, AiObject *key, AiObject *val) {
 
 }
 
-int dict_delitem(Object *dict, Object *key) {
+int dict_delitem(AiObject *dict, AiObject *key) {
     return 0;
 }

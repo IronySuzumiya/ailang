@@ -14,32 +14,34 @@ typedef struct _intobject {
     OBJECT_HEAD
     long ob_ival;
 }
-IntObject;
+AiIntObject;
 
 #define NUMBER_INTOBJECT_PER_BLOCK      82
-#define INT_BLOCK_SIZE                  (sizeof(struct _intblock *) + sizeof(IntObject) * NUMBER_INTOBJECT_PER_BLOCK)
+#define INT_BLOCK_SIZE                  (sizeof(struct _intblock *) + sizeof(AiIntObject) * NUMBER_INTOBJECT_PER_BLOCK)
 #define INT_BLOCK_HEAD_SIZE             (sizeof(struct _intblock *))
 
 typedef struct _intblock {
     struct _intblock *next;
-    IntObject block[NUMBER_INTOBJECT_PER_BLOCK];
+    AiIntObject block[NUMBER_INTOBJECT_PER_BLOCK];
 }
-IntBlock;
+AiIntBlock;
 
 #define CHECK_TYPE_INT(a) CHECK_TYPE(a, &type_intobject)
 
 #define INT_UNARY_WITH_CHECK(ob, op)                                \
-    (CHECK_TYPE_INT(ob) ? int_fromlong(op (ob)->ob_ival) : NULL)
+    (CHECK_TYPE_INT(ob) ? int_from_long(op (ob)->ob_ival) : NULL)
 
 #define INT_BINARY_WITH_CHECK(lhs, rhs, op)                         \
     (CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs) ?                   \
-        int_fromlong((lhs)->ob_ival op (rhs)->ob_ival) : NULL)
+        int_from_long((lhs)->ob_ival op (rhs)->ob_ival) : NULL)
 
-API_DATA(IntBlock *) block_list;
-API_DATA(IntObject *) free_list;
-API_DATA(TypeObject) type_intobject;
-API_DATA(IntObject *) small_intobject_buf[SMALL_INTOBJECT_BUF_SIZE];
-API_FUNC(Object *) int_fromlong(long ival);
-API_FUNC(void) int_init(void);
+#define INT_TO_CSTRING_BUFFER_SIZE 33
+
+AiAPI_DATA(AiIntBlock *) block_list;
+AiAPI_DATA(AiIntObject *) free_list;
+AiAPI_DATA(AiTypeObject) type_intobject;
+AiAPI_DATA(AiIntObject *) small_intobject_buf[SMALL_INTOBJECT_BUF_SIZE];
+AiAPI_FUNC(AiObject *) int_from_long(long ival);
+AiAPI_FUNC(void) int_init(void);
 
 #endif
