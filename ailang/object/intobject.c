@@ -60,9 +60,11 @@ AiTypeObject type_intobject = {
     (destructor)int_dealloc,        /* tp_dealloc */
     (printfunc)int_print,           /* tp_print */
     (cmpfunc)int_compare,           /* tp_compare */
+
     &int_as_number,                 /* tp_as_number */
     0,                              /* tp_as_sequence */
     0,                              /* tp_as_mapping */
+
     (hashfunc)int_hash,             /* tp_hash */
     (unaryfunc)int_to_string,       /* tp_to_string */
     0,                              /* tp_free */
@@ -115,12 +117,7 @@ void int_dealloc(AiIntObject *ob) {
 }
 
 void int_print(AiIntObject *ob, FILE *stream) {
-    if (CHECK_TYPE_INT(ob)) {
-        fprintf(stream, "%d\n", ob->ob_ival);
-    }
-    else {
-        ob->ob_type->tp_print((AiObject *)ob, stream);
-    }
+    fprintf(stream, "%d\n", ob->ob_ival);
 }
 
 int int_compare(AiIntObject *lhs, AiIntObject *rhs) {
@@ -137,14 +134,9 @@ void int_to_cstring(AiIntObject *ob, char *buffer, int radix) {
 }
 
 AiObject *int_to_string_with_radix(AiIntObject *ob, int radix) {
-    if (CHECK_TYPE_INT(ob)) {
-        char buffer[INT_TO_CSTRING_BUFFER_SIZE];
-        int_to_cstring(ob, buffer, radix);
-        return string_from_cstring(buffer);
-    }
-    else {
-        return OB_TO_STRING(ob);
-    }
+    char buffer[INT_TO_CSTRING_BUFFER_SIZE];
+    int_to_cstring(ob, buffer, radix);
+    return string_from_cstring(buffer);
 }
 
 AiObject *int_to_string(AiIntObject *ob) {
@@ -319,7 +311,7 @@ AiObject *int_xor(AiIntObject *lhs, AiIntObject *rhs) {
 
 AiIntObject *fill_free_list() {
     AiIntObject *p, *q;
-    p = AiMEM_ALLOC(sizeof(AiIntBlock));
+    p = AiObject_GC_NEW(AiIntBlock);
     ((AiIntBlock *)p)->next = block_list;
     block_list = (AiIntBlock *)p;
     p = ((AiIntBlock *)p)->block;

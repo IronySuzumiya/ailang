@@ -30,11 +30,31 @@ long pointer_hash(void *p) {
     return x == -1 ? -2 : x;
 }
 
-void none_print(AiNoneObject *ob, FILE *stream) {
-    if (CHECK_TYPE_NONE(ob)) {
-        fprintf(stream, "<type 'none'> <addr %p>\n", ob);
+int object_rich_compare(AiObject *lhs, AiObject *rhs, int op) {
+    if (OB_TYPE(lhs) == OB_TYPE(rhs)) {
+        switch (op) {
+        case CMP_EQ:
+            return lhs == rhs || lhs->ob_type->tp_compare(lhs, rhs) == 0;
+        case CMP_NE:
+            return lhs->ob_type->tp_compare(lhs, rhs) != 0;
+        case CMP_GT:
+            return lhs->ob_type->tp_compare(lhs, rhs) > 0;
+        case CMP_LT:
+            return lhs->ob_type->tp_compare(lhs, rhs) < 0;
+        case CMP_GE:
+            return lhs->ob_type->tp_compare(lhs, rhs) >= 0;
+        case CMP_LE:
+            return lhs->ob_type->tp_compare(lhs, rhs) <= 0;
+        default:
+            FATAL_ERROR("internal error: invalid compare option");
+            return -1;
+        }
     }
     else {
-        ob->ob_type->tp_print((AiObject *)ob, stream);
+        return -1;
     }
+}
+
+void none_print(AiNoneObject *ob, FILE *stream) {
+    fprintf(stream, "<type 'none'> <addr %p>\n", ob);
 }

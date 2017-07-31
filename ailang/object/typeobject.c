@@ -28,7 +28,7 @@ void type_print(AiTypeObject *ob, FILE *stream) {
         fprintf(stream, "<type 'type'>\n");
     }
     else {
-        ob->ob_type->tp_print((AiObject *)ob, stream);
+        OB_PRINT(ob, stream);
     }
 }
 

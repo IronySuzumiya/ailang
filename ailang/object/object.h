@@ -26,10 +26,10 @@
 #define DEC_REFCNT(ob)              \
     if (--OB_REFCNT(ob) > 0);       \
     else OB_DEALLOC(ob)
-#define INC_XREFCNT(ob)             \
+#define XINC_REFCNT(ob)             \
     if(!ob);                        \
     else INC_REFCNT(ob)
-#define DEC_XREFCNT(ob)             \
+#define XDEC_REFCNT(ob)             \
     if(!ob);                        \
     else DEC_REFCNT(ob)
 
@@ -49,7 +49,9 @@
 
 #define OB_TO_STRING(ob) ((ob)->ob_type->tp_to_string((AiObject *)(ob)))
 
-#define OB_PRINT_STDOUT(ob) ((ob)->ob_type->tp_print((AiObject *)(ob), stdout))
+#define OB_PRINT(ob, stream) ((ob)->ob_type->tp_print((AiObject *)(ob), (stream)))
+
+#define OB_PRINT_STDOUT(ob) OB_PRINT(ob, stdout)
 
 #define OB_FREE(ob) ((ob)->ob_type->tp_free((ob)))
 
@@ -81,6 +83,9 @@ typedef AiObject*(*ssize2argfunc)(AiObject*, ssize_t, ssize_t);
 typedef AiObject*(*ssizeobjargfunc)(AiObject*, ssize_t, AiObject*);
 
 typedef long(*hashfunc)(AiObject*);
+typedef int(*sqsetitemfunc)(AiObject*, ssize_t, AiObject*);
+typedef int(*mpsetitemfunc)(AiObject*, AiObject*, AiObject*);
+typedef int(*mpinsertfunc)(AiObject*, AiObject *, long, AiObject*);
 
 typedef struct _numbermethods {
     binaryfunc nb_add;
@@ -113,7 +118,7 @@ typedef struct _sequencemethods {
     lengthfunc sq_length;
     binaryfunc sq_concat;
     ssizeargfunc sq_getitem;
-    ssizeobjargfunc sq_setitem;
+    sqsetitemfunc sq_setitem;
     ssize2argfunc sq_slice;
     enquiry2 sq_contains;
 }
@@ -122,7 +127,8 @@ sequencemethods;
 typedef struct _mappingmethods {
     lengthfunc mp_length;
     binaryfunc mp_getitem;
-    ternaryfunc mp_setitem;
+    mpsetitemfunc mp_setitem;
+    mpinsertfunc mp_insert;
     enquiry2 mp_delitem;
 }
 mappingmethods;
@@ -136,8 +142,20 @@ AiNoneObject;
 
 #define NONE ((AiObject *)none)
 
+#define CMP_EQ 0
+#define CMP_NE 1
+#define CMP_GT 2
+#define CMP_LT 3
+#define CMP_GE 4
+#define CMP_LE 5
+
+#define OBJECT_HASH(ob)                                 \
+    ((ob)->ob_type->tp_hash ?                           \
+        (ob)->ob_type->tp_hash((AiObject *)(ob)) : -1)
+
 AiAPI_DATA(struct _typeobject) type_noneobject;
 AiAPI_DATA(AiNoneObject *) none;
 AiAPI_FUNC(long) pointer_hash(void *p);
+AiAPI_FUNC(int) object_rich_compare(AiObject *lhs, AiObject *rhs, int op);
 
 #endif

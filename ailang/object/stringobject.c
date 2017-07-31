@@ -1,7 +1,7 @@
 #include "../ailang.h"
 
 static AiStringObject *characters[UCHAR_MAX + 1];
-static AiObject *interned;
+static AiDictObject *interned;
 
 static AiObject *_string_from_cstring_with_size(char *sval, ssize_t size);
 static void string_dealloc(AiStringObject *a);
@@ -27,9 +27,11 @@ AiTypeObject type_stringobject = {
     (destructor)string_dealloc,                 /* tp_dealloc */
     (printfunc)string_print,                    /* tp_print */
     (cmpfunc)string_compare,                    /* tp_compare */
+
     0,                                          /* tp_as_number */
     &string_as_sequence,                        /* tp_as_sequence */
     0,                                          /* tp_as_mapping */
+
     (hashfunc)string_hash,                      /* tp_hash */
     (unaryfunc)string_to_string,                /* tp_to_string */
     (freefunc)string_free,                      /* tp_free */
@@ -56,7 +58,7 @@ void string_intern(AiStringObject **a) {
     }
 
     if (!interned) {
-        interned = dict_new();
+        interned = (AiDictObject *)dict_new();
     }
 
     if (t = dict_getitem(interned, s)) {
@@ -128,7 +130,7 @@ AiObject *string_join(AiStringObject *split, AiObject *iter) {
         }
     }
     else {
-        RUNTIME_EXCEPTION("iterator not supported yet");
+        RUNTIME_EXCEPTION("only list now, iterator would be supported in the future");
         return NONE;
     }
 }
@@ -188,12 +190,7 @@ void string_dealloc(AiStringObject *a) {
 }
 
 void string_print(AiStringObject *a, FILE *stream) {
-    if (CHECK_TYPE_STRING(a)) {
-        fprintf(stream, "%s\n", STRING_AS_CSTRING(a));
-    }
-    else {
-        a->ob_type->tp_print((AiObject *)a, stream);
-    }
+    fprintf(stream, "%s\n", STRING_AS_CSTRING(a));
 }
 
 int string_compare(AiStringObject *lhs, AiStringObject *rhs) {
@@ -263,38 +260,28 @@ AiObject *string_concat(AiStringObject *lhs, AiStringObject *rhs) {
 }
 
 AiObject *string_getitem(AiStringObject *a, ssize_t index) {
-    if (CHECK_TYPE_STRING(a)) {
-        MAKE_INDEX_IN_RANGE(index, STRING_LEN(a));
-        if (index < STRING_LEN(a)) {
-            return string_from_cstring_with_size(&STRING_AS_CSTRING(a)[index], 1);
-        }
-        else {
-            RUNTIME_EXCEPTION("index out of range");
-            return NONE;
-        }
+    MAKE_INDEX_IN_RANGE(index, STRING_LEN(a));
+    if (index < STRING_LEN(a)) {
+        return string_from_cstring_with_size(&STRING_AS_CSTRING(a)[index], 1);
     }
     else {
-        return a->ob_type->tp_as_sequence->sq_getitem((AiObject *)a, index);
+        RUNTIME_EXCEPTION("index out of range");
+        return NONE;
     }
 }
 
 AiObject *string_slice(AiStringObject *a, ssize_t start, ssize_t end) {
-    if (CHECK_TYPE_STRING(a)) {
-        MAKE_INDEX_IN_RANGE(start, STRING_LEN(a));
-        MAKE_INDEX_IN_RANGE(end, STRING_LEN(a));
-        if (start < STRING_LEN(a) && start < end) {
-            if (end > STRING_LEN(a)) {
-                end = STRING_LEN(a);
-            }
-            return string_from_cstring_with_size(&STRING_AS_CSTRING(a)[start], end - start);
+    MAKE_INDEX_IN_RANGE(start, STRING_LEN(a));
+    MAKE_INDEX_IN_RANGE(end, STRING_LEN(a));
+    if (start < STRING_LEN(a) && start < end) {
+        if (end > STRING_LEN(a)) {
+            end = STRING_LEN(a);
         }
-        else {
-            RUNTIME_EXCEPTION("invalid range sliced");
-            return NONE;
-        }
+        return string_from_cstring_with_size(&STRING_AS_CSTRING(a)[start], end - start);
     }
     else {
-        return a->ob_type->tp_as_sequence->sq_slice((AiObject *)a, start, end);
+        RUNTIME_EXCEPTION("invalid range sliced");
+        return NONE;
     }
 }
 

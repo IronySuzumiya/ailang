@@ -133,8 +133,29 @@ AiAPI_FUNC(void) inline print_fatal_error(char *msg, ...) {
 #define UNSUPPORTED_CONCAT(fo, la)          \
     UNSUPPORTED_2ARG_BUILTINFUNC(fo, la, "concat")
 
+#define UNSUPPORTED_EXTEND(fo, la)          \
+    UNSUPPORTED_2ARG_BUILTINFUNC(fo, la, "extend")
+
 #define UNSUPPORTED_CONTAINS(ob, el)        \
     UNSUPPORTED_2ARG_BUILTINFUNC(ob, el, "contains")
+
+#define UNSUPPORTED_EQ(lhs, rhs)            \
+    UNSUPPORTED_BINARY(lhs, rhs, "==")
+
+#define UNSUPPORTED_NE(lhs, rhs)            \
+    UNSUPPORTED_BINARY(lhs, rhs, "!=")
+
+#define UNSUPPORTED_GT(lhs, rhs)            \
+    UNSUPPORTED_BINARY(lhs, rhs, ">")
+
+#define UNSUPPORTED_LT(lhs, rhs)            \
+    UNSUPPORTED_BINARY(lhs, rhs, "<")
+
+#define UNSUPPORTED_GE(lhs, rhs)            \
+    UNSUPPORTED_BINARY(lhs, rhs, ">=")
+
+#define UNSUPPORTED_LE(lhs, rhs)            \
+    UNSUPPORTED_BINARY(lhs, rhs, "<=")
 
 #define MAKE_INDEX_IN_RANGE(index, range)   \
     WRAP(                                   \

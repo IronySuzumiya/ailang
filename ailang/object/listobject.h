@@ -23,7 +23,7 @@ AiAPI_DATA(int) number_free_lists;
 AiAPI_FUNC(AiObject *) list_new(ssize_t size);
 AiAPI_FUNC(void) list_resize(AiListObject *list, ssize_t newsize);
 AiAPI_FUNC(AiObject *) list_getitem(AiListObject *list, ssize_t index);
-AiAPI_FUNC(AiObject *) list_setitem(AiListObject *list, ssize_t index, AiObject *newitem);
+AiAPI_FUNC(int) list_setitem(AiListObject *list, ssize_t index, AiObject *newitem);
 AiAPI_FUNC(AiObject *) list_slice(AiListObject *list, ssize_t start, ssize_t end);
 AiAPI_FUNC(int) list_contains(AiListObject *list, AiObject *item);
 AiAPI_FUNC(AiObject *) list_to_string(AiListObject *list);

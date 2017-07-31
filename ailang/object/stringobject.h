@@ -28,6 +28,10 @@ enum stringobject_sstate {
 
 #define NULL_STRING (string_from_cstring(""))
 
+#define STRING_EQUAL(lhs, rhs)                                      \
+    CHECK_TYPE_STRING(lhs) && CHECK_TYPE_STRING(rhs)                \
+        && !strcmp(STRING_AS_CSTRING(lhs), STRING_AS_CSTRING(rhs))
+
 AiAPI_DATA(AiTypeObject) type_stringobject;
 AiAPI_DATA(AiStringObject *) nullstring;
 AiAPI_FUNC(AiObject *) string_from_cstring(char *sval);

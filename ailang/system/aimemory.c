@@ -39,7 +39,7 @@ void mem_free(void *p) {
     }
     if (!hp) {
         FATAL_ERROR("bad memory tracing");
-        return NULL;
+        return;
     }
     if (!prev) {
         heaphead = hp->next;

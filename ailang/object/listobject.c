@@ -2,7 +2,7 @@
 
 static void list_dealloc(AiListObject *list);
 static void list_print(AiListObject *list, FILE *stream);
-static int list_compare(AiListObject *lhs, AiListObject *rhs);
+//static int list_compare(AiListObject *lhs, AiListObject *rhs);
 static ssize_t list_size(AiListObject *list);
 static void list_free(void *p);
 
@@ -10,7 +10,7 @@ static sequencemethods list_as_sequence = {
     (lengthfunc)list_size,
     (binaryfunc)list_extend,
     (ssizeargfunc)list_getitem,
-    (ssizeobjargfunc)list_setitem,
+    (sqsetitemfunc)list_setitem,
     (ssize2argfunc)list_slice,
     (enquiry2)list_contains,
 };
@@ -20,7 +20,7 @@ AiTypeObject type_listobject = {
     "list",
     (destructor)list_dealloc,
     (printfunc)list_print,
-    (cmpfunc)list_compare,
+    0,
 
     0,
     &list_as_sequence,
@@ -42,7 +42,7 @@ AiObject * list_new(ssize_t size) {
         INIT_REFCNT(list);
     }
     else {
-        list = AiMEM_ALLOC(sizeof(AiListObject));
+        list = AiObject_GC_NEW(AiListObject);
         INIT_OBJECT_VAR(list, &type_listobject, 0);
     }
     if (size <= 0) {
@@ -70,78 +70,58 @@ void list_resize(AiListObject *list, ssize_t newsize) {
 }
 
 AiObject *list_getitem(AiListObject *list, ssize_t index) {
-    if (CHECK_TYPE_LIST(list)) {
-        MAKE_INDEX_IN_RANGE(index, LIST_SIZE(list));
-        if (index < LIST_SIZE(list)) {
-            return list->ob_item[index];
-        }
-        else {
-            RUNTIME_EXCEPTION("index out of range");
-            return NONE;
-        }
+    MAKE_INDEX_IN_RANGE(index, LIST_SIZE(list));
+    if (index < LIST_SIZE(list)) {
+        return list->ob_item[index];
     }
     else {
-        return list->ob_type->tp_as_sequence->sq_getitem((AiObject *)list, index);
+        RUNTIME_EXCEPTION("index out of range");
+        return NONE;
     }
 }
 
-AiObject *list_setitem(AiListObject *list, ssize_t index, AiObject *newitem) {
-    if (CHECK_TYPE_LIST(list)) {
-        MAKE_INDEX_IN_RANGE(index, LIST_SIZE(list));
-        if (index < LIST_SIZE(list)) {
-            DEC_XREFCNT(list->ob_item[index]);
-            list->ob_item[index] = newitem;
-            INC_XREFCNT(newitem);
-            return NONE;
-        }
-        else {
-            RUNTIME_EXCEPTION("index out of range");
-            return NONE;
-        }
+int list_setitem(AiListObject *list, ssize_t index, AiObject *newitem) {
+    MAKE_INDEX_IN_RANGE(index, LIST_SIZE(list));
+    if (index < LIST_SIZE(list)) {
+        XDEC_REFCNT(list->ob_item[index]);
+        list->ob_item[index] = newitem;
+        XINC_REFCNT(newitem);
+        return 0;
     }
     else {
-        return list->ob_type->tp_as_sequence->sq_setitem((AiObject *)list, index, newitem);
+        RUNTIME_EXCEPTION("index out of range");
+        return -1;
     }
 }
 
 AiObject *list_slice(AiListObject *list, ssize_t start, ssize_t end) {
-    if (CHECK_TYPE_LIST(list)) {
-        AiListObject *newlist;
-        MAKE_INDEX_IN_RANGE(start, LIST_SIZE(list));
-        MAKE_INDEX_IN_RANGE(end, LIST_SIZE(list));
-        if (start < LIST_SIZE(list) && start < end) {
-            if (end > LIST_SIZE(list)) {
-                end = LIST_SIZE(list);
-            }
-            newlist = (AiListObject *)list_new(end - start);
-            for (ssize_t i = 0; i < end - start; ++i) {
-                newlist->ob_item[i] = list->ob_item[start + i];
-                INC_XREFCNT(newlist->ob_item[i]);
-            }
-            return (AiObject *)newlist;
+    AiListObject *newlist;
+    MAKE_INDEX_IN_RANGE(start, LIST_SIZE(list));
+    MAKE_INDEX_IN_RANGE(end, LIST_SIZE(list));
+    if (start < LIST_SIZE(list) && start < end) {
+        if (end > LIST_SIZE(list)) {
+            end = LIST_SIZE(list);
         }
-        else {
-            RUNTIME_EXCEPTION("invalid range sliced");
-            return NONE;
+        newlist = (AiListObject *)list_new(end - start);
+        for (ssize_t i = 0; i < end - start; ++i) {
+            newlist->ob_item[i] = list->ob_item[start + i];
+            XINC_REFCNT(newlist->ob_item[i]);
         }
+        return (AiObject *)newlist;
     }
     else {
-        return list->ob_type->tp_as_sequence->sq_slice((AiObject *)list, start, end);
+        RUNTIME_EXCEPTION("invalid range sliced");
+        return NONE;
     }
 }
 
 int list_contains(AiListObject *list, AiObject *item) {
-    if (CHECK_TYPE_LIST(list)) {
-        for (ssize_t i = 0; i < LIST_SIZE(list); ++i) {
-            if (list->ob_item[i]->ob_type->tp_compare(list->ob_item[i], item)) {
-                return 1;
-            }
+    for (ssize_t i = 0; i < LIST_SIZE(list); ++i) {
+        if (object_rich_compare(list->ob_item[i], item, CMP_EQ) > 0) {
+            return 1;
         }
-        return 0;
     }
-    else {
-        return list->ob_type->tp_as_sequence->sq_contains((AiObject *)list, item);
-    }
+    return 0;
 }
 
 AiObject *list_to_string(AiListObject *list) {
@@ -149,6 +129,7 @@ AiObject *list_to_string(AiListObject *list) {
     AiStringObject *str;
     AiStringObject *item;
     AiStringObject *split;
+    ssize_t size;
 
     if (LIST_SIZE(list) == 0) {
         return string_from_cstring("[]");
@@ -156,15 +137,14 @@ AiObject *list_to_string(AiListObject *list) {
     else if (LIST_SIZE(list) == 1) {
         item = (AiStringObject *)OB_TO_STRING(list->ob_item[0]);
         str = (AiStringObject *)string_from_cstring_with_size(NULL, STRING_LEN(item) + 2);
-        str->ob_sval[0] = '[';
-        AiMEM_COPY(&str->ob_sval[1], STRING_AS_CSTRING(item), STRING_LEN(item));
-        str->ob_sval[STRING_LEN(str) - 1] = ']';
+        STRING_AS_CSTRING(str)[0] = '[';
+        AiMEM_COPY(&STRING_AS_CSTRING(str)[1], STRING_AS_CSTRING(item), STRING_LEN(item));
+        STRING_AS_CSTRING(str)[STRING_LEN(str) - 1] = ']';
         DEC_REFCNT(item);
         return (AiObject *)str;
     }
 
     strlist = (AiListObject *)list_new(LIST_SIZE(list));
-    ssize_t size;
 
     item = (AiStringObject *)OB_TO_STRING(list->ob_item[0]);
     size = STRING_LEN(item);
@@ -200,7 +180,7 @@ int list_insert(AiListObject *list, ssize_t index, AiObject *item) {
             list->ob_item[i] = list->ob_item[i - 1];
         }
         list->ob_item[index] = item;
-        INC_XREFCNT(item);
+        XINC_REFCNT(item);
         return 0;
     }
     else {
@@ -212,18 +192,24 @@ int list_insert(AiListObject *list, ssize_t index, AiObject *item) {
 int list_append(AiListObject *list, AiObject *item) {
     list_resize(list, LIST_SIZE(list) + 1);
     list->ob_item[LIST_SIZE(list) - 1] = item;
-    INC_XREFCNT(item);
+    XINC_REFCNT(item);
     return 0;
 }
 
 int list_extend(AiListObject *fo, AiListObject *la) {
-    ssize_t fo_size = LIST_SIZE(fo), la_size = LIST_SIZE(la);
-    list_resize(fo, fo_size + la_size);
-    for (ssize_t i = 0; i < la_size; ++i) {
-        fo->ob_item[fo_size + i] = la->ob_item[i];
-        INC_XREFCNT(la->ob_item[i]);
+    if (CHECK_TYPE_LIST(fo) && CHECK_TYPE_LIST(la)) {
+        ssize_t fo_size = LIST_SIZE(fo), la_size = LIST_SIZE(la);
+        list_resize(fo, fo_size + la_size);
+        for (ssize_t i = 0; i < la_size; ++i) {
+            fo->ob_item[fo_size + i] = la->ob_item[i];
+            XINC_REFCNT(la->ob_item[i]);
+        }
+        return 0;
     }
-    return 0;
+    else {
+        UNSUPPORTED_EXTEND(OB_TYPENAME(fo), OB_TYPENAME(la));
+        return -1;
+    }
 }
 
 ssize_t list_size(AiListObject *list) {
@@ -233,7 +219,7 @@ ssize_t list_size(AiListObject *list) {
 void list_dealloc(AiListObject *list) {
     if (list->ob_item) {
         for (ssize_t i = 0; i < LIST_SIZE(list); ++i) {
-            DEC_XREFCNT(list->ob_item[i]);
+            XDEC_REFCNT(list->ob_item[i]);
         }
         AiMEM_FREE(list->ob_item);
     }
@@ -246,36 +232,35 @@ void list_dealloc(AiListObject *list) {
 }
 
 void list_print(AiListObject *list, FILE *stream) {
-    if (CHECK_TYPE_LIST(list)) {
-        fprintf(stream, "[");
-        if (list->ob_item && LIST_SIZE(list) > 0) {
-            for (ssize_t i = 0; i < LIST_SIZE(list) - 1; ++i) {
-                if (!list->ob_item[i])
-                    continue;
-                list->ob_item[i]->ob_type->tp_print(list->ob_item[i], stream);
-                fprintf(stream, ", ");
-            }
-            list->ob_item[LIST_SIZE(list) - 1]->ob_type->tp_print(list->ob_item[LIST_SIZE(list) - 1], stream);
+    fprintf(stream, "[");
+    if (list->ob_item && LIST_SIZE(list) > 0) {
+        for (ssize_t i = 0; i < LIST_SIZE(list) - 1; ++i) {
+            if (!list->ob_item[i])
+                continue;
+            OB_PRINT(list->ob_item[i], stream);
+            fprintf(stream, ", ");
         }
-        fprintf(stream, "]\n");
+        OB_PRINT(list->ob_item[LIST_SIZE(list) - 1], stream);
     }
-    else {
-        list->ob_type->tp_print((AiObject *)list, stream);
-    }
+    fprintf(stream, "]\n");
 }
-
+/*
 int list_compare(AiListObject *lhs, AiListObject *rhs) {
     ssize_t minsize = min(LIST_SIZE(lhs), LIST_SIZE(rhs));
     int r;
 
     for (ssize_t i = 0; i < minsize; ++i) {
-        if ((r = lhs->ob_type->tp_compare((AiObject *)lhs, (AiObject *)rhs))) {
-            return r;
+        r = object_rich_compare(lhs->ob_item[i], rhs->ob_item[i], CMP_NE);
+        if (r > 0) {
+            return object_rich_compare(lhs->ob_item[i], rhs->ob_item[i], CMP_GT) > 0 ? 1 : -1;
+        }
+        else if (r < 0) {
+            RUNTIME_EXCEPTION("there's no compare method between '%s' and '%s' yet", OB_TYPENAME(lhs->ob_item[i]), OB_TYPENAME(rhs->ob_item[i]));
         }
     }
     return LIST_SIZE(lhs) > LIST_SIZE(rhs) ? 1 : LIST_SIZE(lhs) < LIST_SIZE(rhs) ? -1 : 0;
 }
-
+*/
 void list_free(void *p) {
     AiMEM_FREE(p);
 }

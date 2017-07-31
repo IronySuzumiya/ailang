@@ -4,12 +4,12 @@
 
 #include "../system/utils.h"
 
-#define AiMEM_INIT      mem_init
-#define AiMEM_ALLOC     mem_alloc
-#define AiMEM_FREE      mem_free
-#define AiMEM_REALLOC   mem_realloc
-#define AiMEM_COPY      mem_copy
-#define AiMEM_SET       mem_set
+#define AiMEM_ALLOC             mem_alloc
+#define AiMEM_FREE              mem_free
+#define AiMEM_REALLOC           mem_realloc
+#define AiMEM_COPY              mem_copy
+#define AiMEM_SET               mem_set
+#define AiObject_GC_NEW(type)   (mem_alloc(sizeof(type)))
 
 typedef struct _heap_list {
     void *mem;

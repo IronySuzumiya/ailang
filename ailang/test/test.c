@@ -35,6 +35,17 @@ int main() {
 
     OB_PRINT_STDOUT(liststr);
 
+    AiDictObject *dict = (AiDictObject *)dict_new();
+
+    dict_setitem(dict, s1, v1);
+    dict_setitem(dict, v2, v3);
+
+    AiStringObject *dictstr = (AiStringObject *)dict_to_string(dict);
+
+    OB_PRINT_STDOUT(dictstr);
+
+    DEC_REFCNT(dictstr);
+    DEC_REFCNT(dict);
     DEC_REFCNT(liststr);
     DEC_REFCNT(list);
     DEC_REFCNT(v1);
@@ -50,6 +61,14 @@ int main() {
 
     while (number_free_lists--) {
         AiMEM_FREE(free_lists[number_free_lists]);
+    }
+
+    while (number_free_dicts--) {
+        AiMEM_FREE(free_dicts[number_free_dicts]);
+    }
+
+    if (dummy) {
+        AiMEM_FREE(dummy);
     }
 
     assert(heaphead == NULL);
