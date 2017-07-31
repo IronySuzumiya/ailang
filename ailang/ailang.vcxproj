@@ -139,6 +139,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="object\boolobject.c" />
+    <ClCompile Include="object\codeobject.c" />
     <ClCompile Include="object\dictobject.c" />
     <ClCompile Include="object\intobject.c" />
     <ClCompile Include="object\listobject.c" />
@@ -146,10 +148,13 @@
     <ClCompile Include="object\stringobject.c" />
     <ClCompile Include="object\typeobject.c" />
     <ClCompile Include="system\aimemory.c" />
+    <ClCompile Include="system\marshal.c" />
     <ClCompile Include="test\test.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ailang.h" />
+    <ClInclude Include="object\boolobject.h" />
+    <ClInclude Include="object\codeobject.h" />
     <ClInclude Include="object\dictobject.h" />
     <ClInclude Include="object\intobject.h" />
     <ClInclude Include="object\listobject.h" />
@@ -157,6 +162,7 @@
     <ClInclude Include="object\stringobject.h" />
     <ClInclude Include="object\typeobject.h" />
     <ClInclude Include="system\aimemory.h" />
+    <ClInclude Include="system\marshal.h" />
     <ClInclude Include="system\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

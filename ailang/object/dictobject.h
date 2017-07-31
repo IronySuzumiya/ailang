@@ -35,7 +35,7 @@ AiDictObject;
 #define EMPTY_TO_MINSIZE(mp)                                            \
     WRAP(                                                               \
         AiMEM_SET((mp)->ma_smalltable, 0, sizeof((mp)->ma_smalltable)); \
-        (mp)->ma_used = (mp)->ma_fill = 0;                              \
+        DICT_SIZE(mp) = (mp)->ma_fill = 0;                              \
         INIT_NONZERO_DICT_SLOTS(mp);                                    \
     )
 
@@ -44,6 +44,8 @@ AiDictObject;
 #define PERTURB_SHIFT 5
 
 #define CHECK_TYPE_DICT(ob) CHECK_TYPE(ob, &type_dictobject)
+
+#define DICT_SIZE(ob) (((AiDictObject *)(ob))->ma_used)
 
 AiAPI_DATA(AiTypeObject) type_dictobject;
 AiAPI_DATA(AiObject *) dummy;

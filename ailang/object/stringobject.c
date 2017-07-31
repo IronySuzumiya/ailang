@@ -190,7 +190,7 @@ void string_dealloc(AiStringObject *a) {
 }
 
 void string_print(AiStringObject *a, FILE *stream) {
-    fprintf(stream, "%s\n", STRING_AS_CSTRING(a));
+    fputs(STRING_AS_CSTRING(a), stream);
 }
 
 int string_compare(AiStringObject *lhs, AiStringObject *rhs) {
@@ -293,4 +293,29 @@ int string_contains(AiStringObject *a, AiStringObject *sub) {
         UNSUPPORTED_CONTAINS(OB_TYPENAME(a), OB_TYPENAME(sub));
         return 0;
     }
+}
+
+void string_resize(AiStringObject **a, ssize_t newsize) {
+    if (CHECK_TYPE_STRING(*a)) {
+        switch (CHECK_STRING_INTERNED(*a))
+        {
+        case SSTATE_NOT_INTERNED:
+            break;
+        case SSTATE_INTERNED_MORTAL:
+            (*a)->ob_refcnt = 3;
+            if (dict_delitem(interned, (AiObject *)(*a))) {
+                FATAL_ERROR("deletion of interned string failed");
+            }
+            break;
+        case SSTATE_INTERNED_IMMORTAL:
+            break;
+        default:
+            FATAL_ERROR("Inconsistent interned string state");
+        }
+    }
+    *a = AiMEM_REALLOC(*a, sizeof(AiStringObject) + newsize);
+    INIT_REFCNT(*a);
+    STRING_LEN(*a) = newsize;
+    STRING_AS_CSTRING(*a)[newsize] = 0;
+    (*a)->ob_shash = -1;
 }

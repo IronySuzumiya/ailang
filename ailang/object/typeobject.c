@@ -24,12 +24,7 @@ void type_dealloc(AiTypeObject *ob) {
 }
 
 void type_print(AiTypeObject *ob, FILE *stream) {
-    if (CHECK_TYPE_TYPE(ob)) {
-        fprintf(stream, "<type 'type'>\n");
-    }
-    else {
-        OB_PRINT(ob, stream);
-    }
+    fputs("<type 'type'>", stream);
 }
 
 AiObject *type_to_string(AiTypeObject *ob) {

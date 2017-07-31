@@ -1,8 +1,5 @@
 #include "../ailang.h"
 
-AiIntBlock *block_list;
-AiIntObject *free_list;
-
 static void int_dealloc(AiIntObject *ob);
 static void int_print(AiIntObject *ob, FILE *stream);
 static int int_compare(AiIntObject *lhs, AiIntObject *rhs);
@@ -70,6 +67,9 @@ AiTypeObject type_intobject = {
     0,                              /* tp_free */
 };
 
+AiIntBlock *block_list;
+AiIntObject *free_list;
+
 AiIntObject *small_intobject_buf[SMALL_INTOBJECT_BUF_SIZE];
 
 AiObject *int_from_long(long ival) {
@@ -117,7 +117,7 @@ void int_dealloc(AiIntObject *ob) {
 }
 
 void int_print(AiIntObject *ob, FILE *stream) {
-    fprintf(stream, "%d\n", ob->ob_ival);
+    fprintf(stream, "%d", ob->ob_ival);
 }
 
 int int_compare(AiIntObject *lhs, AiIntObject *rhs) {

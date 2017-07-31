@@ -37,6 +37,8 @@ AiIntBlock;
 
 #define INT_TO_CSTRING_BUFFER_SIZE 33
 
+#define INT_AS_CLONG(ob) (((AiIntObject *)(ob))->ob_ival)
+
 AiAPI_DATA(AiIntBlock *) block_list;
 AiAPI_DATA(AiIntObject *) free_list;
 AiAPI_DATA(AiTypeObject) type_intobject;

@@ -56,5 +56,5 @@ int object_rich_compare(AiObject *lhs, AiObject *rhs, int op) {
 }
 
 void none_print(AiNoneObject *ob, FILE *stream) {
-    fprintf(stream, "<type 'none'> <addr %p>\n", ob);
+
 }

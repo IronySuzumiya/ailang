@@ -6,7 +6,7 @@ static HeapList *heapptr;
 void *mem_alloc(ssize_t size) {
     void *m = malloc((size_t)size);
     if (m) {
-#ifdef DEBUG
+#ifdef AI_DEBUG
         if (!heaphead) {
             heapptr = malloc(sizeof(HeapList));
             heaphead = heapptr;
@@ -27,7 +27,7 @@ void *mem_alloc(ssize_t size) {
 }
 
 void mem_free(void *p) {
-#ifdef DEBUG
+#ifdef AI_DEBUG
     HeapList *hp = heaphead;
     HeapList *prev = NULL;
     while (hp) {
@@ -53,7 +53,7 @@ void mem_free(void *p) {
 }
 
 void *mem_realloc(void *p, ssize_t size) {
-#ifdef DEBUG
+#ifdef AI_DEBUG
     HeapList *hp = heaphead;
     while (hp) {
         if (hp->mem == p) {
@@ -67,7 +67,7 @@ void *mem_realloc(void *p, ssize_t size) {
     }
 #endif
     return
-#ifdef DEBUG
+#ifdef AI_DEBUG
         hp->mem =
 #endif
         realloc(p, (size_t)size);

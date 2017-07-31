@@ -44,5 +44,6 @@ AiAPI_FUNC(AiObject *) string_concat(AiStringObject *lhs, AiStringObject *rhs);
 AiAPI_FUNC(AiObject *) string_getitem(AiStringObject *a, ssize_t index);
 AiAPI_FUNC(AiObject *) string_slice(AiStringObject *a, ssize_t start, ssize_t end);
 AiAPI_FUNC(int) string_contains(AiStringObject *a, AiStringObject *sub);
+AiAPI_FUNC(void) string_resize(AiStringObject **a, ssize_t newsize);
 
 #endif

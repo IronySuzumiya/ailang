@@ -179,11 +179,11 @@ int dict_setitem(AiDictObject *mp, AiObject *key, AiObject *value) {
             return -1;
         }
     }
-    used = mp->ma_used;
+    used = DICT_SIZE(mp);
     dict_insert(mp, key, hash, value);
 
-    if (mp->ma_used > used && mp->ma_fill * 3 >= (mp->ma_mask + 1) * 2) {
-        return dict_resize(mp, mp->ma_used * (mp->ma_used > 50000 ? 2 : 4));
+    if (DICT_SIZE(mp) > used && mp->ma_fill * 3 >= (mp->ma_mask + 1) * 2) {
+        return dict_resize(mp, DICT_SIZE(mp) * (DICT_SIZE(mp) > 50000 ? 2 : 4));
     }
     else {
         return 0;
@@ -213,7 +213,7 @@ int dict_insert(AiDictObject *mp, AiObject *key, long hash, AiObject *value) {
         ep->me_key = key;
         ep->me_hash = hash;
         ep->me_value = value;
-        ++mp->ma_used;
+        ++DICT_SIZE(mp);
     }
 
     return 0;
@@ -240,7 +240,7 @@ int dict_delitem(AiDictObject *mp, AiObject *key) {
     ep->me_key = dummy;
     old_value = ep->me_value;
     ep->me_value = NULL;
-    --mp->ma_used;
+    --DICT_SIZE(mp);
     DEC_REFCNT(old_value);
     DEC_REFCNT(old_key);
 
@@ -249,7 +249,7 @@ int dict_delitem(AiDictObject *mp, AiObject *key) {
 
 AiObject *dict_to_string(AiDictObject *mp) {
     AiDictEntry *ep;
-    ssize_t used = mp->ma_used;
+    ssize_t used = DICT_SIZE(mp);
     char *p;
     ssize_t i = 0;
     AiListObject *strlist;
@@ -258,10 +258,10 @@ AiObject *dict_to_string(AiDictObject *mp) {
     AiStringObject *value;
     AiStringObject *split;
 
-    if (mp->ma_used == 0) {
+    if (DICT_SIZE(mp) == 0) {
         return string_from_cstring("{}");
     }
-    else if (mp->ma_used == 1) {
+    else if (DICT_SIZE(mp) == 1) {
         for (ep = mp->ma_table; ; ++ep) {
             if (ep->me_key && ep->me_value) {
                 key = (AiStringObject *)OB_TO_STRING(ep->me_key);
@@ -285,7 +285,7 @@ AiObject *dict_to_string(AiDictObject *mp) {
         return (AiObject *)str;
     }
 
-    strlist = (AiListObject *)list_new(mp->ma_used);
+    strlist = (AiListObject *)list_new(DICT_SIZE(mp));
 
     for (ep = mp->ma_table; ; ++ep) {
         if (ep->me_key && ep->me_value) {
@@ -361,7 +361,7 @@ AiObject *dict_to_string(AiDictObject *mp) {
 }
 
 ssize_t dict_size(AiDictObject *mp) {
-    return mp->ma_used;
+    return DICT_SIZE(mp);
 }
 
 int dict_resize(AiDictObject *mp, ssize_t minused) {
@@ -381,7 +381,7 @@ int dict_resize(AiDictObject *mp, ssize_t minused) {
     if (newsize == DICT_SMALL_TABLE_SIZE) {
         new_table = mp->ma_smalltable;
         if (new_table == old_table) {
-            if (mp->ma_fill == mp->ma_used) {
+            if (mp->ma_fill == DICT_SIZE(mp)) {
                 return 0;
             }
             else {
@@ -397,7 +397,7 @@ int dict_resize(AiDictObject *mp, ssize_t minused) {
     mp->ma_table = new_table;
     mp->ma_mask = newsize - 1;
     AiMEM_SET(new_table, 0, sizeof(AiDictEntry) * newsize);
-    mp->ma_used = 0;
+    DICT_SIZE(mp) = 0;
     i = mp->ma_fill;
     mp->ma_fill = 0;
 
@@ -442,27 +442,27 @@ void dict_dealloc(AiDictObject *mp) {
 
 void dict_print(AiDictObject *mp, FILE *stream) {
     AiDictEntry *ep;
-    ssize_t used = mp->ma_used;
+    ssize_t used = DICT_SIZE(mp);
 
-    fprintf(stream, "{");
+    fputs("{", stream);
     for (ep = mp->ma_table; used > 1; ++ep) {
         if (ep->me_key && ep->me_value) {
             --used;
             OB_PRINT(ep->me_key, stream);
-            fprintf(stream, ": ");
+            fputs(": ", stream);
             OB_PRINT(ep->me_value, stream);
-            fprintf(stream, ", ");
+            fputs(", ", stream);
         }
     }
     for (; ; ++ep) {
         if (ep->me_key && ep->me_value) {
             OB_PRINT(ep->me_key, stream);
-            fprintf(stream, ": ");
+            fputs(": ", stream);
             OB_PRINT(ep->me_value, stream);
             break;
         }
     }
-    fprintf(stream, "}");
+    fputs("}", stream);
 }
 
 void dict_free(void *p) {

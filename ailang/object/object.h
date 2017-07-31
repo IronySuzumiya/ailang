@@ -51,8 +51,6 @@
 
 #define OB_PRINT(ob, stream) ((ob)->ob_type->tp_print((AiObject *)(ob), (stream)))
 
-#define OB_PRINT_STDOUT(ob) OB_PRINT(ob, stdout)
-
 #define OB_FREE(ob) ((ob)->ob_type->tp_free((ob)))
 
 typedef struct _object {

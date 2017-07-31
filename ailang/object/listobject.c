@@ -232,17 +232,17 @@ void list_dealloc(AiListObject *list) {
 }
 
 void list_print(AiListObject *list, FILE *stream) {
-    fprintf(stream, "[");
+    fputs("[", stream);
     if (list->ob_item && LIST_SIZE(list) > 0) {
         for (ssize_t i = 0; i < LIST_SIZE(list) - 1; ++i) {
             if (!list->ob_item[i])
                 continue;
             OB_PRINT(list->ob_item[i], stream);
-            fprintf(stream, ", ");
+            fputs(", ", stream);
         }
         OB_PRINT(list->ob_item[LIST_SIZE(list) - 1], stream);
     }
-    fprintf(stream, "]\n");
+    fputs("]", stream);
 }
 /*
 int list_compare(AiListObject *lhs, AiListObject *rhs) {

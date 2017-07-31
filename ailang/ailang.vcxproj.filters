@@ -42,6 +42,15 @@
     <ClCompile Include="test\test.c">
       <Filter>测试</Filter>
     </ClCompile>
+    <ClCompile Include="object\codeobject.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="system\marshal.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="object\boolobject.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="system\utils.h">
@@ -69,6 +78,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="system\aimemory.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="object\codeobject.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="system\marshal.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="object\boolobject.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
