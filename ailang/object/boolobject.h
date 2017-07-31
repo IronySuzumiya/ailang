@@ -6,8 +6,8 @@
 
 #define CHECK_TYPE_BOOL(ob) ((ob) == aitrue || (ob) == aifalse)
 
-#define AI_TRUE     ((AiObject *)aitrue)
-#define AI_FALSE    ((AiObject *)aifalse)
+#define AiTRUE     ((AiObject *)aitrue)
+#define AiFALSE    ((AiObject *)aifalse)
 
 typedef AiIntObject AiBoolObject;
 

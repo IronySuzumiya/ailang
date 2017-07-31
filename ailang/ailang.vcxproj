@@ -146,6 +146,7 @@
     <ClCompile Include="object\listobject.c" />
     <ClCompile Include="object\object.c" />
     <ClCompile Include="object\stringobject.c" />
+    <ClCompile Include="object\tupleobject.c" />
     <ClCompile Include="object\typeobject.c" />
     <ClCompile Include="system\aimemory.c" />
     <ClCompile Include="system\marshal.c" />
@@ -160,6 +161,7 @@
     <ClInclude Include="object\listobject.h" />
     <ClInclude Include="object\object.h" />
     <ClInclude Include="object\stringobject.h" />
+    <ClInclude Include="object\tupleobject.h" />
     <ClInclude Include="object\typeobject.h" />
     <ClInclude Include="system\aimemory.h" />
     <ClInclude Include="system\marshal.h" />

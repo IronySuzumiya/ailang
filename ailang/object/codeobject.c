@@ -1,5 +1,8 @@
 #include "../ailang.h"
 
+static void intern_strings(AiObject *tuple);
+static int intern_string_constants(AiObject *tuple);
+
 AiTypeObject type_codeobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
 };
@@ -47,4 +50,34 @@ AiCodeObject *code_new(int argcount, int nlocals, int stacksize, int flags,
     co->co_lnotab = lnotab;
 
     return co;
+}
+
+void intern_strings(AiObject *tuple) {
+    ssize_t i = TUPLE_SIZE(tuple);
+    while (--i >= 0) {
+        string_intern((AiStringObject **)&TUPLE_GET_ITEM(tuple, i));
+    }
+}
+
+int intern_string_constants(AiObject *tuple) {
+    int modified = 0;
+    ssize_t i = TUPLE_SIZE(tuple);
+    AiObject *v;
+
+    while (--i >= 0) {
+        v = TUPLE_GET_ITEM(tuple, i);
+        if (CHECK_TYPE_STRING(v)) {
+            AiObject *w = v;
+            string_intern((AiStringObject **)&v);
+            if (w != v) {
+                TUPLE_SET_ITEM(tuple, i, v);
+                modified = 1;
+            }
+        }
+        else if (CHECK_TYPE_TUPLE(v)) {
+            intern_string_constants(v);
+        }
+    }
+
+    return modified;
 }

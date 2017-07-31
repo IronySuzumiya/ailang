@@ -277,7 +277,13 @@ AiObject *string_slice(AiStringObject *a, ssize_t start, ssize_t end) {
         if (end > STRING_LEN(a)) {
             end = STRING_LEN(a);
         }
-        return string_from_cstring_with_size(&STRING_AS_CSTRING(a)[start], end - start);
+        if (start == 0 && end == STRING_LEN(a)) {
+            INC_REFCNT(a);
+            return (AiObject *)a;
+        }
+        else {
+            return string_from_cstring_with_size(&STRING_AS_CSTRING(a)[start], end - start);
+        }
     }
     else {
         RUNTIME_EXCEPTION("invalid range sliced");

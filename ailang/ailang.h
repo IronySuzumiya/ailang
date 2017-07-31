@@ -26,6 +26,7 @@
 #include "object\dictobject.h"
 #include "object\listobject.h"
 #include "object\boolobject.h"
+#include "object\tupleobject.h"
 #include "system\marshal.h"
 
 #endif

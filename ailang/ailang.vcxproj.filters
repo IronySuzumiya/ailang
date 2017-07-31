@@ -51,6 +51,9 @@
     <ClCompile Include="object\boolobject.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="object\tupleobject.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="system\utils.h">
@@ -87,6 +90,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="object\boolobject.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="object\tupleobject.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

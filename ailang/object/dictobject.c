@@ -360,6 +360,13 @@ AiObject *dict_to_string(AiDictObject *mp) {
     return (AiObject *)str;
 }
 
+int dict_clear_free_dicts() {
+    while (number_free_dicts--) {
+        AiMEM_FREE(free_dicts[number_free_dicts]);
+    }
+    return 0;
+}
+
 ssize_t dict_size(AiDictObject *mp) {
     return DICT_SIZE(mp);
 }

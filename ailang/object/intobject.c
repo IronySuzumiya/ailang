@@ -92,7 +92,7 @@ AiObject *int_from_long(long ival) {
     }
 }
 
-void int_init() {
+int int_init() {
     AiIntObject *v;
     for (long i = -NUM_NEG_SMALL_INTOBJECT; i < NUM_POS_SMALL_INTOBJECT; ++i) {
         if (!free_list && !(free_list = fill_free_list())) {
@@ -104,6 +104,19 @@ void int_init() {
         v->ob_ival = i;
         small_intobject_buf[SMALL_INTOBJECT_INDEX(i)] = v;
     }
+    return 0;
+}
+
+int int_clear_blocks(void) {
+    AiIntBlock *s = block_list;
+    AiIntBlock *n = s;
+
+    while (s) {
+        n = s->next;
+        AiMEM_FREE(s);
+        s = n;
+    }
+    return 0;
 }
 
 void int_dealloc(AiIntObject *ob) {

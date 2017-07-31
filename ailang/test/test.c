@@ -21,9 +21,6 @@ int main() {
 
     AiObject *s2 = v1->ob_type->tp_as_number->nb_add(v1, s1);
 
-    AiIntBlock *s = block_list;
-    AiIntBlock *n = s;
-
     AiListObject *list = (AiListObject *)list_new(4);
 
     list_setitem(list, 0, v1);
@@ -53,23 +50,11 @@ int main() {
     DEC_REFCNT(v3);
     DEC_REFCNT(s1);
 
-    while (s) {
-        n = s->next;
-        AiMEM_FREE(s);
-        s = n;
-    }
-
-    while (number_free_lists--) {
-        AiMEM_FREE(free_lists[number_free_lists]);
-    }
-
-    while (number_free_dicts--) {
-        AiMEM_FREE(free_dicts[number_free_dicts]);
-    }
-
-    if (dummy) {
+    int_clear_blocks();
+    list_clear_free_lists();
+    dict_clear_free_dicts();
+    if (dummy)
         AiMEM_FREE(dummy);
-    }
 
     assert(heaphead == NULL);
 

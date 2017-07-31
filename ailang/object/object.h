@@ -4,6 +4,8 @@
 
 #include "../system/utils.h"
 
+typedef __int64 ssize_t;
+
 #define OBJECT_HEAD                 \
     ssize_t ob_refcnt;              \
     struct _typeobject *ob_type;

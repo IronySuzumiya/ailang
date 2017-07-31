@@ -13,7 +13,6 @@ typedef struct _aicfile {
 AicFile;
 
 static FILE *open_exclusive(char *filename, mode_t mode) {
-#if defined(O_EXCL)&&defined(O_CREAT)&&defined(O_WRONLY)&&defined(O_TRUNC)
     int fd;
     _unlink(filename);
     fd = open(filename, O_EXCL | O_CREAT | O_WRONLY | O_TRUNC
@@ -27,7 +26,6 @@ static FILE *open_exclusive(char *filename, mode_t mode) {
     else {
         return _fdopen(fd, "wb");
     }
-#endif
 }
 
 static void w_more(int c, AicFile *p) {
@@ -88,10 +86,10 @@ static void w_object(AiObject *v, AicFile *p) {
     else if (v == NONE) {
         w_byte(TYPE_NONE, p);
     }
-    else if (v == AI_FALSE) {
+    else if (v == AiFALSE) {
         w_byte(TYPE_FALSE, p);
     }
-    else if (v == AI_TRUE) {
+    else if (v == AiTRUE) {
         w_byte(TYPE_TRUE, p);
     }
     else if (CHECK_TYPE_INT(v)) {
@@ -112,12 +110,13 @@ static void w_object(AiObject *v, AicFile *p) {
                 dict_setitem((AiDictObject *)p->strings, v, o);
                 XDEC_REFCNT(o);
                 w_byte(TYPE_INTERNED, p);
+                w_pstring(STRING_AS_CSTRING(v), STRING_LEN(v), p);
             }
         }
         else {
             w_byte(TYPE_STRING, p);
+            w_pstring(STRING_AS_CSTRING(v), STRING_LEN(v), p);
         }
-        w_pstring(STRING_AS_CSTRING(v), STRING_LEN(v), p);
     }
     else if (CHECK_TYPE_LIST(v)) {
         ssize_t n;
@@ -248,11 +247,11 @@ static AiObject *r_object(AicFile *p) {
         break;
     case TYPE_FALSE:
         INC_REFCNT(aifalse);
-        retval = AI_FALSE;
+        retval = AiFALSE;
         break;
     case TYPE_TRUE:
         INC_REFCNT(aitrue);
-        retval = AI_TRUE;
+        retval = AiTRUE;
         break;
     case TYPE_INT:
         retval = int_from_long(r_long(p));

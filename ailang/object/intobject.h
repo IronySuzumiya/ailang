@@ -44,6 +44,8 @@ AiAPI_DATA(AiIntObject *) free_list;
 AiAPI_DATA(AiTypeObject) type_intobject;
 AiAPI_DATA(AiIntObject *) small_intobject_buf[SMALL_INTOBJECT_BUF_SIZE];
 AiAPI_FUNC(AiObject *) int_from_long(long ival);
-AiAPI_FUNC(void) int_init(void);
+AiAPI_FUNC(int) int_init(void);
+
+AiAPI_DATA(int) int_clear_blocks(void);
 
 #endif

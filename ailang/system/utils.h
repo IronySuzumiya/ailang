@@ -169,6 +169,4 @@ AiAPI_FUNC(void) inline print_fatal_error(char *msg, ...) {
 
 #define OB_PRINT_STDOUT(ob) (OB_PRINT(ob, stdout), fputc('\n', stdout))
 
-typedef __int64 ssize_t;
-
 #endif

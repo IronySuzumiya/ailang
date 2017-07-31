@@ -57,16 +57,17 @@ AiObject * list_new(ssize_t size) {
     return (AiObject *)list;
 }
 
-void list_resize(AiListObject *list, ssize_t newsize) {
+int list_resize(AiListObject *list, ssize_t newsize) {
     ssize_t old_allo = list->allocated, new_allo;
     if (newsize < old_allo && newsize >= old_allo / 2) {
-        return;
+        return 0;
     }
     // The growth pattern is:  0, 4, 8, 16, 25, 35, 46, 58, 72, 88, ...
     new_allo = newsize + (newsize >> 3) + (newsize < 9 ? 3 : 6);
     list->ob_item = AiMEM_REALLOC(list->ob_item, newsize);
     LIST_SIZE(list) = newsize;
     list->allocated = new_allo;
+    return 0;
 }
 
 AiObject *list_getitem(AiListObject *list, ssize_t index) {
@@ -102,12 +103,18 @@ AiObject *list_slice(AiListObject *list, ssize_t start, ssize_t end) {
         if (end > LIST_SIZE(list)) {
             end = LIST_SIZE(list);
         }
-        newlist = (AiListObject *)list_new(end - start);
-        for (ssize_t i = 0; i < end - start; ++i) {
-            newlist->ob_item[i] = list->ob_item[start + i];
-            XINC_REFCNT(newlist->ob_item[i]);
+        if (start == 0 && end == LIST_SIZE(list)) {
+            INC_REFCNT(list);
+            return (AiObject *)list;
         }
-        return (AiObject *)newlist;
+        else {
+            newlist = (AiListObject *)list_new(end - start);
+            for (ssize_t i = 0; i < end - start; ++i) {
+                newlist->ob_item[i] = list->ob_item[start + i];
+                XINC_REFCNT(newlist->ob_item[i]);
+            }
+            return (AiObject *)newlist;
+        }
     }
     else {
         RUNTIME_EXCEPTION("invalid range sliced");
@@ -210,6 +217,13 @@ int list_extend(AiListObject *fo, AiListObject *la) {
         UNSUPPORTED_EXTEND(OB_TYPENAME(fo), OB_TYPENAME(la));
         return -1;
     }
+}
+
+int list_clear_free_lists() {
+    while (number_free_lists--) {
+        AiMEM_FREE(free_lists[number_free_lists]);
+    }
+    return 0;
 }
 
 ssize_t list_size(AiListObject *list) {

@@ -61,4 +61,6 @@ AiAPI_FUNC(int) dict_insert(AiDictObject *mp, AiObject *key, long hash, AiObject
 AiAPI_FUNC(int) dict_delitem(AiDictObject *mp, AiObject *key);
 AiAPI_FUNC(AiObject *) dict_to_string(AiDictObject *mp);
 
+AiAPI_FUNC(int) dict_clear_free_dicts(void);
+
 #endif
