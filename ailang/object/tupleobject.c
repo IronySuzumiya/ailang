@@ -87,6 +87,7 @@ AiObject *tuple_slice(AiTupleObject *tp, ssize_t start, ssize_t end) {
 }
 
 int tuple_resize(AiTupleObject *tp, ssize_t newsize) {
+    FATAL_ERROR("not implemented yet");
     return 0;
 }
 

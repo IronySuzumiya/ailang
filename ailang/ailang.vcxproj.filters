@@ -54,6 +54,15 @@
     <ClCompile Include="object\tupleobject.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="object\frameobject.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="system\aieval.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="system\aistate.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="system\utils.h">
@@ -93,6 +102,18 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="object\tupleobject.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="object\frameobject.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="system\aieval.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="system\aistate.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="system\aiopcode.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

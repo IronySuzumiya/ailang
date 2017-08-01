@@ -11,6 +11,32 @@ static AiObject *string_to_string(AiStringObject *a);
 static void string_free(void *p);
 static ssize_t string_length(AiStringObject *a);
 
+static numbermethods string_as_number = {
+    (binaryfunc)string_concat,
+    0,
+    0,
+    0,
+    0,
+    0,
+
+    0,
+    0,
+    0,
+
+    0,
+
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+
+    0,
+    0,
+    0,
+};
+
 // string object is immutable
 static sequencemethods string_as_sequence = {
     (lengthfunc)string_length,
@@ -28,7 +54,7 @@ AiTypeObject type_stringobject = {
     (printfunc)string_print,                    /* tp_print */
     (cmpfunc)string_compare,                    /* tp_compare */
 
-    0,                                          /* tp_as_number */
+    &string_as_number,                          /* tp_as_number */
     &string_as_sequence,                        /* tp_as_sequence */
     0,                                          /* tp_as_mapping */
 

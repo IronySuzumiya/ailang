@@ -25,6 +25,15 @@ typedef struct _codeobject {
 }
 AiCodeObject;
 
+#define CO_OPTIMIZED	0x0001
+#define CO_NEWLOCALS	0x0002
+#define CO_VARARGS	    0x0004
+#define CO_VARKEYWORDS	0x0008
+#define CO_NESTED       0x0010
+#define CO_GENERATOR    0x0020
+
+#define CO_MAXBLOCKS    20
+
 #define CHECK_TYPE_CODE(ob) CHECK_TYPE(ob, &type_codeobject)
 
 AiAPI_DATA(struct _typeobject) type_codeobject;

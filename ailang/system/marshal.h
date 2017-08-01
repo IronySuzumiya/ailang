@@ -46,7 +46,21 @@
 #define SAFE_DOWNCAST(VALUE, WIDE, NARROW)  \
     (assert((WIDE)(NARROW)(VALUE) == (VALUE)), (NARROW)(VALUE))
 
+typedef struct _aicfile {
+    FILE *fp;
+    int error;
+    int depth;
+    AiObject *str;
+    char *ptr;
+    char *end;
+    /* dict on marshal, list on unmarshal */
+    AiObject *strings;
+}
+AicFile;
+
 typedef unsigned short mode_t;
 typedef __time64_t time_t;
+
+AiAPI_FUNC(void) write_compiled_module(AiCodeObject *co, char *path, struct stat *srcstat, time_t mtime);
 
 #endif

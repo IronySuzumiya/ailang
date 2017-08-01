@@ -142,13 +142,16 @@
     <ClCompile Include="object\boolobject.c" />
     <ClCompile Include="object\codeobject.c" />
     <ClCompile Include="object\dictobject.c" />
+    <ClCompile Include="object\frameobject.c" />
     <ClCompile Include="object\intobject.c" />
     <ClCompile Include="object\listobject.c" />
     <ClCompile Include="object\object.c" />
     <ClCompile Include="object\stringobject.c" />
     <ClCompile Include="object\tupleobject.c" />
     <ClCompile Include="object\typeobject.c" />
+    <ClCompile Include="system\aieval.c" />
     <ClCompile Include="system\aimemory.c" />
+    <ClCompile Include="system\aistate.c" />
     <ClCompile Include="system\marshal.c" />
     <ClCompile Include="test\test.c" />
   </ItemGroup>
@@ -157,13 +160,17 @@
     <ClInclude Include="object\boolobject.h" />
     <ClInclude Include="object\codeobject.h" />
     <ClInclude Include="object\dictobject.h" />
+    <ClInclude Include="object\frameobject.h" />
     <ClInclude Include="object\intobject.h" />
     <ClInclude Include="object\listobject.h" />
     <ClInclude Include="object\object.h" />
     <ClInclude Include="object\stringobject.h" />
     <ClInclude Include="object\tupleobject.h" />
     <ClInclude Include="object\typeobject.h" />
+    <ClInclude Include="system\aieval.h" />
     <ClInclude Include="system\aimemory.h" />
+    <ClInclude Include="system\aiopcode.h" />
+    <ClInclude Include="system\aistate.h" />
     <ClInclude Include="system\marshal.h" />
     <ClInclude Include="system\utils.h" />
   </ItemGroup>

@@ -1,34 +1,45 @@
 #include "../ailang.h"
 
-typedef struct _aicfile {
-    FILE *fp;
-    int error;
-    int depth;
-    AiObject *str;
-    char *ptr;
-    char *end;
-    /* dict on marshal, list on unmarshal */
-    AiObject *strings;
-}
-AicFile;
+static FILE *open_exclusive(char *filename, mode_t mode);
+static void w_more(int c, AicFile *p);
+static void w_long(long x, AicFile *p);
+static void write_long_to_file(long x, FILE *fp);
+static void w_string(const char *s, ssize_t n, AicFile *p);
+static void w_pstring(const char *s, ssize_t n, AicFile *p);
+static void w_object(AiObject *v, AicFile *p);
+static void write_object_to_file(AiObject *x, FILE *fp);
+static ssize_t r_string(char *s, ssize_t n, AicFile *p);
+static long r_long(AicFile *p);
+static long read_long_from_file(FILE *fp);
+static AiObject *r_object(AicFile *p);
+static AiObject *read_object_from_file(FILE *fp);
 
-static FILE *open_exclusive(char *filename, mode_t mode) {
+void write_compiled_module(AiCodeObject *co, char *path, struct stat *srcstat, time_t mtime) {
+    FILE *fp;
+    mode_t mode = srcstat->st_mode & S_IEXEC;
+    mode |= _S_IWRITE;
+
+    fp = open_exclusive(path, mode);
+    if (!fp) {
+        FATAL_ERROR("cannot create .aic file %s\n", path);
+        return;
+    }
+    write_long_to_file(AI_MAGIC, fp);
+    write_long_to_file((long)mtime, fp);
+    write_object_to_file((AiObject *)co, fp);
+
+    fflush(fp);
+    fclose(fp);
+}
+
+FILE *open_exclusive(char *filename, mode_t mode) {
     int fd;
     _unlink(filename);
-    fd = open(filename, O_EXCL | O_CREAT | O_WRONLY | O_TRUNC
-#ifdef O_BINARY
-        | O_BINARY
-#endif
-    );
-    if (fd < 0) {
-        return NULL;
-    }
-    else {
-        return _fdopen(fd, "wb");
-    }
+    fd = open(filename, O_EXCL | O_CREAT | O_WRONLY | O_TRUNC | O_BINARY);
+    return fd < 0 ? NULL : _fdopen(fd, "wb");
 }
 
-static void w_more(int c, AicFile *p) {
+void w_more(int c, AicFile *p) {
     ssize_t size, newsize;
     if (p->str == NULL)
         return;
@@ -44,14 +55,14 @@ static void w_more(int c, AicFile *p) {
     *p->ptr++ = SAFE_DOWNCAST(c, int, char);
 }
 
-static void w_long(long x, AicFile *p) {
+void w_long(long x, AicFile *p) {
     w_byte((char)(x & 0xff), p);
     w_byte((char)((x >> 8) & 0xff), p);
     w_byte((char)((x >> 16) & 0xff), p);
     w_byte((char)((x >> 24) & 0xff), p);
 }
 
-static void write_long_to_file(long x, FILE *fp) {
+void write_long_to_file(long x, FILE *fp) {
     AicFile af;
     af.fp = fp;
     af.error = AFERR_OK;
@@ -60,7 +71,7 @@ static void write_long_to_file(long x, FILE *fp) {
     w_long(x, &af);
 }
 
-static void w_string(const char *s, ssize_t n, AicFile *p) {
+void w_string(const char *s, ssize_t n, AicFile *p) {
     if (p->fp) {
         fwrite(s, 1, (size_t)n, p->fp);
     }
@@ -72,12 +83,12 @@ static void w_string(const char *s, ssize_t n, AicFile *p) {
     }
 }
 
-static void w_pstring(const char *s, ssize_t n, AicFile *p) {
+void w_pstring(const char *s, ssize_t n, AicFile *p) {
     w_long((long)n, p);
     w_string(s, n, p);
 }
 
-static void w_object(AiObject *v, AicFile *p) {
+void w_object(AiObject *v, AicFile *p) {
     ++p->depth;
 
     if (v == NULL) {
@@ -136,8 +147,10 @@ static void w_object(AiObject *v, AicFile *p) {
 
         w_byte(TYPE_DICT, p);
         for (ep = mp->ma_table; fill > 0; ++ep) {
-            if (ep->me_key) {
+            if (ep->me_value) {
                 --fill;
+                key = ep->me_key;
+                value = ep->me_value;
                 w_object(key, p);
                 w_object(value, p);
             }
@@ -169,7 +182,7 @@ static void w_object(AiObject *v, AicFile *p) {
     --p->depth;
 }
 
-static void write_object_to_file(AiObject *x, FILE *fp) {
+void write_object_to_file(AiObject *x, FILE *fp) {
     AicFile af;
     af.fp = fp;
     af.error = AFERR_OK;
@@ -179,25 +192,7 @@ static void write_object_to_file(AiObject *x, FILE *fp) {
     DEC_REFCNT(af.strings);
 }
 
-static void write_compiled_module(AiCodeObject *co, char *path, struct stat *srcstat, time_t mtime) {
-    FILE *fp;
-    mode_t mode = srcstat->st_mode & S_IEXEC;
-    mode |= _S_IWRITE;
-
-    fp = open_exclusive(path, mode);
-    if (!fp) {
-        FATAL_ERROR("cannot create .aic file %s\n", path);
-        return;
-    }
-    write_long_to_file(AI_MAGIC, fp);
-    write_long_to_file((long)mtime, fp);
-    write_object_to_file((AiObject *)co, fp);
-
-    fflush(fp);
-    fclose(fp);
-}
-
-static ssize_t r_string(char *s, ssize_t n, AicFile *p) {
+ssize_t r_string(char *s, ssize_t n, AicFile *p) {
     if (p->fp)
         return fread(s, 1, (size_t)n, p->fp);
     else if (p->end - p->ptr < n)
@@ -207,7 +202,7 @@ static ssize_t r_string(char *s, ssize_t n, AicFile *p) {
     return n;
 }
 
-static long r_long(AicFile *p) {
+long r_long(AicFile *p) {
     long x;
     FILE *fp = p->fp;
 
@@ -226,7 +221,15 @@ static long r_long(AicFile *p) {
     return x;
 }
 
-static AiObject *r_object(AicFile *p) {
+long read_long_from_file(FILE *fp) {
+    AicFile af;
+    af.fp = fp;
+    af.strings = NULL;
+    af.ptr = af.end = NULL;
+    return r_long(&af);
+}
+
+AiObject *r_object(AicFile *p) {
     int type = r_byte(p);
     AiObject *v, *v2, *retval;
     ssize_t n;
@@ -321,8 +324,6 @@ static AiObject *r_object(AicFile *p) {
             int firstlineno;
             AiObject *lnotab = NULL;
 
-            v = NULL;
-
             argcount = (int)r_long(p);
             nlocals = (int)r_long(p);
             stacksize = (int)r_long(p);
@@ -356,4 +357,18 @@ static AiObject *r_object(AicFile *p) {
     }
     --p->depth;
     return retval;
+}
+
+AiObject *read_object_from_file(FILE *fp) {
+    AicFile af;
+    AiObject *r;
+
+    af.fp = fp;
+    af.strings = list_new(0);
+    af.depth = 0;
+    af.ptr = af.end = NULL;
+    r = r_object(&af);
+    DEC_REFCNT(af.strings);
+
+    return r;
 }

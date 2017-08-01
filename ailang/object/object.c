@@ -55,6 +55,11 @@ int object_rich_compare(AiObject *lhs, AiObject *rhs, int op) {
     }
 }
 
+AiObject *object_rich_compare_bool(AiObject *lhs, AiObject *rhs, int op) {
+    int r = object_rich_compare(lhs, rhs, op);
+    return r > 0 ? AiTRUE : r == 0 ? AiFALSE : NONE;
+}
+
 void none_print(AiNoneObject *ob, FILE *stream) {
 
 }

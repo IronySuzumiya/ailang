@@ -17,10 +17,13 @@
 #include <sys\stat.h>
 #include <sys\types.h>
 #include "system\utils.h"
+#include "system\aiopcode.h"
 #include "object\object.h"
+#include "system\aimemory.h"
+#include "system\aistate.h"
 #include "object\typeobject.h"
 #include "object\codeobject.h"
-#include "system\aimemory.h"
+#include "object\frameobject.h"
 #include "object\intobject.h"
 #include "object\stringobject.h"
 #include "object\dictobject.h"
@@ -28,5 +31,6 @@
 #include "object\boolobject.h"
 #include "object\tupleobject.h"
 #include "system\marshal.h"
+#include "system\aieval.h"
 
 #endif

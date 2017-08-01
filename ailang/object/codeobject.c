@@ -15,7 +15,6 @@ AiCodeObject *code_new(int argcount, int nlocals, int stacksize, int flags,
 
     AiCodeObject *co;
 
-// TODO
     intern_strings(names);
     intern_strings(varnames);
     intern_strings(freevars);

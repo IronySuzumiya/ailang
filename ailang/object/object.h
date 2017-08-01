@@ -157,5 +157,6 @@ AiAPI_DATA(struct _typeobject) type_noneobject;
 AiAPI_DATA(AiNoneObject *) none;
 AiAPI_FUNC(long) pointer_hash(void *p);
 AiAPI_FUNC(int) object_rich_compare(AiObject *lhs, AiObject *rhs, int op);
+AiAPI_FUNC(AiObject *) object_rich_compare_bool(AiObject *lhs, AiObject *rhs, int op);
 
 #endif
