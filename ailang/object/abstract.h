@@ -36,5 +36,6 @@ AiAPI_FUNC(AiObject *) object_rich_compare_bool(AiObject *lhs, AiObject *rhs, in
 AiAPI_FUNC(AiObject *) object_getiter(AiObject *sq);
 AiAPI_FUNC(ssize_t) sequence_size(AiObject *sq);
 AiAPI_FUNC(AiObject *) sequence_getitem(AiObject *sq, ssize_t index);
+AiAPI_FUNC(int) sequence_contains(AiObject *sq, AiObject *item);
 
 #endif

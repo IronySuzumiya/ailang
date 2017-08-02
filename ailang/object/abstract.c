@@ -23,14 +23,16 @@ int object_rich_compare(AiObject *lhs, AiObject *rhs, int op) {
             return lhs->ob_type->tp_compare(lhs, rhs) >= 0;
         case CMP_LE:
             return lhs->ob_type->tp_compare(lhs, rhs) <= 0;
-
-            // TODO
         case CMP_IS:
+            return lhs == rhs;
         case CMP_IS_NOT:
+            return lhs != rhs;
         case CMP_IN:
+            return sequence_contains(rhs, lhs);
         case CMP_NOT_IN:
+            return !sequence_contains(rhs, lhs);
         case CMP_EXC_MATCH:
-            
+            return exception_matches(lhs, rhs);
         default:
             FATAL_ERROR("internal error: invalid compare option");
             return -1;
@@ -73,5 +75,15 @@ AiObject *sequence_getitem(AiObject *sq, ssize_t index) {
     else {
         RUNTIME_EXCEPTION("only sequence supported");
         return NULL;
+    }
+}
+
+int sequence_contains(AiObject *sq, AiObject *item) {
+    if (CHECK_SEQUENCE(sq)) {
+        return sq->ob_type->tp_as_sequence->sq_contains(sq, item);
+    }
+    else {
+        RUNTIME_EXCEPTION("only sequence supported");
+        return -1;
     }
 }

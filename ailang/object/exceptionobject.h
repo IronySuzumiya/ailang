@@ -4,11 +4,11 @@
 
 #include "../system/utils.h"
 
-#define RUNTIME_EXCEPTION record_runtime_exception
+#define RUNTIME_EXCEPTION runtime_exception_store
 
-#define TYPE_ERROR record_type_error
+#define TYPE_ERROR type_error_restore
 
-#define FATAL_ERROR print_fatal_error
+#define FATAL_ERROR fatal_error_abort
 
 #define UNSUPPORTED_BINARY(lhs, rhs, op)    \
     TYPE_ERROR                              \
@@ -113,9 +113,11 @@ AiAPI_FUNC(void) exception_setobject(AiObject *exception, AiObject *value);
 AiAPI_FUNC(void) exception_setstring(AiObject *exception, char *string);
 AiAPI_FUNC(void) exception_clear();
 AiAPI_FUNC(void) exception_fetch(AiObject **type, AiObject **value, AiObject **tb);
+AiAPI_FUNC(int) exceptionclass_check(AiObject *exception);
+AiAPI_FUNC(int) exception_matches(AiObject *err, AiObject *exc);
 
-AiAPI_FUNC(void) record_runtime_exception(char *msg, ...);
-AiAPI_FUNC(void) record_type_error(char *msg, ...);
-AiAPI_FUNC(void) print_fatal_error(char *msg, ...);
+AiAPI_FUNC(void) runtime_exception_store(char *msg, ...);
+AiAPI_FUNC(void) type_error_restore(char *msg, ...);
+AiAPI_FUNC(void) fatal_error_abort(char *msg, ...);
 
 #endif

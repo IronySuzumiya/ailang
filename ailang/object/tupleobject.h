@@ -24,5 +24,6 @@ AiAPI_FUNC(int) tuple_setitem(AiTupleObject *tp, ssize_t index, AiObject *newite
 AiAPI_FUNC(AiObject *) tuple_slice(AiTupleObject *tp, ssize_t start, ssize_t end);
 AiAPI_FUNC(int) tuple_resize(AiTupleObject *tp, ssize_t newsize);
 AiAPI_FUNC(AiObject *) tuple_pack(ssize_t argc, ...);
+AiAPI_FUNC(ssize_t) tuple_size(AiTupleObject *tp);
 
 #endif

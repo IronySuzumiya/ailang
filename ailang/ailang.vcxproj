@@ -145,6 +145,7 @@
     <ClCompile Include="object\dictobject.c" />
     <ClCompile Include="object\exceptionobject.c" />
     <ClCompile Include="object\frameobject.c" />
+    <ClCompile Include="object\functionobject.c" />
     <ClCompile Include="object\intobject.c" />
     <ClCompile Include="object\iterobject.c" />
     <ClCompile Include="object\listobject.c" />
@@ -167,6 +168,7 @@
     <ClInclude Include="object\dictobject.h" />
     <ClInclude Include="object\exceptionobject.h" />
     <ClInclude Include="object\frameobject.h" />
+    <ClInclude Include="object\functionobject.h" />
     <ClInclude Include="object\intobject.h" />
     <ClInclude Include="object\iterobject.h" />
     <ClInclude Include="object\listobject.h" />

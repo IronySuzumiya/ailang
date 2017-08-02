@@ -16,41 +16,6 @@ AiTypeObject type_exceptionobject = {
 AiObject *runtime_exception;
 AiObject *type_error;
 
-void record_runtime_exception(char *msg, ...) {
-    char buffer[100];
-    va_list ap;
-    va_start(ap, msg);
-
-    vsprintf_s(buffer, 100, msg, ap);
-    exception_setstring(runtime_exception, buffer);
-
-    va_end(ap);
-}
-
-void record_type_error(char *msg, ...) {
-    char buffer[100];
-    va_list ap;
-    va_start(ap, msg);
-
-    vsprintf_s(buffer, 100, msg, ap);
-    exception_setstring(type_error, buffer);
-
-    va_end(ap);
-}
-
-void print_fatal_error(char *msg, ...) {
-    va_list ap;
-    va_start(ap, msg);
-
-    fprintf(stderr, "fatal error: ");
-    vfprintf(stderr, msg, ap);
-    fprintf(stderr, "\n");
-
-    va_end(ap);
-
-    abort();
-}
-
 void exception_restore(AiObject *type, AiObject *value, AiObject *traceback) {
     AiThreadState *tstate = threadstate_get();
 
@@ -93,4 +58,56 @@ void exception_fetch(AiObject **type, AiObject **value, AiObject **tb) {
 
 int exceptionclass_check(AiObject *exception) {
     return exception == runtime_exception || exception == type_error;
+}
+
+int exception_matches(AiObject *err, AiObject *exc) {
+    if (CHECK_TYPE_TUPLE(exc)) {
+        for (ssize_t i = 0; i < TUPLE_SIZE(exc); ++i) {
+            if (exception_matches(err, TUPLE_GET_ITEM(exc, i))) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+    else if (exceptionclass_check(err) && exceptionclass_check(exc)) {
+        return err == exc;
+    }
+    else {
+        return 0;
+    }
+}
+
+void runtime_exception_store(char *msg, ...) {
+    char buffer[100];
+    va_list ap;
+    va_start(ap, msg);
+
+    vsprintf_s(buffer, 100, msg, ap);
+    exception_setstring(runtime_exception, buffer);
+
+    va_end(ap);
+}
+
+void type_error_restore(char *msg, ...) {
+    char buffer[100];
+    va_list ap;
+    va_start(ap, msg);
+
+    vsprintf_s(buffer, 100, msg, ap);
+    exception_setstring(type_error, buffer);
+
+    va_end(ap);
+}
+
+void fatal_error_abort(char *msg, ...) {
+    va_list ap;
+    va_start(ap, msg);
+
+    fprintf(stderr, "fatal error: ");
+    vfprintf(stderr, msg, ap);
+    fprintf(stderr, "\n");
+
+    va_end(ap);
+
+    abort();
 }

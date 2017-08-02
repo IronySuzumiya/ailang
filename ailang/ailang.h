@@ -34,6 +34,7 @@
 #include "object\dictobject.h"
 #include "object\iterobject.h"
 #include "object\tupleobject.h"
+#include "object\functionobject.h"
 #include "system\aimarshal.h"
 #include "system\aieval.h"
 

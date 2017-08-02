@@ -75,6 +75,9 @@
     <ClCompile Include="object\tracebackobject.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="object\functionobject.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="system\utils.h">
@@ -138,6 +141,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="object\tracebackobject.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="object\functionobject.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

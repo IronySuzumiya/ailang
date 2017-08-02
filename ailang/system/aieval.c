@@ -11,6 +11,7 @@ enum why_code {
 };
 
 static enum why_code do_raise(AiObject *type, AiObject *value, AiObject *tb);
+static AiObject *call_function(AiObject ***pp_stack, int oparg);
 
 AiObject *eval_frame(AiFrameObject *f) {
     AiObject **stack_pointer;
@@ -84,7 +85,7 @@ AiObject *eval_frame(AiFrameObject *f) {
     filename = STRING_AS_CSTRING(co->co_filename);
 
     why = WHY_NOT;
-    x = NONE;
+    x = GET_NONE();
     w = NULL;
 
     for (;;) {
@@ -282,21 +283,37 @@ AiObject *eval_frame(AiFrameObject *f) {
                     retval = POP();
                 }
                 DEC_REFCNT(v);
-                break;
             }
             else if (exceptionclass_check(v) || CHECK_TYPE_STRING(v)) {
                 w = POP();
                 u = POP();
                 exception_restore(v, w, u);
                 why = WHY_RERAISE;
-                break;
             }
             else if (v != NONE) {
                 RUNTIME_EXCEPTION("'finally' pops bad exception");
                 why = WHY_EXCEPTION;
                 DEC_REFCNT(v);
-                break;
             }
+            break;
+
+        case MAKE_FUNCTION:
+            v = POP();
+            x = function_new(v, f->f_globals);
+            DEC_REFCNT(v);
+            // TODO
+            PUSH(x);
+            break;
+
+        case CALL_FUNCTION:
+        {
+            AiObject **sp;
+            sp = stack_pointer;
+            x = call_function(&sp, oparg);
+            stack_pointer = sp;
+            PUSH(x);
+            break;
+        }
 
         case BINARY_ADD:
         {
@@ -309,7 +326,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
             else {
                 UNSUPPORTED_ADD(OB_TYPENAME(v), OB_TYPENAME(w));
-                x = NONE;
+                x = GET_NONE();
             }
             DEC_REFCNT(v);
             DEC_REFCNT(w);
@@ -328,7 +345,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
             else {
                 UNSUPPORTED_SUB(OB_TYPENAME(v), OB_TYPENAME(w));
-                x = NONE;
+                x = GET_NONE();
             }
             DEC_REFCNT(v);
             DEC_REFCNT(w);
@@ -347,7 +364,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
             else {
                 UNSUPPORTED_MUL(OB_TYPENAME(v), OB_TYPENAME(w));
-                x = NONE;
+                x = GET_NONE();
             }
             DEC_REFCNT(v);
             DEC_REFCNT(w);
@@ -366,7 +383,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
             else {
                 UNSUPPORTED_DIV(OB_TYPENAME(v), OB_TYPENAME(w));
-                x = NONE;
+                x = GET_NONE();
             }
             DEC_REFCNT(v);
             DEC_REFCNT(w);
@@ -385,7 +402,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
             else {
                 UNSUPPORTED_POW(OB_TYPENAME(v), OB_TYPENAME(w));
-                x = NONE;
+                x = GET_NONE();
             }
             DEC_REFCNT(v);
             DEC_REFCNT(w);
@@ -404,7 +421,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
             else {
                 UNSUPPORTED_MOD(OB_TYPENAME(v), OB_TYPENAME(w));
-                x = NONE;
+                x = GET_NONE();
             }
             DEC_REFCNT(v);
             DEC_REFCNT(w);
@@ -422,7 +439,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
             else {
                 UNSUPPORTED_POS(OB_TYPENAME(v));
-                x = NONE;
+                x = GET_NONE();
             }
             DEC_REFCNT(v);
             PUSH(x);
@@ -439,7 +456,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
             else {
                 UNSUPPORTED_NEG(OB_TYPENAME(v));
-                x = NONE;
+                x = GET_NONE();
             }
             DEC_REFCNT(v);
             PUSH(x);
@@ -457,7 +474,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
             else {
                 UNSUPPORTED_SHL(OB_TYPENAME(v), OB_TYPENAME(w));
-                x = NONE;
+                x = GET_NONE();
             }
             DEC_REFCNT(v);
             DEC_REFCNT(w);
@@ -476,7 +493,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
             else {
                 UNSUPPORTED_SHR(OB_TYPENAME(v), OB_TYPENAME(w));
-                x = NONE;
+                x = GET_NONE();
             }
             DEC_REFCNT(v);
             DEC_REFCNT(w);
@@ -495,7 +512,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
             else {
                 UNSUPPORTED_AND(OB_TYPENAME(v), OB_TYPENAME(w));
-                x = NONE;
+                x = GET_NONE();
             }
             DEC_REFCNT(v);
             DEC_REFCNT(w);
@@ -514,7 +531,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
             else {
                 UNSUPPORTED_OR(OB_TYPENAME(v), OB_TYPENAME(w));
-                x = NONE;
+                x = GET_NONE();
             }
             DEC_REFCNT(v);
             DEC_REFCNT(w);
@@ -532,7 +549,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
             else {
                 UNSUPPORTED_NOT(OB_TYPENAME(v));
-                x = NONE;
+                x = GET_NONE();
             }
             DEC_REFCNT(v);
             PUSH(x);
@@ -550,7 +567,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
             else {
                 UNSUPPORTED_XOR(OB_TYPENAME(v), OB_TYPENAME(w));
-                x = NONE;
+                x = GET_NONE();
             }
             DEC_REFCNT(v);
             DEC_REFCNT(w);
@@ -563,7 +580,7 @@ AiObject *eval_frame(AiFrameObject *f) {
         if (why == WHY_NOT) {
             if (!x || EXCEPTION_OCCURRED()) {
                 why = WHY_EXCEPTION;
-                x = NONE;
+                x = GET_NONE();
             }
             else {
                 continue;
@@ -594,16 +611,15 @@ AiObject *eval_frame(AiFrameObject *f) {
                 break;
             }
             if (b->b_type == SETUP_FINALLY
-                || (b->b_type == SETUP_EXCEPT && why == WHY_EXCEPTION)
-                || b->b_type == SETUP_WITH) {
+                || (b->b_type == SETUP_EXCEPT && why == WHY_EXCEPTION)) {
                 if (why == WHY_EXCEPTION) {
                     AiObject *type, *val, *tb;
                     exception_fetch(&type, &val, &tb);
                     if (!val) {
-                        val = NONE;
+                        val = GET_NONE();
                     }
                     if (!tb) {
-                        tb = NONE;
+                        tb = GET_NONE();
                     }
                     PUSH(tb);
                     PUSH(val);
@@ -672,24 +688,20 @@ enum why_code do_raise(AiObject *type, AiObject *value, AiObject *tb) {
     }
     else if (tb && !CHECK_TYPE_TRACEBACK(tb)) {
         RUNTIME_EXCEPTION("raise: arg 3 must be a traceback or None");
-        goto raise_error;
+        XDEC_REFCNT(value);
+        XDEC_REFCNT(type);
+        XDEC_REFCNT(tb);
+        return WHY_EXCEPTION;
     }
-
     if (!value) {
-        value = NONE;
+        value = GET_NONE();
     }
-
     while (CHECK_TYPE_TUPLE(type) && TUPLE_SIZE(type) > 0) {
         AiObject *tmp = type;
         type = TUPLE_GET_ITEM(type, 0);
         INC_REFCNT(type);
         DEC_REFCNT(tmp);
     }
-
-    if (exceptionclass_check(type)) {
-        exception_normalize(&type, &value, &tb);
-    }
-
     exception_restore(type, value, tb);
     if (!tb) {
         return WHY_EXCEPTION;
@@ -698,9 +710,21 @@ enum why_code do_raise(AiObject *type, AiObject *value, AiObject *tb) {
         return WHY_RERAISE;
     }
 
-raise_error:
     XDEC_REFCNT(value);
     XDEC_REFCNT(type);
     XDEC_REFCNT(tb);
     return WHY_EXCEPTION;
+}
+
+AiObject *call_function(AiObject ***pp_stack, int oparg) {
+    int na = oparg & 0xff;
+    int nk = (oparg >> 8) & 0xff;
+    int n = na + 2 * nk;
+    AiObject **pfunc = (*pp_stack) - n - 1;
+    AiObject *func = *pfunc;
+    AiObject *x, *w;
+
+    if (CHECK_TYPE_FUNCTION(func) && nk == 0) {
+        // TODO
+    }
 }

@@ -265,16 +265,13 @@ AiObject *r_object(AicFile *p) {
         retval = NULL;
         break;
     case TYPE_NONE:
-        INC_REFCNT(none);
-        retval = NONE;
+        retval = GET_NONE();
         break;
     case TYPE_FALSE:
-        INC_REFCNT(aifalse);
-        retval = AiFALSE;
+        retval = GET_FALSE();
         break;
     case TYPE_TRUE:
-        INC_REFCNT(aitrue);
-        retval = AiTRUE;
+        retval = GET_TRUE();
         break;
     case TYPE_INT:
         retval = int_from_long(r_long(p));

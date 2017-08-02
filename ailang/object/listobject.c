@@ -2,7 +2,7 @@
 
 static void list_dealloc(AiListObject *list);
 static void list_print(AiListObject *list, FILE *stream);
-//static int list_compare(AiListObject *lhs, AiListObject *rhs);
+static int list_compare(AiListObject *lhs, AiListObject *rhs);
 static ssize_t list_size(AiListObject *list);
 static void list_free(void *p);
 
@@ -23,7 +23,7 @@ AiTypeObject type_listobject = {
     "list",
     (destructor)list_dealloc,
     (printfunc)list_print,
-    0,
+    (cmpfunc)list_compare,
 
     0,
     &list_as_sequence,
@@ -77,7 +77,7 @@ AiObject *list_getitem(AiListObject *list, ssize_t index) {
     }
     else {
         RUNTIME_EXCEPTION("index out of range");
-        return NONE;
+        return NULL;
     }
 }
 
@@ -118,7 +118,7 @@ AiObject *list_slice(AiListObject *list, ssize_t start, ssize_t end) {
     }
     else {
         RUNTIME_EXCEPTION("invalid range sliced");
-        return NONE;
+        return NULL;
     }
 }
 
@@ -258,7 +258,7 @@ void list_print(AiListObject *list, FILE *stream) {
     }
     fputs("]", stream);
 }
-/*
+
 int list_compare(AiListObject *lhs, AiListObject *rhs) {
     ssize_t minsize = min(LIST_SIZE(lhs), LIST_SIZE(rhs));
     int r;
@@ -274,7 +274,7 @@ int list_compare(AiListObject *lhs, AiListObject *rhs) {
     }
     return LIST_SIZE(lhs) > LIST_SIZE(rhs) ? 1 : LIST_SIZE(lhs) < LIST_SIZE(rhs) ? -1 : 0;
 }
-*/
+
 void list_free(void *p) {
     AiMEM_FREE(p);
 }

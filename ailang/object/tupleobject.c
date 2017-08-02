@@ -1,6 +1,5 @@
 #include "../ailang.h"
 
-static ssize_t tuple_size(AiTupleObject *tp);
 static void tuple_dealloc(AiTupleObject *tp);
 static void tuple_print(AiTupleObject *tp, FILE *stream);
 static AiObject *tuple_to_string(AiTupleObject *tp);
@@ -67,7 +66,7 @@ AiObject *tuple_new(ssize_t size) {
 AiObject *tuple_getitem(AiTupleObject *tp, ssize_t index) {
     if (index < 0 || index >= TUPLE_SIZE(tp)) {
         RUNTIME_EXCEPTION("index out of range");
-        return NONE;
+        return NULL;
     }
     else {
         return TUPLE_GET_ITEM(tp, index);
@@ -111,7 +110,7 @@ AiObject *tuple_slice(AiTupleObject *tp, ssize_t start, ssize_t end) {
     }
     else {
         RUNTIME_EXCEPTION("invalid range sliced");
-        return NONE;
+        return NULL;
     }
 }
 
@@ -136,7 +135,7 @@ AiObject *tuple_pack(ssize_t argc, ...) {
 }
 
 ssize_t tuple_size(AiTupleObject *tp) {
-    return CHECK_TYPE_LIST(tp) ? LIST_SIZE(tp) : tp->ob_type->tp_as_sequence->sq_length((AiObject *)tp);
+    return CHECK_TYPE_TUPLE(tp) ? TUPLE_SIZE(tp) : tp->ob_type->tp_as_sequence->sq_length((AiObject *)tp);
 }
 
 void tuple_dealloc(AiTupleObject *tp) {

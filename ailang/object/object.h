@@ -141,8 +141,8 @@ typedef struct {
 AiNoneObject;
 
 #define CHECK_TYPE_NONE(a) CHECK_TYPE(a, &type_noneobject)
-
 #define NONE ((AiObject *)none)
+#define GET_NONE() (INC_REFCNT(none), NONE)
 
 #define OBJECT_HASH(ob)                                 \
     ((ob)->ob_type->tp_hash ?                           \

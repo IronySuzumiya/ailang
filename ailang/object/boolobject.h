@@ -6,8 +6,10 @@
 
 #define CHECK_TYPE_BOOL(ob) ((ob) == aitrue || (ob) == aifalse)
 
-#define AiTRUE     ((AiObject *)aitrue)
-#define AiFALSE    ((AiObject *)aifalse)
+#define AiTRUE      ((AiObject *)aitrue)
+#define AiFALSE     ((AiObject *)aifalse)
+#define GET_TRUE()  (INC_REFCNT(aitrue), AiTRUE)
+#define GET_FALSE() (INC_REFCNT(aifalse), AiFALSE)
 
 typedef AiIntObject AiBoolObject;
 
