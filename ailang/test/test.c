@@ -3,12 +3,7 @@
 #include "../ailang.h"
 #include <crtdbg.h>
 
-int main() {
-    AiThreadState *t = threadstate_new(interpreterstate_new());
-    threadstate_swap(t);
-
-    int_init();
-
+void testobject(AiThreadState *t) {
     AiObject *v1 = int_from_long(998);
     AiObject *v2 = int_from_long(-33);
     AiObject *v3 = v1->ob_type->tp_as_number->nb_divide(v1, v2);
@@ -54,6 +49,15 @@ int main() {
     DEC_REFCNT(v2);
     DEC_REFCNT(v3);
     DEC_REFCNT(s1);
+}
+
+int main() {
+    AiThreadState *t = threadstate_new(interpreterstate_new());
+    threadstate_swap(t);
+
+    int_init();
+
+    testobject(t);
 
     int_clear_blocks();
     list_clear_free_lists();

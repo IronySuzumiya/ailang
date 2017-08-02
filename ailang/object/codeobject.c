@@ -82,7 +82,7 @@ int intern_string_constants(AiObject *tuple) {
 }
 
 int code_addr2line(AiCodeObject *co, int addrq) {
-    int size = STRING_LEN(co->co_lnotab) / 2;
+    int size = (int)(STRING_LEN(co->co_lnotab) / 2);
     unsigned char *p = (unsigned char*)STRING_AS_CSTRING(co->co_lnotab);
     int line = co->co_firstlineno;
     int addr = 0;

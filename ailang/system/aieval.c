@@ -10,6 +10,8 @@ enum why_code {
     WHY_YIELD = 0x0040      /* 'yield' operator */
 };
 
+static enum why_code do_raise(AiObject *type, AiObject *value, AiObject *tb);
+
 AiObject *eval_frame(AiFrameObject *f) {
     AiObject **stack_pointer;
     unsigned char *next_instr;
@@ -251,6 +253,50 @@ AiObject *eval_frame(AiFrameObject *f) {
             retval = int_from_long(oparg);
             why = WHY_CONTINUE;
             break;
+
+        case RAISE_VARARGS:
+            u = v = w = NULL;
+            switch (oparg) {
+            case 3:
+                u = POP();
+            case 2:
+                v = POP();
+            case 1:
+                w = POP();
+            case 0:
+                why = do_raise(w, v, u);
+                break;
+            default:
+                RUNTIME_EXCEPTION("bad RAISE_VARARGS oparg");
+                why = WHY_EXCEPTION;
+                break;
+            }
+            break;
+
+        case END_FINALLY:
+            v = POP();
+            if (CHECK_TYPE_INT(v)) {
+                why = INT_AS_CLONG(v);
+                if (why == WHY_RETURN
+                    || why == WHY_CONTINUE) {
+                    retval = POP();
+                }
+                DEC_REFCNT(v);
+                break;
+            }
+            else if (exceptionclass_check(v) || CHECK_TYPE_STRING(v)) {
+                w = POP();
+                u = POP();
+                exception_restore(v, w, u);
+                why = WHY_RERAISE;
+                break;
+            }
+            else if (v != NONE) {
+                RUNTIME_EXCEPTION("'finally' pops bad exception");
+                why = WHY_EXCEPTION;
+                DEC_REFCNT(v);
+                break;
+            }
 
         case BINARY_ADD:
         {
@@ -547,6 +593,114 @@ AiObject *eval_frame(AiFrameObject *f) {
                 JUMPTO(b->b_handler);
                 break;
             }
+            if (b->b_type == SETUP_FINALLY
+                || (b->b_type == SETUP_EXCEPT && why == WHY_EXCEPTION)
+                || b->b_type == SETUP_WITH) {
+                if (why == WHY_EXCEPTION) {
+                    AiObject *type, *val, *tb;
+                    exception_fetch(&type, &val, &tb);
+                    if (!val) {
+                        val = NONE;
+                    }
+                    if (!tb) {
+                        tb = NONE;
+                    }
+                    PUSH(tb);
+                    PUSH(val);
+                    PUSH(type);
+                }
+                else {
+                    if (why & (WHY_RETURN | WHY_CONTINUE)) {
+                        PUSH(retval);
+                    }
+                    v = int_from_long((long)why);
+                    PUSH(v);
+                }
+                why = WHY_NOT;
+                JUMPTO(b->b_handler);
+                break;
+            }
+        }
+        if (why != WHY_NOT) {
+            break;
         }
     }
+    while (!EMPTY()) {
+        v = POP();
+        XDEC_REFCNT(v);
+    }
+    if (why != WHY_RETURN) {
+        retval = NULL;
+    }
+    tstate->frame = f->f_back;
+
+    return retval;
+}
+
+enum why_code do_raise(AiObject *type, AiObject *value, AiObject *tb) {
+    if (!type) {
+        AiThreadState *tstate = threadstate_get();
+        type = tstate->exc_type ? tstate->exc_type : NONE;
+        value = tstate->exc_value;
+        tb = tstate->exc_traceback;
+        XINC_REFCNT(type);
+        XINC_REFCNT(value);
+        XINC_REFCNT(tb);
+    }
+
+    /* We support the following forms of raise:
+    raise <class>, <classinstance>
+    raise <class>, <argument tuple>
+    raise <class>, None
+    raise <class>, <argument>
+    raise <classinstance>, None
+    raise <string>, <object>
+    raise <string>, None
+
+    An omitted second argument is the same as None.
+
+    In addition, raise <tuple>, <anything> is the same as
+    raising the tuple's first item (and it better have one!);
+    this rule is applied recursively.
+
+    Finally, an optional third argument can be supplied, which
+    gives the traceback to be substituted (useful when
+    re-raising an exception after examining it).  */
+
+    if (tb == NONE) {
+        tb = NULL;
+    }
+    else if (tb && !CHECK_TYPE_TRACEBACK(tb)) {
+        RUNTIME_EXCEPTION("raise: arg 3 must be a traceback or None");
+        goto raise_error;
+    }
+
+    if (!value) {
+        value = NONE;
+    }
+
+    while (CHECK_TYPE_TUPLE(type) && TUPLE_SIZE(type) > 0) {
+        AiObject *tmp = type;
+        type = TUPLE_GET_ITEM(type, 0);
+        INC_REFCNT(type);
+        DEC_REFCNT(tmp);
+    }
+
+    if (exceptionclass_check(type)) {
+        exception_normalize(&type, &value, &tb);
+    }
+
+    exception_restore(type, value, tb);
+    if (!tb) {
+        return WHY_EXCEPTION;
+    }
+    else {
+        return WHY_RERAISE;
+    }
+
+raise_error:
+    XDEC_REFCNT(value);
+    XDEC_REFCNT(type);
+    XDEC_REFCNT(tb);
+    return WHY_EXCEPTION;
 }

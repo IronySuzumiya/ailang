@@ -8,14 +8,10 @@ static void w_string(const char *s, ssize_t n, AicFile *p);
 static void w_pstring(const char *s, ssize_t n, AicFile *p);
 static void write_string_to_file(const char *x, ssize_t n, FILE *fp);
 static void w_object(AiObject *v, AicFile *p);
-static void write_object_to_file(AiObject *x, FILE *fp);
-static AiObject *write_object_to_string(AiObject *x);
 static ssize_t r_string(char *s, ssize_t n, AicFile *p);
 static long r_long(AicFile *p);
 static long read_long_from_file(FILE *fp);
 static AiObject *r_object(AicFile *p);
-static AiObject *read_object_from_file(FILE *fp);
-static AiObject *read_object_from_cstring(char *s, ssize_t len);
 
 void write_compiled_module(AiCodeObject *co, char *path, struct stat *srcstat, time_t mtime) {
     FILE *fp;

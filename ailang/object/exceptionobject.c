@@ -78,3 +78,19 @@ void exception_setstring(AiObject *exception, char *string) {
 void exception_clear() {
     exception_restore(NULL, NULL, NULL);
 }
+
+void exception_fetch(AiObject **type, AiObject **value, AiObject **tb) {
+    AiThreadState *tstate = threadstate_get();
+
+    *type = tstate->curexc_type;
+    *value = tstate->curexc_value;
+    *tb = tstate->curexc_traceback;
+
+    tstate->curexc_type = NULL;
+    tstate->curexc_value = NULL;
+    tstate->curexc_traceback = NULL;
+}
+
+int exceptionclass_check(AiObject *exception) {
+    return exception == runtime_exception || exception == type_error;
+}

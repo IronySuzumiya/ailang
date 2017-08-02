@@ -23,6 +23,14 @@ int object_rich_compare(AiObject *lhs, AiObject *rhs, int op) {
             return lhs->ob_type->tp_compare(lhs, rhs) >= 0;
         case CMP_LE:
             return lhs->ob_type->tp_compare(lhs, rhs) <= 0;
+
+            // TODO
+        case CMP_IS:
+        case CMP_IS_NOT:
+        case CMP_IN:
+        case CMP_NOT_IN:
+        case CMP_EXC_MATCH:
+            
         default:
             FATAL_ERROR("internal error: invalid compare option");
             return -1;

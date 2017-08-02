@@ -112,6 +112,7 @@ AiAPI_FUNC(void) exception_restore(AiObject *type, AiObject *value, AiObject *tr
 AiAPI_FUNC(void) exception_setobject(AiObject *exception, AiObject *value);
 AiAPI_FUNC(void) exception_setstring(AiObject *exception, char *string);
 AiAPI_FUNC(void) exception_clear();
+AiAPI_FUNC(void) exception_fetch(AiObject **type, AiObject **value, AiObject **tb);
 
 AiAPI_FUNC(void) record_runtime_exception(char *msg, ...);
 AiAPI_FUNC(void) record_type_error(char *msg, ...);
