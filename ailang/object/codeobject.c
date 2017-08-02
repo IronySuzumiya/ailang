@@ -7,7 +7,7 @@ AiTypeObject type_codeobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
 };
 
-AiCodeObject *code_new(int argcount, int nlocals, int stacksize, int flags,
+AiObject *code_new(int argcount, int nlocals, int stacksize, int flags,
     AiObject *code, AiObject *consts, AiObject *names,
     AiObject *varnames, AiObject *freevars, AiObject *cellvars,
     AiObject *filename, AiObject *name, int firstlineno,
@@ -48,7 +48,7 @@ AiCodeObject *code_new(int argcount, int nlocals, int stacksize, int flags,
     INC_REFCNT(lnotab);
     co->co_lnotab = lnotab;
 
-    return co;
+    return (AiObject *)co;
 }
 
 void intern_strings(AiObject *tuple) {

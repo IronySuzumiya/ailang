@@ -142,21 +142,11 @@ AiNoneObject;
 
 #define NONE ((AiObject *)none)
 
-#define CMP_EQ 0
-#define CMP_NE 1
-#define CMP_GT 2
-#define CMP_LT 3
-#define CMP_GE 4
-#define CMP_LE 5
-
 #define OBJECT_HASH(ob)                                 \
     ((ob)->ob_type->tp_hash ?                           \
         (ob)->ob_type->tp_hash((AiObject *)(ob)) : -1)
 
 AiAPI_DATA(struct _typeobject) type_noneobject;
 AiAPI_DATA(AiNoneObject *) none;
-AiAPI_FUNC(long) pointer_hash(void *p);
-AiAPI_FUNC(int) object_rich_compare(AiObject *lhs, AiObject *rhs, int op);
-AiAPI_FUNC(AiObject *) object_rich_compare_bool(AiObject *lhs, AiObject *rhs, int op);
 
 #endif

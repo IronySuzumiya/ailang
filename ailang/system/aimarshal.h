@@ -1,6 +1,6 @@
 #pragma once
-#ifndef MARSHAL_H
-#define MARSHAL_H
+#ifndef AI_MARSHAL_H
+#define AI_MARSHAL_H
 
 #include "utils.h"
 
@@ -34,6 +34,8 @@
 #define AFERR_NESTEDTOODEEP     2
 #define AFERR_NOMEMORY          3
 
+#define MAX_MARSHAL_STACK_DEPTH 1000
+
 #define w_byte(c, p)                                    \
     if (((p)->fp)) putc((c), (p)->fp);                  \
     else if ((p)->ptr != (p)->end) *(p)->ptr++ = (c);   \
@@ -42,9 +44,6 @@
 #define rs_byte(p) (((p)->ptr < (p)->end) ? (unsigned char)*(p)->ptr++ : EOF)
 
 #define r_byte(p) ((p)->fp ? getc((p)->fp) : rs_byte(p))
-
-#define SAFE_DOWNCAST(VALUE, WIDE, NARROW)  \
-    (assert((WIDE)(NARROW)(VALUE) == (VALUE)), (NARROW)(VALUE))
 
 typedef struct _aicfile {
     FILE *fp;

@@ -103,6 +103,6 @@ AiObject *bool_to_string(AiBoolObject *ob) {
     }
     else {
         FATAL_ERROR("bad bool handling");
-        return NONE;
+        return NULL;
     }
 }

@@ -1,18 +1,21 @@
 #include "../ailang.h"
 
 static FILE *open_exclusive(char *filename, mode_t mode);
-static void w_more(int c, AicFile *p);
+static void w_more(char c, AicFile *p);
 static void w_long(long x, AicFile *p);
 static void write_long_to_file(long x, FILE *fp);
 static void w_string(const char *s, ssize_t n, AicFile *p);
 static void w_pstring(const char *s, ssize_t n, AicFile *p);
+static void write_string_to_file(const char *x, ssize_t n, FILE *fp);
 static void w_object(AiObject *v, AicFile *p);
 static void write_object_to_file(AiObject *x, FILE *fp);
+static AiObject *write_object_to_string(AiObject *x);
 static ssize_t r_string(char *s, ssize_t n, AicFile *p);
 static long r_long(AicFile *p);
 static long read_long_from_file(FILE *fp);
 static AiObject *r_object(AicFile *p);
 static AiObject *read_object_from_file(FILE *fp);
+static AiObject *read_object_from_cstring(char *s, ssize_t len);
 
 void write_compiled_module(AiCodeObject *co, char *path, struct stat *srcstat, time_t mtime) {
     FILE *fp;
@@ -39,7 +42,7 @@ FILE *open_exclusive(char *filename, mode_t mode) {
     return fd < 0 ? NULL : _fdopen(fd, "wb");
 }
 
-void w_more(int c, AicFile *p) {
+void w_more(char c, AicFile *p) {
     ssize_t size, newsize;
     if (p->str == NULL)
         return;
@@ -52,7 +55,7 @@ void w_more(int c, AicFile *p) {
     string_resize((AiStringObject **)&p->str, newsize);
     p->ptr = STRING_AS_CSTRING(p->str) + size;
     p->end = STRING_AS_CSTRING(p->str) + newsize;
-    *p->ptr++ = SAFE_DOWNCAST(c, int, char);
+    *p->ptr++ = c;
 }
 
 void w_long(long x, AicFile *p) {
@@ -65,9 +68,6 @@ void w_long(long x, AicFile *p) {
 void write_long_to_file(long x, FILE *fp) {
     AicFile af;
     af.fp = fp;
-    af.error = AFERR_OK;
-    af.depth = 0;
-    af.strings = NULL;
     w_long(x, &af);
 }
 
@@ -88,8 +88,17 @@ void w_pstring(const char *s, ssize_t n, AicFile *p) {
     w_string(s, n, p);
 }
 
+void write_string_to_file(const char *x, ssize_t n, FILE *fp) {
+    AicFile af;
+    af.fp = fp;
+    w_pstring(x, n, &af);
+}
+
 void w_object(AiObject *v, AicFile *p) {
-    ++p->depth;
+    if (++p->depth > MAX_MARSHAL_STACK_DEPTH) {
+        FATAL_ERROR("code recursion too deep");
+        return;
+    }
 
     if (v == NULL) {
         w_byte(TYPE_NULL, p);
@@ -139,9 +148,7 @@ void w_object(AiObject *v, AicFile *p) {
         }
     }
     else if (CHECK_TYPE_DICT(v)) {
-        ssize_t pos = 0;
         AiDictObject *mp = (AiDictObject *)v;
-        AiObject *key, *value;
         AiDictEntry *ep;
         ssize_t fill = mp->ma_fill;
 
@@ -149,10 +156,8 @@ void w_object(AiObject *v, AicFile *p) {
         for (ep = mp->ma_table; fill > 0; ++ep) {
             if (ep->me_value) {
                 --fill;
-                key = ep->me_key;
-                value = ep->me_value;
-                w_object(key, p);
-                w_object(value, p);
+                w_object(ep->me_key, p);
+                w_object(ep->me_value, p);
             }
         }
         w_object((AiObject *)NULL, p);
@@ -190,6 +195,25 @@ void write_object_to_file(AiObject *x, FILE *fp) {
     af.strings = dict_new();
     w_object(x, &af);
     DEC_REFCNT(af.strings);
+}
+
+AiObject *write_object_to_string(AiObject *x) {
+    AicFile af;
+    af.fp = NULL;
+    af.str = string_from_cstring_with_size(NULL, 50);
+    af.ptr = STRING_AS_CSTRING(af.str);
+    af.end = af.ptr + STRING_LEN(af.str);
+    af.error = AFERR_OK;
+    af.depth = 0;
+    af.strings = dict_new();
+
+    w_object(x, &af);
+
+    DEC_REFCNT(af.strings);
+
+    string_resize((AiStringObject **)&af.str,
+        (ssize_t)(af.ptr - STRING_AS_CSTRING(af.str)));
+    return af.str;
 }
 
 ssize_t r_string(char *s, ssize_t n, AicFile *p) {
@@ -332,8 +356,7 @@ AiObject *r_object(AicFile *p) {
             firstlineno = (int)r_long(p);
             lnotab = r_object(p);
 
-            v = (AiObject *)code_new(
-                argcount, nlocals, stacksize, flags,
+            v = code_new(argcount, nlocals, stacksize, flags,
                 code, consts, names, varnames,
                 freevars, cellvars, filename, name,
                 firstlineno, lnotab);
@@ -369,6 +392,21 @@ AiObject *read_object_from_file(FILE *fp) {
     af.ptr = af.end = NULL;
     r = r_object(&af);
     DEC_REFCNT(af.strings);
+
+    return r;
+}
+
+AiObject *read_object_from_cstring(char *s, ssize_t len) {
+    AicFile rf;
+    AiObject *r;
+
+    rf.fp = NULL;
+    rf.ptr = s;
+    rf.end = s + len;
+    rf.strings = list_new(0);
+    rf.depth = 0;
+    r = r_object(&rf);
+    DEC_REFCNT(rf.strings);
 
     return r;
 }

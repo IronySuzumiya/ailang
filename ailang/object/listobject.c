@@ -6,6 +6,9 @@ static void list_print(AiListObject *list, FILE *stream);
 static ssize_t list_size(AiListObject *list);
 static void list_free(void *p);
 
+static AiListObject *free_lists[NUMBER_FREE_LISTS_MAX];
+static int number_free_lists;
+
 static sequencemethods list_as_sequence = {
     (lengthfunc)list_size,
     (binaryfunc)list_extend,
@@ -30,9 +33,6 @@ AiTypeObject type_listobject = {
     (unaryfunc)list_to_string,
     (freefunc)list_free,
 };
-
-AiListObject *free_lists[NUMBER_FREE_LISTS_MAX];
-int number_free_lists;
 
 AiObject * list_new(ssize_t size) {
     AiListObject *list;
@@ -237,7 +237,7 @@ void list_dealloc(AiListObject *list) {
         }
         AiMEM_FREE(list->ob_item);
     }
-    if (number_free_lists < NUMBER_FREE_LISTS_MAX && CHECK_TYPE_LIST(list)) {
+    if (CHECK_TYPE_LIST(list) && number_free_lists < NUMBER_FREE_LISTS_MAX) {
         free_lists[number_free_lists++] = list;
     }
     else {

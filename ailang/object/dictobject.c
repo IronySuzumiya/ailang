@@ -6,6 +6,10 @@ static void dict_dealloc(AiDictObject *mp);
 static void dict_print(AiDictObject *mp, FILE *stream);
 static void dict_free(void *p);
 
+static AiDictEntry *freeslot;
+static AiDictObject *free_dicts[NUMBER_FREE_DICTS_MAX];
+static int number_free_dicts;
+
 static mappingmethods dict_as_mapping = {
     (lengthfunc)dict_size,
     (binaryfunc)dict_getitem,
@@ -31,9 +35,6 @@ AiTypeObject type_dictobject = {
 };
 
 AiObject *dummy;
-AiDictEntry *freeslot;
-AiDictObject *free_dicts[NUMBER_FREE_DICTS_MAX];
-int number_free_dicts;
 
 AiDictEntry *dict_lookup(AiDictObject *mp, AiObject *key, long hash) {
     size_t perturb;

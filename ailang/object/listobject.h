@@ -18,8 +18,6 @@ AiListObject;
 #define LIST_SIZE OB_SIZE
 
 AiAPI_DATA(AiTypeObject) type_listobject;
-AiAPI_DATA(AiListObject *) free_lists[NUMBER_FREE_LISTS_MAX];
-AiAPI_DATA(int) number_free_lists;
 AiAPI_FUNC(AiObject *) list_new(ssize_t size);
 AiAPI_FUNC(int) list_resize(AiListObject *list, ssize_t newsize);
 AiAPI_FUNC(AiObject *) list_getitem(AiListObject *list, ssize_t index);

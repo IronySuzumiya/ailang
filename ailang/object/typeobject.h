@@ -19,6 +19,9 @@ typedef struct _typeobject {
     hashfunc tp_hash;
     unaryfunc tp_to_string;
     freefunc tp_free;
+
+    unaryfunc tp_iter;
+    unaryfunc tp_iternext;
 }
 AiTypeObject;
 

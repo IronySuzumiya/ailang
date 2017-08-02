@@ -45,9 +45,6 @@
     <ClCompile Include="object\codeobject.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="system\marshal.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="object\boolobject.c">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -61,6 +58,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="system\aistate.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="object\iterobject.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="object\abstract.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="system\aimarshal.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -95,9 +101,6 @@
     <ClInclude Include="object\codeobject.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="system\marshal.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="object\boolobject.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -114,6 +117,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="system\aiopcode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="object\iterobject.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="object\abstract.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="system\aimarshal.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -36,5 +36,6 @@ AiAPI_DATA(AiTypeObject) type_frameobject;
 AiAPI_FUNC(AiFrameObject *) frame_new(AiThreadState *tstate, AiCodeObject *code,
     AiObject *globals, AiObject *locals);
 AiAPI_FUNC(void) frame_setup_block(AiFrameObject *f, int type, int handler, int level);
+AiAPI_FUNC(AiTryBlock *) frame_pop_block(AiFrameObject *f);
 
 #endif

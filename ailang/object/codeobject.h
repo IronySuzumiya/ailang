@@ -37,8 +37,7 @@ AiCodeObject;
 #define CHECK_TYPE_CODE(ob) CHECK_TYPE(ob, &type_codeobject)
 
 AiAPI_DATA(struct _typeobject) type_codeobject;
-AiAPI_FUNC(AiCodeObject *)
-code_new(int argcount, int nlocals, int stacksize, int flags,
+AiAPI_FUNC(AiObject *) code_new(int argcount, int nlocals, int stacksize, int flags,
     AiObject *code, AiObject *consts, AiObject *names,
     AiObject *varnames, AiObject *freevars, AiObject *cellvars,
     AiObject *filename, AiObject *name, int firstlineno,

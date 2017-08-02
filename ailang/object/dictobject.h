@@ -49,9 +49,6 @@ AiDictObject;
 
 AiAPI_DATA(AiTypeObject) type_dictobject;
 AiAPI_DATA(AiObject *) dummy;
-AiAPI_DATA(AiDictEntry *) freeslot;
-AiAPI_DATA(AiDictObject *) free_dicts[NUMBER_FREE_DICTS_MAX];
-AiAPI_DATA(int) number_free_dicts;
 AiAPI_FUNC(AiDictEntry *) dict_lookup(AiDictObject *mp, AiObject *key, long hash);
 AiAPI_FUNC(AiDictEntry *) dict_lookup_with_string(AiDictObject *mp, AiStringObject *key, long hash);
 AiAPI_FUNC(AiObject *) dict_new(void);

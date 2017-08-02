@@ -6,7 +6,7 @@
 
 typedef struct _tupleobject {
     OBJECT_VAR_HEAD
-    AiObject *ob_item[1];
+    AiObject **ob_item;
 }
 AiTupleObject;
 
@@ -18,8 +18,6 @@ AiTupleObject;
 #define NUMBER_FREE_TUPLES_MAX 20
 
 AiAPI_DATA(AiTypeObject) type_tupleobject;
-AiAPI_DATA(AiTupleObject *) free_tuples[NUMBER_FREE_TUPLES_MAX];
-AiAPI_DATA(int) number_free_tuples[NUMBER_FREE_TUPLES_MAX];
 AiAPI_FUNC(AiObject *) tuple_new(ssize_t size);
 AiAPI_FUNC(AiObject *) tuple_getitem(AiTupleObject *tp, ssize_t index);
 AiAPI_FUNC(int) tuple_setitem(AiTupleObject *tp, ssize_t index, AiObject *newitem);
