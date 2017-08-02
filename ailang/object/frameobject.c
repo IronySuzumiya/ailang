@@ -75,3 +75,7 @@ void frame_setup_block(AiFrameObject *f, int type, int handler, int level) {
 AiTryBlock *frame_pop_block(AiFrameObject *f) {
     return &f->f_blockstack[--f->f_iblock];
 }
+
+AiTryBlock *frame_peek_block(AiFrameObject *f) {
+    return &f->f_blockstack[f->f_iblock];
+}

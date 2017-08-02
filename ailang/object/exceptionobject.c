@@ -1,8 +1,16 @@
 #include "../ailang.h"
 
+static AiObject _runtime_exception = {
+    INIT_OBJECT_HEAD(&type_exceptionobject)
+};
+
+static AiObject _type_error = {
+    INIT_OBJECT_HEAD(&type_exceptionobject)
+};
+
 AiTypeObject type_exceptionobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
-
+    "exception",
 };
 
 AiObject *runtime_exception;

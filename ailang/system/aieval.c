@@ -247,6 +247,11 @@ AiObject *eval_frame(AiFrameObject *f) {
             why = WHY_BREAK;
             break;
 
+        case CONTINUE_LOOP:
+            retval = int_from_long(oparg);
+            why = WHY_CONTINUE;
+            break;
+
         case BINARY_ADD:
         {
             numbermethods *nb;
@@ -509,15 +514,30 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         }
 
-        if (why = WHY_NOT) {
-            if (!x) {
+        if (why == WHY_NOT) {
+            if (!x || EXCEPTION_OCCURRED()) {
                 why = WHY_EXCEPTION;
                 x = NONE;
             }
+            else {
+                continue;
+            }
         }
-
+        if (why == WHY_EXCEPTION) {
+            traceback_here(f);
+        }
+        if (why == WHY_RERAISE) {
+            why = WHY_EXCEPTION;
+        }
         while (why != WHY_NOT && f->f_iblock > 0) {
-            AiTryBlock *b = frame_pop_block(f);
+            AiTryBlock *b = frame_peek_block(f);
+            if (b->b_type == SETUP_LOOP && why == WHY_CONTINUE) {
+                why = WHY_NOT;
+                JUMPTO(INT_AS_CLONG(retval));
+                DEC_REFCNT(retval);
+                break;
+            }
+            --f->f_iblock;
             while (STACK_LEVEL() > b->b_level) {
                 v = POP();
                 XDEC_REFCNT(v);

@@ -42,5 +42,6 @@ AiAPI_FUNC(AiObject *) code_new(int argcount, int nlocals, int stacksize, int fl
     AiObject *varnames, AiObject *freevars, AiObject *cellvars,
     AiObject *filename, AiObject *name, int firstlineno,
     AiObject *lnotab);
+AiAPI_FUNC(int) code_addr2line(AiCodeObject *co, int addrq);
 
 #endif

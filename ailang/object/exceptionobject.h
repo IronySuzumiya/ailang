@@ -103,6 +103,8 @@
 #define UNSUPPORTED_LE(lhs, rhs)            \
     UNSUPPORTED_BINARY(lhs, rhs, "<=")
 
+#define EXCEPTION_OCCURRED() (threadstate_get()->curexc_type)
+
 AiAPI_DATA(struct _typeobject) type_exceptionobject;
 AiAPI_DATA(AiObject *) runtime_exception;
 AiAPI_DATA(AiObject *) type_error;
