@@ -47,6 +47,9 @@ void mem_free(void *p) {
     else {
         prev->next = hp->next;
     }
+    if (heapptr == hp) {
+        heapptr = prev;
+    }
     free(hp);
 #endif
     free(p);

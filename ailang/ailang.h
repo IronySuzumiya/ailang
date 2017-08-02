@@ -16,9 +16,10 @@
 #include <fcntl.h>
 #include <sys\stat.h>
 #include <sys\types.h>
-#include "system\utils.h"
+#include <Windows.h>
 #include "system\aiopcode.h"
 #include "object\object.h"
+#include "object\exceptionobject.h"
 #include "object\abstract.h"
 #include "system\aimemory.h"
 #include "system\aistate.h"

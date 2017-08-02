@@ -6,6 +6,7 @@ static void dict_dealloc(AiDictObject *mp);
 static void dict_print(AiDictObject *mp, FILE *stream);
 static void dict_free(void *p);
 
+static AiObject *dummy;
 static AiDictEntry *freeslot;
 static AiDictObject *free_dicts[NUMBER_FREE_DICTS_MAX];
 static int number_free_dicts;
@@ -74,7 +75,6 @@ AiDictEntry *dict_lookup(AiDictObject *mp, AiObject *key, long hash) {
             freeslot = ep;
         }
     }
-    assert(0); // never goes here
 }
 
 AiDictEntry *dict_lookup_with_string(AiDictObject *mp, AiStringObject *key, long hash) {
@@ -120,7 +120,6 @@ AiDictEntry *dict_lookup_with_string(AiDictObject *mp, AiStringObject *key, long
             freeslot = ep;
         }
     }
-    assert(0); // never goes here
 }
 
 AiObject *dict_new() {
@@ -157,6 +156,7 @@ AiObject *dict_getitem(AiDictObject *mp, AiObject *key) {
     else {
         hash = OBJECT_HASH(key);
         if (hash == -1) {
+            RUNTIME_EXCEPTION("bad hash");
             return NULL;
         }
     }
@@ -177,6 +177,7 @@ int dict_setitem(AiDictObject *mp, AiObject *key, AiObject *value) {
     else {
         hash = OBJECT_HASH(key);
         if (hash == -1) {
+            RUNTIME_EXCEPTION("bad hash");
             return -1;
         }
     }
@@ -229,6 +230,7 @@ int dict_delitem(AiDictObject *mp, AiObject *key) {
         || (hash = ((AiStringObject *)key)->ob_shash) == -1) {
         hash = OBJECT_HASH(key);
         if (hash == -1) {
+            RUNTIME_EXCEPTION("bad hash");
             return -1;
         }
     }
@@ -361,9 +363,12 @@ AiObject *dict_to_string(AiDictObject *mp) {
     return (AiObject *)str;
 }
 
-int dict_clear_free_dicts() {
+int dict_clear_free_dicts_and_dummy() {
     while (number_free_dicts--) {
         AiMEM_FREE(free_dicts[number_free_dicts]);
+    }
+    if (dummy) {
+        AiMEM_FREE(dummy);
     }
     return 0;
 }

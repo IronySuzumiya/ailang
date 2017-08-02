@@ -143,6 +143,7 @@
     <ClCompile Include="object\boolobject.c" />
     <ClCompile Include="object\codeobject.c" />
     <ClCompile Include="object\dictobject.c" />
+    <ClCompile Include="object\exceptionobject.c" />
     <ClCompile Include="object\frameobject.c" />
     <ClCompile Include="object\intobject.c" />
     <ClCompile Include="object\iterobject.c" />
@@ -163,6 +164,7 @@
     <ClInclude Include="object\boolobject.h" />
     <ClInclude Include="object\codeobject.h" />
     <ClInclude Include="object\dictobject.h" />
+    <ClInclude Include="object\exceptionobject.h" />
     <ClInclude Include="object\frameobject.h" />
     <ClInclude Include="object\intobject.h" />
     <ClInclude Include="object\iterobject.h" />

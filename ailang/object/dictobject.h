@@ -48,7 +48,6 @@ AiDictObject;
 #define DICT_SIZE(ob) (((AiDictObject *)(ob))->ma_used)
 
 AiAPI_DATA(AiTypeObject) type_dictobject;
-AiAPI_DATA(AiObject *) dummy;
 AiAPI_FUNC(AiDictEntry *) dict_lookup(AiDictObject *mp, AiObject *key, long hash);
 AiAPI_FUNC(AiDictEntry *) dict_lookup_with_string(AiDictObject *mp, AiStringObject *key, long hash);
 AiAPI_FUNC(AiObject *) dict_new(void);
@@ -58,6 +57,6 @@ AiAPI_FUNC(int) dict_insert(AiDictObject *mp, AiObject *key, long hash, AiObject
 AiAPI_FUNC(int) dict_delitem(AiDictObject *mp, AiObject *key);
 AiAPI_FUNC(AiObject *) dict_to_string(AiDictObject *mp);
 
-AiAPI_FUNC(int) dict_clear_free_dicts(void);
+AiAPI_FUNC(int) dict_clear_free_dicts_and_dummy(void);
 
 #endif

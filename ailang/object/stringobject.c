@@ -248,8 +248,18 @@ long string_hash(AiStringObject *a) {
 
 AiObject *string_to_string(AiStringObject *a) {
     if (CHECK_TYPE_STRING(a)) {
-        INC_REFCNT(a);
-        return (AiObject *)a;
+        AiStringObject *str;
+        ssize_t size = STRING_LEN(a) + 2;
+        str = (AiStringObject *)AiMEM_ALLOC(sizeof(AiStringObject) + size);
+        INIT_OBJECT_VAR(str, &type_stringobject, size);
+        str->ob_shash = -1;
+        str->ob_sstate = SSTATE_NOT_INTERNED;
+
+        STRING_AS_CSTRING(str)[0] = '\'';
+        AiMEM_COPY(&STRING_AS_CSTRING(str)[1], STRING_AS_CSTRING(a), STRING_LEN(a));
+        STRING_AS_CSTRING(str)[STRING_LEN(str) - 1] = '\'';
+        STRING_AS_CSTRING(str)[STRING_LEN(str)] = 0;
+        return (AiObject *)str;
     }
     else {
         return OB_TO_STRING(a);

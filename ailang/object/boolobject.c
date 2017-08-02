@@ -64,6 +64,7 @@ AiBoolObject *aifalse = &_aifalse;
 AiObject *bool_and(AiBoolObject *lhs, AiBoolObject *rhs) {
     if (!CHECK_TYPE_BOOL(lhs) || !CHECK_TYPE_BOOL(rhs)) {
         FATAL_ERROR("bad bool handling");
+        return NULL;
     }
     return lhs == aitrue && rhs == aitrue ? (AiObject *)aitrue : (AiObject *)aifalse;
 }
@@ -71,6 +72,7 @@ AiObject *bool_and(AiBoolObject *lhs, AiBoolObject *rhs) {
 AiObject *bool_or(AiBoolObject *lhs, AiBoolObject *rhs) {
     if (!CHECK_TYPE_BOOL(lhs) || !CHECK_TYPE_BOOL(rhs)) {
         FATAL_ERROR("bad bool handling");
+        return NULL;
     }
     return lhs == aitrue || rhs == aitrue ? (AiObject *)aitrue : (AiObject *)aifalse;
 }
@@ -78,6 +80,7 @@ AiObject *bool_or(AiBoolObject *lhs, AiBoolObject *rhs) {
 AiObject *bool_not(AiBoolObject *ob) {
     if (!CHECK_TYPE_BOOL(ob)) {
         FATAL_ERROR("bad bool handling");
+        return NULL;
     }
     return ob == aitrue ? (AiObject *)aifalse : (AiObject *)aitrue;
 }

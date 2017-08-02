@@ -97,6 +97,7 @@ int int_init() {
     for (long i = -NUM_NEG_SMALL_INTOBJECT; i < NUM_POS_SMALL_INTOBJECT; ++i) {
         if (!free_list && !(free_list = fill_free_list())) {
             FATAL_ERROR("bad free list allocating");
+            return -1;
         }
         v = free_list;
         free_list = (AiIntObject *)v->ob_type;
@@ -325,6 +326,9 @@ AiObject *int_xor(AiIntObject *lhs, AiIntObject *rhs) {
 AiIntObject *fill_free_list() {
     AiIntObject *p, *q;
     p = AiObject_GC_NEW(AiIntBlock);
+    if (!p) {
+        return NULL;
+    }
     ((AiIntBlock *)p)->next = block_list;
     block_list = (AiIntBlock *)p;
     p = ((AiIntBlock *)p)->block;

@@ -55,6 +55,8 @@ typedef __int64 ssize_t;
 
 #define OB_FREE(ob) ((ob)->ob_type->tp_free((ob)))
 
+#define OB_CLEAR(ob) WRAP(DEC_REFCNT(ob); (ob) = NULL;)
+
 typedef struct _object {
     OBJECT_HEAD
 }

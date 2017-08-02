@@ -4,6 +4,9 @@
 #include <crtdbg.h>
 
 int main() {
+    AiThreadState *t = threadstate_new(interpreterstate_new());
+    threadstate_swap(t);
+
     int_init();
 
     AiObject *v1 = int_from_long(998);
@@ -20,6 +23,8 @@ int main() {
     OB_PRINT_STDOUT(s1);
 
     AiObject *s2 = v1->ob_type->tp_as_number->nb_add(v1, s1);
+    OB_PRINT_STDOUT(t->curexc_value);
+    exception_clear();
 
     AiListObject *list = (AiListObject *)list_new(4);
 
@@ -52,9 +57,10 @@ int main() {
 
     int_clear_blocks();
     list_clear_free_lists();
-    dict_clear_free_dicts();
-    if (dummy)
-        AiMEM_FREE(dummy);
+    dict_clear_free_dicts_and_dummy();
+
+    t = threadstate_swap(NULL);
+    interpreterstate_delete(t->interp);
 
     assert(heaphead == NULL);
 
