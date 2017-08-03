@@ -23,9 +23,15 @@ AiFunctionObject;
 #define FUNCTION_GETCODE(ob) (((AiFunctionObject *)(ob))->func_code)
 #define FUNCTION_GETGLOBALS(ob) (((AiFunctionObject *)(ob))->func_globals)
 #define FUNCTION_GETDEFAULTS(ob) (((AiFunctionObject *)(ob))->func_defaults)
+#define FUNCTION_GETMODULE(ob) (((AiFunctionObject *)(ob))->func_module)
+#define FUNCTION_GETCLOSURE(ob) (((AiFunctionObject *)(ob))->func_closure)
+
+#define FUNCTION_SETDEFAULTS(ob, v) (FUNCTION_GETDEFAULTS(ob) = (v))
+#define FUNCTION_SETCLOSURE(ob, v) (FUNCTION_GETCLOSURE(ob) = (v))
 
 AiAPI_DATA(AiTypeObject) type_functionobject;
 AiAPI_FUNC(AiObject *) function_new(AiObject *code, AiObject *globals);
 AiAPI_FUNC(int) function_setdefaults(AiFunctionObject *func, AiObject *defaults);
+AiAPI_FUNC(int) function_setclosure(AiFunctionObject *func, AiObject *closure);
 
 #endif

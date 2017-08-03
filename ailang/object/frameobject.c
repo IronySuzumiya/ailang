@@ -19,7 +19,7 @@ AiFrameObject *frame_new(AiThreadState *tstate, AiCodeObject *code,
         builtins = dict_getitem((AiDictObject *)globals, builtin_object);
         if (builtins) {
             if (CHECK_TYPE_MODULE(builtins)) {
-                builtins = module_getdict(builtins);
+                builtins = module_getdict((AiModuleObject *)builtins);
                 INC_REFCNT(builtins);
             }
             else if (!CHECK_TYPE_DICT(builtins)) {

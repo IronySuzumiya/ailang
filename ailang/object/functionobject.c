@@ -1,8 +1,22 @@
 #include "../ailang.h"
 
+static void function_dealloc(AiFunctionObject *func);
+static void function_free(void *p);
+
 AiTypeObject type_functionobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    "function",
+    (destructor)function_dealloc,
+    0,
+    0,
 
+    0,
+    0,
+    0,
+
+    0,
+    0,
+    (freefunc)function_free,
 };
 
 AiObject *function_new(AiObject *code, AiObject *globals) {
@@ -62,4 +76,37 @@ int function_setdefaults(AiFunctionObject *func, AiObject *defaults) {
     XDEC_REFCNT(func->func_defaults);
     func->func_defaults = defaults;
     return 0;
+}
+
+int function_setclosure(AiFunctionObject *func, AiObject *closure) {
+    if (closure == NONE) {
+        closure = NULL;
+    }
+    else if (closure && CHECK_TYPE_TUPLE(closure)) {
+        INC_REFCNT(closure);
+    }
+    else {
+        RUNTIME_EXCEPTION("expected tuple for closure, got '%s'", OB_TYPENAME(closure));
+        return -1;
+    }
+    XDEC_REFCNT(func->func_closure);
+    func->func_closure = closure;
+    return 0;
+}
+
+void function_dealloc(AiFunctionObject *func) {
+    // ignore weakrefs yet
+    DEC_REFCNT(func->func_code);
+    DEC_REFCNT(func->func_globals);
+    XDEC_REFCNT(func->func_module);
+    DEC_REFCNT(func->func_name);
+    XDEC_REFCNT(func->func_defaults);
+    XDEC_REFCNT(func->func_doc);
+    XDEC_REFCNT(func->func_dict);
+    XDEC_REFCNT(func->func_closure);
+    OB_FREE(func);
+}
+
+void function_free(void *p) {
+    AiMEM_FREE(p);
 }

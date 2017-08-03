@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="object\abstract.c" />
     <ClCompile Include="object\boolobject.c" />
+    <ClCompile Include="object\cellobject.c" />
     <ClCompile Include="object\codeobject.c" />
     <ClCompile Include="object\dictobject.c" />
     <ClCompile Include="object\exceptionobject.c" />
@@ -149,6 +150,7 @@
     <ClCompile Include="object\intobject.c" />
     <ClCompile Include="object\iterobject.c" />
     <ClCompile Include="object\listobject.c" />
+    <ClCompile Include="object\moduleobject.c" />
     <ClCompile Include="object\object.c" />
     <ClCompile Include="object\stringobject.c" />
     <ClCompile Include="object\tracebackobject.c" />
@@ -164,6 +166,7 @@
     <ClInclude Include="ailang.h" />
     <ClInclude Include="object\abstract.h" />
     <ClInclude Include="object\boolobject.h" />
+    <ClInclude Include="object\cellobject.h" />
     <ClInclude Include="object\codeobject.h" />
     <ClInclude Include="object\dictobject.h" />
     <ClInclude Include="object\exceptionobject.h" />
@@ -172,6 +175,7 @@
     <ClInclude Include="object\intobject.h" />
     <ClInclude Include="object\iterobject.h" />
     <ClInclude Include="object\listobject.h" />
+    <ClInclude Include="object\moduleobject.h" />
     <ClInclude Include="object\object.h" />
     <ClInclude Include="object\stringobject.h" />
     <ClInclude Include="object\tracebackobject.h" />

@@ -5,6 +5,7 @@ static int intern_string_constants(AiObject *tuple);
 
 AiTypeObject type_codeobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    "code",
 };
 
 AiObject *code_new(int argcount, int nlocals, int stacksize, int flags,

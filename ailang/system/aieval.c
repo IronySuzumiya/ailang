@@ -345,6 +345,58 @@ AiObject *eval_frame(AiFrameObject *f) {
             SETLOCAL(oparg, x);
             continue;
 
+        case STORE_DEREF:
+            w = POP();
+            x = freevars[oparg];
+            cell_set((AiCellObject *)x, w);
+            DEC_REFCNT(w);
+            break;
+
+        case LOAD_DEREF:
+            x = freevars[oparg];
+            w = cell_get((AiCellObject *)x);
+            if (w) {
+                PUSH(w);
+            }
+            else {
+                if (oparg < TUPLE_SIZE(co->co_cellvars)) {
+                    v = TUPLE_GETITEM(co->co_cellvars, oparg);
+                    RUNTIME_EXCEPTION("unbound local visited");
+                }
+                else {
+                    v = TUPLE_GETITEM(co->co_freevars, oparg - TUPLE_SIZE(co->co_cellvars));
+                    RUNTIME_EXCEPTION("unbound freevar visited");
+                }
+            }
+            break;
+
+        case LOAD_CLOSURE:
+            x = freevars[oparg];
+            INC_REFCNT(x);
+            PUSH(x);
+            break;
+
+        case MAKE_CLOSURE:
+            v = POP();
+            x = function_new(v, f->f_globals);
+            DEC_REFCNT(v);
+            if (x) {
+                v = POP();
+                function_setclosure((AiFunctionObject *)x, v);
+                DEC_REFCNT(v);
+                if (oparg > 0) {
+                    v = tuple_new(oparg);
+                    while (--oparg >= 0) {
+                        w = POP();
+                        TUPLE_SETITEM(v, oparg, w);
+                    }
+                    function_setdefaults((AiFunctionObject *)x, v);
+                    DEC_REFCNT(v);
+                }
+            }
+            PUSH(x);
+            break;
+
         case BINARY_ADD:
         {
             numbermethods *nb;
@@ -697,7 +749,7 @@ AiObject *eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,
     fastlocals = f->f_localsplus;
     freevars = f->f_localsplus + co->co_nlocals;
     if (co->co_argcount > 0 || co->co_flags & (CO_VARARGS | CO_VARKEYWORDS)) {
-        int nposarg = argcount;
+        int nposargs = argcount;
         AiObject *lst = NULL;
         AiObject *kwdict = NULL;
 
@@ -712,12 +764,12 @@ AiObject *eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,
                 goto fail;
             }
             else {
-                nposarg = co->co_argcount;
+                nposargs = co->co_argcount;
             }
         }
         
         if (co->co_flags & CO_VARARGS) {
-            lst = tuple_new(argcount - nposarg);
+            lst = tuple_new(argcount - nposargs);
             SETLOCAL(co->co_argcount, lst);
         }
         if (co->co_flags & CO_VARKEYWORDS) {
@@ -725,14 +777,14 @@ AiObject *eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,
             SETLOCAL(co->co_flags & CO_VARARGS ?
                 co->co_argcount + 1 : co->co_argcount, kwdict);
         }
-        for (int i = 0; i < nposarg; ++i) {
+        for (int i = 0; i < nposargs; ++i) {
             INC_REFCNT(args[i]);
             SETLOCAL(i, args[i]);
         }
         if (co->co_flags & CO_VARARGS) {
-            for (int i = nposarg; i < argcount; ++i) {
+            for (int i = nposargs; i < argcount; ++i) {
                 INC_REFCNT(args[i]);
-                TUPLE_SETITEM(lst, i - nposarg, args[i]);
+                TUPLE_SETITEM(lst, i - nposargs, args[i]);
             }
         }
         AiObject *keyword;
@@ -765,8 +817,8 @@ AiObject *eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,
             }
         }
         if (argcount < co->co_argcount) {
-            int nnondef = co->co_argcount - defcount;
-            for (int i = argcount; i < nnondef; ++i) {
+            int nnondefs = co->co_argcount - defcount;
+            for (int i = argcount; i < nnondefs; ++i) {
                 if (!GETLOCAL(i)) {
                     int given = 0;
                     for (int j = 0; j < co->co_argcount; ++j) {
@@ -778,14 +830,14 @@ AiObject *eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,
                         STRING_AS_CSTRING(co->co_name),
                         ((co->co_flags & CO_VARARGS) || defcount) ?
                         "at least" : "exactly",
-                        nnondef, nnondef == 1 ? "" : "s", given);
+                        nnondefs, nnondefs == 1 ? "" : "s", given);
                     goto fail;
                 }
             }
-            for (int i = max(nposarg - nnondef, 0); i < defcount; ++i) {
-                if (!GETLOCAL(nnondef + i)) {
+            for (int i = max(nposargs - nnondefs, 0); i < defcount; ++i) {
+                if (!GETLOCAL(nnondefs + i)) {
                     INC_REFCNT(defs[i]);
-                    SETLOCAL(nnondef + i, defs[i]);
+                    SETLOCAL(nnondefs + i, defs[i]);
                 }
             }
         }
@@ -798,14 +850,39 @@ AiObject *eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,
 
     if (TUPLE_SIZE(co->co_cellvars)) {
         int nargs = co->co_argcount;
+        int found;
+
         if (co->co_flags & CO_VARARGS) {
             ++nargs;
         }
         if (co->co_flags & CO_VARKEYWORDS) {
             ++nargs;
         }
-        // TODO (closure)
+        for (int i = 0; i < TUPLE_SIZE(co->co_cellvars); ++i) {
+            found = 0;
+            for (int j = 0; j < nargs; ++j) {
+                if (!strcmp(STRING_AS_CSTRING(TUPLE_GETITEM(co->co_cellvars, i)),
+                    STRING_AS_CSTRING(TUPLE_GETITEM(co->co_varnames, j)))) {
+                    SETLOCAL(co->co_nlocals + i, cell_new(GETLOCAL(j)));
+                    found = 1;
+                    break;
+                }
+            }
+            if (!found) {
+                SETLOCAL(co->co_nlocals + i, cell_new(NULL));
+            }
+        }
     }
+    if (TUPLE_SIZE(co->co_freevars)) {
+        AiObject *o;
+        for (int i = 0; i < TUPLE_SIZE(co->co_freevars); ++i) {
+            o = TUPLE_GETITEM(closure, i);
+            INC_REFCNT(o);
+            freevars[TUPLE_SIZE(co->co_cellvars) + i] = o;
+        }
+    }
+
+    retval = eval_frame(f);
 
 fail:
     DEC_REFCNT(f);
@@ -886,6 +963,10 @@ AiObject *call_function(AiObject ***pp_stack, int oparg) {
     if (CHECK_TYPE_FUNCTION(func) && nk == 0) {
         return fast_function(func, pp_stack, n, na, nk);
     }
+    else {
+        // TODO
+        return NULL;
+    }
 }
 
 AiObject *fast_function(AiObject *func, AiObject ***pp_stack, int n, int na, int nk) {
@@ -922,5 +1003,5 @@ AiObject *fast_function(AiObject *func, AiObject ***pp_stack, int n, int na, int
     return eval_code(co, globals,
         NULL, (*pp_stack) - n, na,
         (*pp_stack) - 2 * nk, nk, d, nd,
-        function_getclosure(func));
+        FUNCTION_GETCLOSURE(func));
 }
