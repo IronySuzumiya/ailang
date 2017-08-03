@@ -7,7 +7,7 @@ static AiObject *_string_from_cstring_with_size(char *sval, ssize_t size);
 static void string_dealloc(AiStringObject *a);
 static void string_print(AiStringObject *a, FILE *stream);
 static int string_compare(AiStringObject *lhs, AiStringObject *rhs);
-static AiObject *string_to_string(AiStringObject *a);
+static AiObject *string_tostring(AiStringObject *a);
 static void string_free(void *p);
 static ssize_t string_length(AiStringObject *a);
 
@@ -59,7 +59,7 @@ AiTypeObject type_stringobject = {
     0,                                          /* tp_as_mapping */
 
     (hashfunc)string_hash,                      /* tp_hash */
-    (unaryfunc)string_to_string,                /* tp_to_string */
+    (unaryfunc)string_tostring,                /* tp_tostring */
     (freefunc)string_free,                      /* tp_free */
 };
 
@@ -246,7 +246,7 @@ long string_hash(AiStringObject *a) {
     return x;
 }
 
-AiObject *string_to_string(AiStringObject *a) {
+AiObject *string_tostring(AiStringObject *a) {
     if (CHECK_TYPE_STRING(a)) {
         AiStringObject *str;
         ssize_t size = STRING_LEN(a) + 2;

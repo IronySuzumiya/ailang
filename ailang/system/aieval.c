@@ -12,6 +12,7 @@ enum why_code {
 
 static enum why_code do_raise(AiObject *type, AiObject *value, AiObject *tb);
 static AiObject *call_function(AiObject ***pp_stack, int oparg);
+static AiObject *fast_function(AiObject *func, AiObject ***pp_stack, int n, int na, int nk);
 
 AiObject *eval_frame(AiFrameObject *f) {
     AiObject **stack_pointer;
@@ -96,16 +97,16 @@ AiObject *eval_frame(AiFrameObject *f) {
         switch (opcode) {
 
         case NOP:
-            break;
+            continue;
             
         case LOAD_CONST:
-            x = TUPLE_GET_ITEM(consts, oparg);
+            x = TUPLE_GETITEM(consts, oparg);
             INC_REFCNT(x);
             PUSH(x);
-            break;
+            continue;
 
         case STORE_NAME:
-            w = TUPLE_GET_ITEM(names, oparg);
+            w = TUPLE_GETITEM(names, oparg);
             v = POP();
             if (x = f->f_locals) {
                 dict_setitem((AiDictObject *)x, w, v);
@@ -116,7 +117,7 @@ AiObject *eval_frame(AiFrameObject *f) {
         case BUILD_MAP:
             x = dict_new();
             PUSH(x);
-            break;
+            continue;
 
         case BUILD_LIST:
             x = list_new(oparg);
@@ -136,14 +137,14 @@ AiObject *eval_frame(AiFrameObject *f) {
             x = TOP();
             INC_REFCNT(x);
             PUSH(x);
-            break;
+            continue;
 
         case ROT_TWO:
             x = v = POP();
             w = POP();
             PUSH(v);
             PUSH(w);
-            break;
+            continue;
 
         case STORE_SUBSCR:
             x = w = POP();
@@ -156,7 +157,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             break;
 
         case LOAD_NAME:
-            w = TUPLE_GET_ITEM(names, oparg);
+            w = TUPLE_GETITEM(names, oparg);
             v = f->f_locals;
             x = dict_getitem((AiDictObject *)v, w);
             if (!x) {
@@ -164,7 +165,7 @@ AiObject *eval_frame(AiFrameObject *f) {
                 if (!x) {
                     x = dict_getitem((AiDictObject *)f->f_builtins, w);
                     if (!x) {
-                        FATAL_ERROR("unknown name %s", STRING_AS_CSTRING(w));
+                        RUNTIME_EXCEPTION("unknown name %s", STRING_AS_CSTRING(w));
                         break;
                     }
                 }
@@ -179,7 +180,12 @@ AiObject *eval_frame(AiFrameObject *f) {
             x = object_rich_compare_bool(v, w, oparg);
             DEC_REFCNT(w);
             DEC_REFCNT(v);
-            PUSH(x);
+            if (x) {
+                PUSH(x);
+            }
+            else {
+                RUNTIME_EXCEPTION("bad compare");
+            }
             break;
 
         case POP_JUMP_IF_FALSE:
@@ -198,13 +204,13 @@ AiObject *eval_frame(AiFrameObject *f) {
             
         case JUMP_FORWARD:
             JUMPBY(oparg);
-            break;
+            continue;
 
         case SETUP_LOOP:
         case SETUP_EXCEPT:
         case SETUP_FINALLY:
             frame_setup_block(f, opcode, INSTR_OFFSET() + oparg, STACK_LEVEL());
-            break;
+            continue;
 
         case GET_ITER:
             v = POP();
@@ -213,14 +219,14 @@ AiObject *eval_frame(AiFrameObject *f) {
                 PUSH(x);
             }
             else {
-                FATAL_ERROR("object cannot be iterated");
+                RUNTIME_EXCEPTION("object cannot be iterated");
             }
             break;
 
         case FOR_ITER:
             v = TOP();
             if (!CHECK_TYPE_ITER(v)) {
-                FATAL_ERROR("only iterator can be index of for-loop");
+                RUNTIME_EXCEPTION("only iterator can be index of for-loop");
             }
             else if (x = v->ob_type->tp_iternext(v)) {
                 PUSH(x);
@@ -234,7 +240,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case JUMP_ABSOLUTE:
             JUMPTO(oparg);
-            break;
+            continue;
 
         case POP_BLOCK:
         {
@@ -301,7 +307,15 @@ AiObject *eval_frame(AiFrameObject *f) {
             v = POP();
             x = function_new(v, f->f_globals);
             DEC_REFCNT(v);
-            // TODO
+            if (x && oparg > 0) {
+                v = tuple_new(oparg);
+                while (--oparg >= 0) {
+                    w = POP();
+                    TUPLE_SETITEM(v, oparg, w);
+                }
+                function_setdefaults((AiFunctionObject *)x, v);
+                DEC_REFCNT(v);
+            }
             PUSH(x);
             break;
 
@@ -314,6 +328,22 @@ AiObject *eval_frame(AiFrameObject *f) {
             PUSH(x);
             break;
         }
+
+        case LOAD_FAST:
+            x = GETLOCAL(oparg);
+            if (x) {
+                INC_REFCNT(x);
+                PUSH(x);
+            }
+            else {
+                FATAL_ERROR("unbound local visited");
+            }
+            break;
+
+        case STORE_FAST:
+            x = POP();
+            SETLOCAL(oparg, x);
+            continue;
 
         case BINARY_ADD:
         {
@@ -653,6 +683,135 @@ AiObject *eval_frame(AiFrameObject *f) {
     return retval;
 }
 
+AiObject *eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,
+    AiObject **args, int argcount,
+    AiObject **kws, int kwcount,
+    AiObject **defs, int defcount,
+    AiObject *closure) {
+    AiFrameObject *f;
+    AiObject *retval = NULL;
+    AiObject **fastlocals, **freevars;
+    AiThreadState *tstate = threadstate_get();
+
+    f = frame_new(tstate, co, globals, locals);
+    fastlocals = f->f_localsplus;
+    freevars = f->f_localsplus + co->co_nlocals;
+    if (co->co_argcount > 0 || co->co_flags & (CO_VARARGS | CO_VARKEYWORDS)) {
+        int nposarg = argcount;
+        AiObject *lst = NULL;
+        AiObject *kwdict = NULL;
+
+        if (argcount > co->co_argcount) {
+            if (!(co->co_flags & CO_VARARGS)) {
+                TYPE_ERROR("function '%s' takes %s %d argument%s (%d given)",
+                    STRING_AS_CSTRING(co->co_name),
+                    defcount ? "atmost" : "exactly",
+                    co->co_argcount,
+                    co->co_argcount == 1 ? "" : "s",
+                    argcount + kwcount);
+                goto fail;
+            }
+            else {
+                nposarg = co->co_argcount;
+            }
+        }
+        
+        if (co->co_flags & CO_VARARGS) {
+            lst = tuple_new(argcount - nposarg);
+            SETLOCAL(co->co_argcount, lst);
+        }
+        if (co->co_flags & CO_VARKEYWORDS) {
+            kwdict = dict_new();
+            SETLOCAL(co->co_flags & CO_VARARGS ?
+                co->co_argcount + 1 : co->co_argcount, kwdict);
+        }
+        for (int i = 0; i < nposarg; ++i) {
+            INC_REFCNT(args[i]);
+            SETLOCAL(i, args[i]);
+        }
+        if (co->co_flags & CO_VARARGS) {
+            for (int i = nposarg; i < argcount; ++i) {
+                INC_REFCNT(args[i]);
+                TUPLE_SETITEM(lst, i - nposarg, args[i]);
+            }
+        }
+        AiObject *keyword;
+        AiObject *value;
+        int kw_found;
+        for (int i = 0; i < kwcount; ++i) {
+            keyword = kws[2 * i];
+            value = kws[2 * i + 1];
+            kw_found = 0;
+            if (!keyword || !CHECK_TYPE_STRING(keyword)) {
+                TYPE_ERROR("function '%s' keywords must be strings",
+                    STRING_AS_CSTRING(co->co_name));
+                goto fail;
+            }
+            for (int j = 0; j < co->co_argcount; ++i) {
+                kw_found = object_rich_compare(
+                    TUPLE_GETITEM(co->co_varnames, j), keyword, CMP_EQ);
+                if (kw_found > 0) {
+                    INC_REFCNT(value);
+                    SETLOCAL(j, value);
+                    break;
+                }
+                else if (kw_found < 0) {
+                    RUNTIME_EXCEPTION("bad keyword matching");
+                    goto fail;
+                }
+            }
+            if(!kw_found) {
+                dict_setitem((AiDictObject *)kwdict, keyword, value);
+            }
+        }
+        if (argcount < co->co_argcount) {
+            int nnondef = co->co_argcount - defcount;
+            for (int i = argcount; i < nnondef; ++i) {
+                if (!GETLOCAL(i)) {
+                    int given = 0;
+                    for (int j = 0; j < co->co_argcount; ++j) {
+                        if (GETLOCAL(j)) {
+                            ++given;
+                        }
+                    }
+                    TYPE_ERROR("function '%s' takes %s %d argument%s (%d given)",
+                        STRING_AS_CSTRING(co->co_name),
+                        ((co->co_flags & CO_VARARGS) || defcount) ?
+                        "at least" : "exactly",
+                        nnondef, nnondef == 1 ? "" : "s", given);
+                    goto fail;
+                }
+            }
+            for (int i = max(nposarg - nnondef, 0); i < defcount; ++i) {
+                if (!GETLOCAL(nnondef + i)) {
+                    INC_REFCNT(defs[i]);
+                    SETLOCAL(nnondef + i, defs[i]);
+                }
+            }
+        }
+    }
+    else if (argcount > 0 || kwcount > 0) {
+        TYPE_ERROR("function '%s' takes no arguments (%d given)",
+            STRING_AS_CSTRING(co->co_name), argcount + kwcount);
+        goto fail;
+    }
+
+    if (TUPLE_SIZE(co->co_cellvars)) {
+        int nargs = co->co_argcount;
+        if (co->co_flags & CO_VARARGS) {
+            ++nargs;
+        }
+        if (co->co_flags & CO_VARKEYWORDS) {
+            ++nargs;
+        }
+        // TODO (closure)
+    }
+
+fail:
+    DEC_REFCNT(f);
+    return retval;
+}
+
 enum why_code do_raise(AiObject *type, AiObject *value, AiObject *tb) {
     if (!type) {
         AiThreadState *tstate = threadstate_get();
@@ -698,7 +857,7 @@ enum why_code do_raise(AiObject *type, AiObject *value, AiObject *tb) {
     }
     while (CHECK_TYPE_TUPLE(type) && TUPLE_SIZE(type) > 0) {
         AiObject *tmp = type;
-        type = TUPLE_GET_ITEM(type, 0);
+        type = TUPLE_GETITEM(type, 0);
         INC_REFCNT(type);
         DEC_REFCNT(tmp);
     }
@@ -725,6 +884,43 @@ AiObject *call_function(AiObject ***pp_stack, int oparg) {
     AiObject *x, *w;
 
     if (CHECK_TYPE_FUNCTION(func) && nk == 0) {
-        // TODO
+        return fast_function(func, pp_stack, n, na, nk);
     }
+}
+
+AiObject *fast_function(AiObject *func, AiObject ***pp_stack, int n, int na, int nk) {
+    AiCodeObject *co = (AiCodeObject *)FUNCTION_GETCODE(func);
+    AiObject *globals = FUNCTION_GETGLOBALS(func);
+    AiObject *argdefs = FUNCTION_GETDEFAULTS(func);
+    AiObject **d = NULL;
+    int nd = 0;
+
+    if (!argdefs && co->co_argcount == n && nk == 0
+        && co->co_flags == (CO_OPTIMIZED | CO_NEWLOCALS | CO_NOFREE)) {
+        AiFrameObject *f;
+        AiObject *retval;
+        AiThreadState *tstate = threadstate_get();
+        AiObject **fastlocals, **stack;
+
+        f = frame_new(tstate, co, globals, NULL);
+        fastlocals = f->f_localsplus;
+        stack = (*pp_stack) - n;
+        for (ssize_t i = 0; i < n; ++i) {
+            fastlocals[i] = *stack++;
+        }
+        retval = eval_frame(f);
+
+        return retval;
+    }
+    else if (argdefs) {
+        if (!CHECK_TYPE_TUPLE(argdefs)) {
+            FATAL_ERROR("argdefaults should be given as a tuple");
+        }
+        d = &TUPLE_GETITEM(argdefs, 0);
+        nd = (int)TUPLE_SIZE(argdefs);
+    }
+    return eval_code(co, globals,
+        NULL, (*pp_stack) - n, na,
+        (*pp_stack) - 2 * nk, nk, d, nd,
+        function_getclosure(func));
 }

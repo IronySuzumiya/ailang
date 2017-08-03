@@ -49,12 +49,10 @@ typedef __int64 ssize_t;
 #define CHECK_TYPE(ob, type)        \
     ((ob)->ob_type == (type))
 
-#define OB_TO_STRING(ob) ((ob)->ob_type->tp_to_string((AiObject *)(ob)))
-
+#define OB_TO_STRING(ob) ((ob)->ob_type->tp_tostring((AiObject *)(ob)))
 #define OB_PRINT(ob, stream) ((ob)->ob_type->tp_print((AiObject *)(ob), (stream)))
-
+#define OB_PRINT_STDOUT(ob) (OB_PRINT(ob, stdout), fputc('\n', stdout))
 #define OB_FREE(ob) ((ob)->ob_type->tp_free((ob)))
-
 #define OB_CLEAR(ob) WRAP(DEC_REFCNT(ob); (ob) = NULL;)
 
 typedef struct _object {

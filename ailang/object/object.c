@@ -12,7 +12,7 @@ AiTypeObject type_noneobject = {
     0,                              /* tp_as_sequence */
     0,                              /* tp_as_mapping */
     (hashfunc)pointer_hash,         /* tp_hash */
-    0,                              /* tp_to_string */
+    0,                              /* tp_tostring */
     0,                              /* tp_free */
 };
 

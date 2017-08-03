@@ -193,7 +193,7 @@ void write_object_to_file(AiObject *x, FILE *fp) {
     DEC_REFCNT(af.strings);
 }
 
-AiObject *write_object_to_string(AiObject *x) {
+AiObject *write_object_tostring(AiObject *x) {
     AicFile af;
     af.fp = NULL;
     af.str = string_from_cstring_with_size(NULL, 50);

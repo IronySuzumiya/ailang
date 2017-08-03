@@ -11,8 +11,8 @@ typedef struct _tupleobject {
 AiTupleObject;
 
 #define CHECK_TYPE_TUPLE(ob) CHECK_TYPE(ob, &type_tupleobject)
-#define TUPLE_GET_ITEM(op, i) (((AiTupleObject *)(op))->ob_item[i])
-#define TUPLE_SET_ITEM(op, i, v) (TUPLE_GET_ITEM(op, i) = (AiObject *)(v))
+#define TUPLE_GETITEM(op, i) (((AiTupleObject *)(op))->ob_item[i])
+#define TUPLE_SETITEM(op, i, v) (TUPLE_GETITEM(op, i) = (AiObject *)(v))
 #define TUPLE_SIZE OB_SIZE
 
 #define NUMBER_FREE_TUPLES_MAX 20

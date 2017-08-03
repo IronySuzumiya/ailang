@@ -4,7 +4,7 @@ static AiObject *bool_and(AiBoolObject *lhs, AiBoolObject *rhs);
 static AiObject *bool_or(AiBoolObject *lhs, AiBoolObject *rhs);
 static AiObject *bool_not(AiBoolObject *ob);
 static void bool_print(AiBoolObject *ob, FILE *stream);
-static AiObject *bool_to_string(AiBoolObject *ob);
+static AiObject *bool_tostring(AiBoolObject *ob);
 
 static AiBoolObject _aitrue = {
     INIT_OBJECT_HEAD(&type_boolobject)
@@ -54,7 +54,7 @@ AiTypeObject type_boolobject = {
     0,                              /* tp_as_mapping */
 
     0,                              /* tp_hash */
-    (unaryfunc)bool_to_string,      /* tp_to_string */
+    (unaryfunc)bool_tostring,      /* tp_tostring */
     0,                              /* tp_free */
 };
 
@@ -97,7 +97,7 @@ void bool_print(AiBoolObject *ob, FILE *stream) {
     }
 }
 
-AiObject *bool_to_string(AiBoolObject *ob) {
+AiObject *bool_tostring(AiBoolObject *ob) {
     if (ob == aitrue) {
         return string_from_cstring("True");
     }

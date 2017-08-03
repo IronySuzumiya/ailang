@@ -5,8 +5,8 @@ static void int_print(AiIntObject *ob, FILE *stream);
 static int int_compare(AiIntObject *lhs, AiIntObject *rhs);
 static long int_hash(AiIntObject *ob);
 static void int_to_cstring(AiIntObject *ob, char *buffer, int radix);
-static AiObject *int_to_string_with_radix(AiIntObject *ob, int radix);
-static AiObject *int_to_string(AiIntObject *ob);
+static AiObject *int_tostring_with_radix(AiIntObject *ob, int radix);
+static AiObject *int_tostring(AiIntObject *ob);
 static AiObject *int_add(AiIntObject *lhs, AiIntObject *rhs);
 static AiObject *int_sub(AiIntObject *lhs, AiIntObject *rhs);
 static AiObject *int_mul(AiIntObject *lhs, AiIntObject *rhs);
@@ -63,7 +63,7 @@ AiTypeObject type_intobject = {
     0,                              /* tp_as_mapping */
 
     (hashfunc)int_hash,             /* tp_hash */
-    (unaryfunc)int_to_string,       /* tp_to_string */
+    (unaryfunc)int_tostring,       /* tp_tostring */
     0,                              /* tp_free */
 };
 
@@ -147,14 +147,14 @@ void int_to_cstring(AiIntObject *ob, char *buffer, int radix) {
     _ltoa_s(ob->ob_ival, buffer, INT_TO_CSTRING_BUFFER_SIZE, radix);
 }
 
-AiObject *int_to_string_with_radix(AiIntObject *ob, int radix) {
+AiObject *int_tostring_with_radix(AiIntObject *ob, int radix) {
     char buffer[INT_TO_CSTRING_BUFFER_SIZE];
     int_to_cstring(ob, buffer, radix);
     return string_from_cstring(buffer);
 }
 
-AiObject *int_to_string(AiIntObject *ob) {
-    return int_to_string_with_radix(ob, 10);
+AiObject *int_tostring(AiIntObject *ob) {
+    return int_tostring_with_radix(ob, 10);
 }
 
 AiObject *int_add(AiIntObject *lhs, AiIntObject *rhs) {

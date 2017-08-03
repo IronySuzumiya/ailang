@@ -5,6 +5,7 @@ static AiObject *builtin_object;
 
 AiTypeObject type_frameobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    "frame",
 };
 
 AiFrameObject *frame_new(AiThreadState *tstate, AiCodeObject *code,
@@ -16,8 +17,18 @@ AiFrameObject *frame_new(AiThreadState *tstate, AiCodeObject *code,
 
     if (!back || back->f_globals != globals) {
         builtins = dict_getitem((AiDictObject *)globals, builtin_object);
-        // TODO
-        INC_REFCNT(builtins);
+        if (builtins) {
+            if (CHECK_TYPE_MODULE(builtins)) {
+                builtins = module_getdict(builtins);
+                INC_REFCNT(builtins);
+            }
+            else if (!CHECK_TYPE_DICT(builtins)) {
+                builtins = dict_new();
+            }
+        }
+        else {
+            builtins = dict_new();
+        }
     }
     else {
         builtins = back->f_builtins;
@@ -32,17 +43,17 @@ AiFrameObject *frame_new(AiThreadState *tstate, AiCodeObject *code,
     INIT_OBJECT_VAR(f, &type_frameobject, extras);
 
     f->f_code = code;
+    INC_REFCNT(code);
     extras = code->co_nlocals + ncells + nfrees;
     f->f_valuestack = f->f_localsplus + extras;
     AiMEM_SET(f->f_localsplus, 0, sizeof(AiObject *) * extras);
     f->f_locals = NULL;
     f->f_stacktop = f->f_valuestack;
     f->f_builtins = builtins;
-    XINC_REFCNT(back);
     f->f_back = back;
-    INC_REFCNT(code);
-    INC_REFCNT(globals);
+    XINC_REFCNT(back);
     f->f_globals = globals;
+    INC_REFCNT(globals);
     
     if (code->co_flags & CO_NEWLOCALS) {
         locals = dict_new();

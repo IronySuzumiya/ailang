@@ -20,7 +20,12 @@ AiFunctionObject;
 
 #define CHECK_TYPE_FUNCTION(ob) CHECK_TYPE(ob, &type_functionobject)
 
+#define FUNCTION_GETCODE(ob) (((AiFunctionObject *)(ob))->func_code)
+#define FUNCTION_GETGLOBALS(ob) (((AiFunctionObject *)(ob))->func_globals)
+#define FUNCTION_GETDEFAULTS(ob) (((AiFunctionObject *)(ob))->func_defaults)
+
 AiAPI_DATA(AiTypeObject) type_functionobject;
 AiAPI_FUNC(AiObject *) function_new(AiObject *code, AiObject *globals);
+AiAPI_FUNC(int) function_setdefaults(AiFunctionObject *func, AiObject *defaults);
 
 #endif

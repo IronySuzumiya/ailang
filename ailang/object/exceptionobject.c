@@ -63,7 +63,7 @@ int exceptionclass_check(AiObject *exception) {
 int exception_matches(AiObject *err, AiObject *exc) {
     if (CHECK_TYPE_TUPLE(exc)) {
         for (ssize_t i = 0; i < TUPLE_SIZE(exc); ++i) {
-            if (exception_matches(err, TUPLE_GET_ITEM(exc, i))) {
+            if (exception_matches(err, TUPLE_GETITEM(exc, i))) {
                 return 1;
             }
         }

@@ -31,7 +31,7 @@ AiTypeObject type_dictobject = {
     &dict_as_mapping,                           /* tp_as_mapping */
 
     (hashfunc)pointer_hash,                     /* tp_hash */
-    (unaryfunc)dict_to_string,                  /* tp_to_string */
+    (unaryfunc)dict_tostring,                  /* tp_tostring */
     (freefunc)dict_free,                        /* tp_free */
 };
 
@@ -250,7 +250,7 @@ int dict_delitem(AiDictObject *mp, AiObject *key) {
     return 0;
 }
 
-AiObject *dict_to_string(AiDictObject *mp) {
+AiObject *dict_tostring(AiDictObject *mp) {
     AiDictEntry *ep;
     ssize_t used = DICT_SIZE(mp);
     char *p;

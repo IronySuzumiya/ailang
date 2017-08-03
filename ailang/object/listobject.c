@@ -30,7 +30,7 @@ AiTypeObject type_listobject = {
     0,
 
     (hashfunc)pointer_hash,
-    (unaryfunc)list_to_string,
+    (unaryfunc)list_tostring,
     (freefunc)list_free,
 };
 
@@ -131,7 +131,7 @@ int list_contains(AiListObject *list, AiObject *item) {
     return 0;
 }
 
-AiObject *list_to_string(AiListObject *list) {
+AiObject *list_tostring(AiListObject *list) {
     AiListObject *strlist;
     AiStringObject *str;
     AiStringObject *item;

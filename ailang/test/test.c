@@ -28,7 +28,7 @@ void testobject(AiThreadState *t) {
     list_setitem(list, 2, v3);
     list_setitem(list, 3, s1);
 
-    AiStringObject *liststr = (AiStringObject *)list_to_string(list);
+    AiStringObject *liststr = (AiStringObject *)list_tostring(list);
 
     OB_PRINT_STDOUT(liststr);
 
@@ -37,7 +37,7 @@ void testobject(AiThreadState *t) {
     dict_setitem(dict, s1, v1);
     dict_setitem(dict, v2, v3);
 
-    AiStringObject *dictstr = (AiStringObject *)dict_to_string(dict);
+    AiStringObject *dictstr = (AiStringObject *)dict_tostring(dict);
 
     OB_PRINT_STDOUT(dictstr);
 

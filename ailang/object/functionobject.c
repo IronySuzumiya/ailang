@@ -47,3 +47,19 @@ AiObject *function_new(AiObject *code, AiObject *globals) {
     }
     return (AiObject *)func;
 }
+
+int function_setdefaults(AiFunctionObject *func, AiObject *defaults) {
+    if (defaults == NONE) {
+        defaults = NULL;
+    }
+    else if (defaults && CHECK_TYPE_TUPLE(defaults)) {
+        INC_REFCNT(defaults);
+    }
+    else {
+        RUNTIME_EXCEPTION("non-tuple default args");
+        return -1;
+    }
+    XDEC_REFCNT(func->func_defaults);
+    func->func_defaults = defaults;
+    return 0;
+}

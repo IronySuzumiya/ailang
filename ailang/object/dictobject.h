@@ -55,7 +55,7 @@ AiAPI_FUNC(AiObject *) dict_getitem(AiDictObject *mp, AiObject *key);
 AiAPI_FUNC(int) dict_setitem(AiDictObject *mp, AiObject *key, AiObject *value);
 AiAPI_FUNC(int) dict_insert(AiDictObject *mp, AiObject *key, long hash, AiObject *value);
 AiAPI_FUNC(int) dict_delitem(AiDictObject *mp, AiObject *key);
-AiAPI_FUNC(AiObject *) dict_to_string(AiDictObject *mp);
+AiAPI_FUNC(AiObject *) dict_tostring(AiDictObject *mp);
 
 AiAPI_FUNC(int) dict_clear_free_dicts_and_dummy(void);
 

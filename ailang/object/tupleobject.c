@@ -2,7 +2,7 @@
 
 static void tuple_dealloc(AiTupleObject *tp);
 static void tuple_print(AiTupleObject *tp, FILE *stream);
-static AiObject *tuple_to_string(AiTupleObject *tp);
+static AiObject *tuple_tostring(AiTupleObject *tp);
 static int tuple_contains(AiTupleObject *tp, AiObject *item);
 static void tuple_free(void *p);
 
@@ -30,7 +30,7 @@ AiTypeObject type_tupleobject = {
     0,
 
     (hashfunc)pointer_hash,
-    (unaryfunc)tuple_to_string,
+    (unaryfunc)tuple_tostring,
     (freefunc)tuple_free,
 };
 
@@ -69,7 +69,7 @@ AiObject *tuple_getitem(AiTupleObject *tp, ssize_t index) {
         return NULL;
     }
     else {
-        return TUPLE_GET_ITEM(tp, index);
+        return TUPLE_GETITEM(tp, index);
     }
 }
 
@@ -80,9 +80,9 @@ int tuple_setitem(AiTupleObject *tp, ssize_t index, AiObject *newitem) {
         return -1;
     }
     else {
-        olditem = TUPLE_GET_ITEM(tp, index);
+        olditem = TUPLE_GETITEM(tp, index);
         XDEC_REFCNT(olditem);
-        TUPLE_SET_ITEM(tp, index, newitem);
+        TUPLE_SETITEM(tp, index, newitem);
         return 0;
     }
 }
@@ -126,8 +126,8 @@ AiObject *tuple_pack(ssize_t argc, ...) {
     va_start(vargs, argc);
     r = tuple_new(argc);
     for (ssize_t i = 0; i < argc; ++i) {
-        TUPLE_GET_ITEM(r, i) = va_arg(vargs, AiObject *);
-        INC_REFCNT(TUPLE_GET_ITEM(r, i));
+        TUPLE_GETITEM(r, i) = va_arg(vargs, AiObject *);
+        INC_REFCNT(TUPLE_GETITEM(r, i));
     }
     va_end(vargs);
 
@@ -171,7 +171,7 @@ void tuple_print(AiTupleObject *tp, FILE *stream) {
     fputs(")", stream);
 }
 
-AiObject *tuple_to_string(AiTupleObject *tp) {
+AiObject *tuple_tostring(AiTupleObject *tp) {
     AiListObject *strlist;
     AiStringObject *str;
     AiStringObject *item;

@@ -17,7 +17,7 @@ typedef struct _typeobject {
     mappingmethods *tp_as_mapping;
 
     hashfunc tp_hash;
-    unaryfunc tp_to_string;
+    unaryfunc tp_tostring;
     freefunc tp_free;
 
     unaryfunc tp_iter;

@@ -20,6 +20,4 @@
         }                                   \
     )
 
-#define OB_PRINT_STDOUT(ob) (OB_PRINT(ob, stdout), fputc('\n', stdout))
-
 #endif
