@@ -30,7 +30,7 @@ AiTypeObject type_listobject = {
     &list_as_sequence,                  /* tp_as_sequence */
     0,                                  /* tp_as_mapping */
 
-    0,//(hashfunc)object_unhashable,        /* tp_hash */
+    (hashfunc)object_unhashable,        /* tp_hash */
     0,                                  /* tp_call */
     (unaryfunc)list_str,                /* tp_str */
 
@@ -261,7 +261,7 @@ void list_dealloc(AiListObject *list) {
         }
         AiMEM_FREE(list->ob_item);
     }
-    if (CHECK_TYPE_LIST(list) && number_free_lists < NUMBER_FREE_LISTS_MAX) {
+    if (CHECK_EXACT_TYPE_LIST(list) && number_free_lists < NUMBER_FREE_LISTS_MAX) {
         free_lists[number_free_lists++] = list;
     }
     else {

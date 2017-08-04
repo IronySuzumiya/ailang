@@ -117,7 +117,7 @@ void string_intern(AiStringObject **a) {
     AiObject *s = (AiObject *)(*a);
     AiObject *t;
 
-    if (!CHECK_TYPE_STRING(s) || CHECK_STRING_INTERNED(s)) {
+    if (!CHECK_EXACT_TYPE_STRING(s) || CHECK_STRING_INTERNED(s)) {
         return;
     }
 
@@ -232,7 +232,7 @@ AiObject *_string_from_cstring_with_size(char *sval, ssize_t size) {
 }
 
 void string_dealloc(AiStringObject *a) {
-    if (CHECK_TYPE_STRING(a)) {
+    if (CHECK_EXACT_TYPE_STRING(a)) {
         switch (CHECK_STRING_INTERNED(a))
         {
         case SSTATE_NOT_INTERNED:

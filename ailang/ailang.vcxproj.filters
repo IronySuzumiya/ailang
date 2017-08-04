@@ -17,6 +17,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="aicore">
+      <UniqueIdentifier>{d00a58e8-3160-422f-b582-b3b636a5b4d8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\test.c">
@@ -79,17 +82,20 @@
     <ClCompile Include="system\aimemory.c">
       <Filter>system</Filter>
     </ClCompile>
-    <ClCompile Include="system\aistate.c">
-      <Filter>system</Filter>
-    </ClCompile>
     <ClCompile Include="system\aimarshal.c">
       <Filter>system</Filter>
     </ClCompile>
     <ClCompile Include="object\descrobject.c">
       <Filter>object</Filter>
     </ClCompile>
-    <ClCompile Include="object\methodobject.c">
-      <Filter>object</Filter>
+    <ClCompile Include="aicore\member.c">
+      <Filter>aicore</Filter>
+    </ClCompile>
+    <ClCompile Include="aicore\method.c">
+      <Filter>aicore</Filter>
+    </ClCompile>
+    <ClCompile Include="aicore\aistate.c">
+      <Filter>aicore</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -109,9 +115,6 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="system\aiopcode.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="system\aistate.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="object\boolobject.h">
@@ -165,7 +168,13 @@
     <ClInclude Include="object\descrobject.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="object\methodobject.h">
+    <ClInclude Include="aicore\aistate.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="aicore\member.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="aicore\method.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

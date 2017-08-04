@@ -216,9 +216,14 @@ AiObject *int_mul(AiIntObject *lhs, AiIntObject *rhs) {
 }
 
 AiObject *int_div(AiIntObject *lhs, AiIntObject *rhs) {
-    AiObject *r = INT_BINARY_WITH_CHECK(lhs, rhs, /);
-    if (r) {
-        return r;
+    if (CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs)) {
+        if (rhs->ob_ival) {
+            return int_from_clong(lhs->ob_ival / rhs->ob_ival);
+        }
+        else {
+            RUNTIME_EXCEPTION("division by zero");
+            return NULL;
+        }
     }
     else {
         UNSUPPORTED_DIV(lhs, rhs);
@@ -227,9 +232,14 @@ AiObject *int_div(AiIntObject *lhs, AiIntObject *rhs) {
 }
 
 AiObject *int_mod(AiIntObject *lhs, AiIntObject *rhs) {
-    AiObject *r = INT_BINARY_WITH_CHECK(lhs, rhs, %);
-    if (r) {
-        return r;
+    if (CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs)) {
+        if (rhs->ob_ival) {
+            return int_from_clong(lhs->ob_ival % rhs->ob_ival);
+        }
+        else {
+            RUNTIME_EXCEPTION("modulo by zero");
+            return NULL;
+        }
     }
     else {
         UNSUPPORTED_MOD(lhs, rhs);

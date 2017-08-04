@@ -21,9 +21,11 @@
 
 #include "object\object.h"
 #include "object\abstract.h"
-#include "system\aistate.h"
 
-#include "object\methodobject.h"
+#include "aicore\aistate.h"
+#include "aicore\method.h"
+#include "aicore\member.h"
+
 #include "object\descrobject.h"
 
 #include "object\intobject.h"

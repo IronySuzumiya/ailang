@@ -1,5 +1,10 @@
 #include "../ailang.h"
 
+long object_unhashable(AiObject *p) {
+    RUNTIME_EXCEPTION("unhashable type");
+    return -1;
+}
+
 long pointer_hash(void *p) {
     long x;
     size_t y = (size_t)p;

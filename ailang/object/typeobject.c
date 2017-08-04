@@ -1,13 +1,13 @@
 #include "../ailang.h"
 
 #define TPSLOT(NAME, SLOT, FUNCTION, WRAPPER, DOC) \
-    {NAME, offsetof(AiTypeObject, SLOT), (void *)(FUNCTION), WRAPPER, DOC}
+    { NAME, offsetof(AiTypeObject, SLOT), (void *)(FUNCTION), WRAPPER, DOC }
 
 #define FLSLOT(NAME, SLOT, FUNCTION, WRAPPER, DOC, FLAGS) \
-    {NAME, offsetof(AiTypeObject, SLOT), (void *)(FUNCTION), WRAPPER, DOC, FLAGS}
+    { NAME, offsetof(AiTypeObject, SLOT), (void *)(FUNCTION), WRAPPER, DOC, FLAGS }
 
 #define ETSLOT(NAME, SLOT, FUNCTION, WRAPPER, DOC) \
-    {NAME, offsetof(AiHeapTypeObject, SLOT), (void *)(FUNCTION), WRAPPER, DOC}
+    { NAME, offsetof(AiHeapTypeObject, SLOT), (void *)(FUNCTION), WRAPPER, DOC }
 
 #define SQSLOT(NAME, SLOT, FUNCTION, WRAPPER, DOC) \
     ETSLOT(NAME, as_sequence.SLOT, FUNCTION, WRAPPER, DOC)
@@ -149,6 +149,14 @@ static slotdef slotdefs[] = {
 
     UNSLOT("__float__", nb_float, slot_nb_float, wrap_unaryfunc, "float(x)"),
 
+    MPSLOT("__len__", mp_length, slot_mp_length, wrap_lenfunc, "x.__len__() <==> len(x)"),
+
+    MPSLOT("__getitem__", mp_getitem, slot_getitem, wrap_binaryfunc, "x.__getitem__(y) <==> x[y]"),
+
+    MPSLOT("__setitem__", mp_setitem, slot_setitem, wrap_objobjargproc, "x.__setitem__(i, y) <==> x[i]=y"),
+
+    MPSLOT("__delitem__", mp_delitem, slot_delitem, wrap_delitem, "x.__delitem__(y) <==> del x[y]"),
+
     SQSLOT("__len__", sq_length, slot_sq_length, wrap_lenfunc, "x.__len__() <==> len(x)"),
 
     SQSLOT("__add__", sq_concat, NULL, wrap_binaryfunc, "x.__add__(y) <==> x+y"),
@@ -161,19 +169,76 @@ static slotdef slotdefs[] = {
 
     SQSLOT("__contains__", sq_contains, slot_sq_contains, wrap_objobjproc, "x.__contains__(y) <==> y in x"),
 
-    MPSLOT("__len__", mp_length, slot_mp_length, wrap_lenfunc, "x.__len__() <==> len(x)"),
-
-    MPSLOT("__getitem__", mp_getitem, slot_getitem, wrap_binaryfunc, "x.__getitem__(y) <==> x[y]"),
-
-    MPSLOT("__setitem__", mp_setitem, slot_setitem, wrap_objobjargproc, "x.__setitem__(i, y) <==> x[i]=y"),
-
-    MPSLOT("__delitem__", mp_delitem, slot_delitem, wrap_delitem, "x.__delitem__(y) <==> del x[y]"),
     */
     { NULL }
 };
 
 static void type_dealloc(AiTypeObject *type);
 static void type_print(AiTypeObject *ob, FILE *stream);
+
+static void init_slotdefs() {
+    static int initialized = 0;
+    if (initialized)
+        return;
+
+    for (slotdef *p = slotdefs; p->name; ++p) {
+        AiObject *str = string_from_cstring(p->name);
+        string_intern((AiStringObject **)&str);
+        p->name_strobj = str;
+    }
+
+    initialized = 1;
+}
+
+static void **slotptr(AiTypeObject *type, int offset) {
+    char *ptr;
+
+    if ((size_t)offset >= offsetof(AiHeapTypeObject, as_sequence)) {
+        ptr = (char *)type->tp_as_sequence;
+        offset -= offsetof(AiHeapTypeObject, as_sequence);
+    }
+    else if ((size_t)offset >= offsetof(AiHeapTypeObject, as_mapping)) {
+        ptr = (char *)type->tp_as_mapping;
+        offset -= offsetof(AiHeapTypeObject, as_mapping);
+    }
+    else if ((size_t)offset >= offsetof(AiHeapTypeObject, as_number)) {
+        ptr = (char *)type->tp_as_number;
+        offset -= offsetof(AiHeapTypeObject, as_number);
+    }
+    else {
+        ptr = (char *)type;
+    }
+    if (ptr) {
+        ptr += offset;
+    }
+    return (void **)ptr;
+}
+
+static int add_operators(AiTypeObject *type) {
+    AiDictObject *dict = (AiDictObject *)type->tp_dict;
+    AiObject *descr;
+    void **ptr;
+
+    init_slotdefs();
+    for (slotdef *p = slotdefs; p->name; ++p) {
+        if (p->wrapper) {
+            ptr = slotptr(type, p->offset);
+            if (ptr && *ptr && dict_getitem(dict, p->name_strobj)
+                && *ptr == object_unhashable) {
+                dict_setitem(dict, p->name_strobj, NONE);
+            }
+        }
+        else {
+            descr = descr_newwrapper(type, p, *ptr);
+            dict_setitem(dict, p->name_strobj, descr);
+            DEC_REFCNT(descr);
+        }
+    }
+    if (type->tp_new) {
+        add_tp_new_wrapper(type);
+    }
+    return 0;
+}
 
 AiTypeObject type_typeobject = {
     INIT_AiVarObject_HEAD(&type_typeobject, 0)
@@ -247,8 +312,45 @@ int AiType_Ready(AiTypeObject *type) {
         dict = dict_new();
         type->tp_dict = dict;
     }
-
-    // TODO
+    add_operators(type);
+    if (type->tp_methods) {
+        add_methods(type, type->tp_methods);
+    }
+    if (type->tp_members) {
+        add_members(type, type->tp_members);
+    }
+    if (type->tp_getset) {
+        add_getset(type, type->tp_getset);
+    }
+    mro_internal(type);
+    if (type->tp_base) {
+        inherit_special(type, type->tp_base);
+    }
+    bases = type->tp_mro;
+    for (ssize_t i = 1; i < TUPLE_SIZE(bases); ++i) {
+        AiObject *b = TUPLE_GETITEM(bases, i);
+        if (CHECK_TYPE_TYPE(b)) {
+            inherit_slots(type, (AiTypeObject *)b);
+        }
+    }
+    if (base) {
+        if (!type->tp_as_number) {
+            type->tp_as_number = base->tp_as_number;
+        }
+        if (!type->tp_as_sequence) {
+            type->tp_as_sequence = base->tp_as_sequence;
+        }
+        if (!type->tp_as_mapping) {
+            type->tp_as_mapping = base->tp_as_mapping;
+        }
+    }
+    for (ssize_t i = 0; i < TUPLE_SIZE(bases); ++i) {
+        AiObject *b = TUPLE_GETITEM(bases, i);
+        if (CHECK_TYPE_TYPE(b)) {
+            add_subclass((AiTypeObject *)b, type);
+        }
+    }
+    return 0;
 }
 
 void type_dealloc(AiTypeObject *type) {
@@ -290,7 +392,7 @@ int half_compare(AiObject *self, AiObject *other) {
         if (res != AiNotImplemented) {
             if (!res)
                 return -2;
-            c = int_as_clong(res);
+            c = INT_AS_CLONG(res);
             DEC_REFCNT(res);
             if (c == -1 && EXCEPTION_OCCURRED())
                 return -2;

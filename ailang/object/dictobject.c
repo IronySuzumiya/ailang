@@ -468,7 +468,7 @@ void dict_dealloc(AiDictObject *mp) {
     if (mp->ma_table != mp->ma_smalltable) {
         AiMEM_FREE(mp->ma_table);
     }
-    if (number_free_dicts < NUMBER_FREE_DICTS_MAX && CHECK_TYPE_DICT(mp)) {
+    if (CHECK_EXACT_TYPE_DICT(mp) && number_free_dicts < NUMBER_FREE_DICTS_MAX) {
         free_dicts[number_free_dicts++] = mp;
     }
     else {

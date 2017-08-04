@@ -30,6 +30,7 @@
 #define SEQUENCE_GETITEM(sq, i)     \
     ((sq)->ob_type->tp_as_sequence->sq_getitem(((AiObject *)(sq)), i))
 
+AiAPI_FUNC(long) object_unhashable(AiObject *p);
 AiAPI_FUNC(long) pointer_hash(void *p);
 AiAPI_FUNC(long) object_hash(AiObject *ob);
 AiAPI_FUNC(int) object_rich_compare(AiObject *lhs, AiObject *rhs, int op);

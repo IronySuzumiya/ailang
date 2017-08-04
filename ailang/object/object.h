@@ -194,8 +194,8 @@ AiTypeObject;
 typedef struct _heaptypeobject {
     AiTypeObject ht_type;
     AiNumberMethods as_number;
-    AiSequenceMethods as_sequence;
     AiMappingMethods as_mapping;
+    AiSequenceMethods as_sequence;
     AiObject *ht_name;
     AiObject *ht_slots;
 }
@@ -227,7 +227,7 @@ AiAPI_DATA(AiObject) notimplemented;
 #define HEAP_TYPE           (1L<<9)
 
 #define CHECK_FAST_SUBCLASS(ob, base) ((ob)->ob_type->tp_flags & (base))
-#define CHECK_TYPE_TYPE(a) CHECK_TYPE(a, &type_typeobject)
+#define CHECK_TYPE_TYPE(a) CHECK_FAST_SUBCLASS(a, SUBCLASS_TYPE)
 
 AiAPI_DATA(AiTypeObject) type_typeobject;
 AiAPI_FUNC(int) AiType_Ready(AiTypeObject *type);

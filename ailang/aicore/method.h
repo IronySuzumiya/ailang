@@ -1,6 +1,6 @@
 #pragma once
-#ifndef METHOD_OBJECT_H
-#define METHOD_OBJECT_H
+#ifndef METHOD_H
+#define METHOD_H
 
 #include "../aiconfig.h"
 

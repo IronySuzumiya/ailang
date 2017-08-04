@@ -49,9 +49,15 @@ AiMethodDescrObject;
 
 typedef struct _memberdescrobject {
     AiDescr_HEAD
-    AiGetSetDef *d_getset;
+    AiMemberDef *d_member;
 }
 AiMemberDescrObject;
+
+typedef struct _getsetdescrobject {
+    AiDescr_HEAD
+    AiGetSetDef *d_getset;
+}
+AiGetSetDescrObject;
 
 typedef struct _wrapperdescrobject {
     AiDescr_HEAD
