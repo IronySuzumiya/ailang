@@ -2,7 +2,7 @@
 #ifndef CODE_OBJECT_H
 #define CODE_OBJECT_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
 typedef struct _codeobject {
     OBJECT_HEAD
@@ -36,6 +36,7 @@ AiCodeObject;
 #define CO_MAXBLOCKS    20
 
 #define CHECK_TYPE_CODE(ob) CHECK_TYPE(ob, &type_codeobject)
+#define CODE_GETNUMFREE(ob) (TUPLE_SIZE(((AiCodeObject *)(ob))->co_freevars))
 
 AiAPI_DATA(struct _typeobject) type_codeobject;
 AiAPI_FUNC(AiObject *) code_new(int argcount, int nlocals, int stacksize, int flags,

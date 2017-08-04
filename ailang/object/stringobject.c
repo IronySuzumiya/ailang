@@ -7,38 +7,56 @@ static AiObject *_string_from_cstring_with_size(char *sval, ssize_t size);
 static void string_dealloc(AiStringObject *a);
 static void string_print(AiStringObject *a, FILE *stream);
 static int string_compare(AiStringObject *lhs, AiStringObject *rhs);
-static AiObject *string_tostring(AiStringObject *a);
-static void string_free(void *p);
+static AiObject *string_str(AiStringObject *a);
 static ssize_t string_length(AiStringObject *a);
 
-static numbermethods string_as_number = {
+AiTypeObject type_basestringobject = {
+    INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    "basestring",                   /* tp_name */
+    0,                              /* tp_basesize */
+    0,                              /* tp_itemsize */
+    0,                              /* tp_dealloc */
+    0,                              /* tp_print */
+    0,                              /* tp_compare */
+
+    0,                              /* tp_as_number */
+    0,                              /* tp_as_sequence */
+    0,                              /* tp_as_mapping */
+
+    0,                              /* tp_hash */
+    0,                              /* tp_call */
+    0,                              /* tp_str */
+
+    0,                              /* tp_getattr */
+    0,                              /* tp_setattr */
+    0,                              /* tp_getattro */
+    0,                              /* tp_setattro */
+
+    BASE_TYPE,                      /* tp_flags */
+
+    0,                              /* tp_iter */
+    0,                              /* tp_iternext */
+
+    0,                              /* tp_methods */
+    0,                              /* tp_members */
+    0,                              /* tp_getset */
+    //&AiBaseObject,                  /* tp_base */
+    0,                              /* tp_dict */
+    0,                              /* tp_descr_get */
+    0,                              /* tp_descr_set*/
+    0,                              /* tp_dictoffset */
+    0,                              /* tp_init */
+    0,                              /* tp_alloc */
+    //basestring_new,                 /* tp_new */
+};
+
+static AiNumberMethods string_as_number = {
     (binaryfunc)string_concat,
-    0,
-    0,
-    0,
-    0,
-    0,
-
-    0,
-    0,
-    0,
-
-    0,
-
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-
-    0,
-    0,
     0,
 };
 
 // string object is immutable
-static sequencemethods string_as_sequence = {
+static AiSequenceMethods string_as_sequence = {
     (lengthfunc)string_length,
     (binaryfunc)string_concat,
     (ssizeargfunc)string_getitem,
@@ -50,6 +68,8 @@ static sequencemethods string_as_sequence = {
 AiTypeObject type_stringobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
     "string",                                   /* tp_name */
+    STRING_OBJECT_SIZE,                         /* tp_basicsize */
+    sizeof(char),                               /* tp_itemsize */
     (destructor)string_dealloc,                 /* tp_dealloc */
     (printfunc)string_print,                    /* tp_print */
     (cmpfunc)string_compare,                    /* tp_compare */
@@ -59,8 +79,31 @@ AiTypeObject type_stringobject = {
     0,                                          /* tp_as_mapping */
 
     (hashfunc)string_hash,                      /* tp_hash */
-    (unaryfunc)string_tostring,                /* tp_tostring */
-    (freefunc)string_free,                      /* tp_free */
+    0,                                          /* tp_call */
+    (unaryfunc)string_str,                      /* tp_str */
+
+    0,                                          /* tp_getattr */
+    0,                                          /* tp_setattr */
+    0,                                          /* tp_getattro */
+    0,                                          /* tp_setattro */
+
+    SUBCLASS_STRING | BASE_TYPE,                /* tp_flags */
+
+    0,                                          /* tp_iter */
+    0,                                          /* tp_iternext */
+
+    0,//string_methods,                             /* tp_methods */
+    0,                                          /* tp_members */
+    0,                                          /* tp_getset */
+    &type_basestringobject,                     /* tp_base */
+    0,                                          /* tp_dict */
+    0,                                          /* tp_descr_get */
+    0,                                          /* tp_descr_set */
+    0,                                          /* tp_dictoffset */
+    0,                                          /* tp_init */
+    0,                                          /* tp_alloc */
+    0,//string_new,                                 /* tp_new */
+    AiObject_GC_DEL,                            /* tp_free */
 };
 
 AiStringObject *nullstring;
@@ -119,20 +162,20 @@ AiObject *string_join(AiStringObject *split, AiObject *iter) {
     }
     else {
         RUNTIME_EXCEPTION("only string expected");
-        return NONE;
+        return NULL;
     }
 
     if (CHECK_TYPE_LIST(list)) {
         if (list->ob_item && LIST_SIZE(list) > 0) {
             if (!CHECK_TYPE_STRING(list->ob_item[0])) {
                 RUNTIME_EXCEPTION("sequence item 0: only string expected");
-                return NONE;
+                return NULL;
             }
             size = STRING_LEN(list->ob_item[0]);
             for (ssize_t i = 1; i < LIST_SIZE(list); ++i) {
                 if (!CHECK_TYPE_STRING(list->ob_item[i])) {
                     RUNTIME_EXCEPTION("sequence item %d: only string expected", i);
-                    return NONE;
+                    return NULL;
                 }
                 size += intersize + STRING_LEN(list->ob_item[i]);
             }
@@ -157,7 +200,7 @@ AiObject *string_join(AiStringObject *split, AiObject *iter) {
     }
     else {
         RUNTIME_EXCEPTION("only list now, iterator would be supported in the future");
-        return NONE;
+        return NULL;
     }
 }
 
@@ -216,7 +259,9 @@ void string_dealloc(AiStringObject *a) {
 }
 
 void string_print(AiStringObject *a, FILE *stream) {
+    fputc('\'', stream);
     fputs(STRING_AS_CSTRING(a), stream);
+    fputc('\'', stream);
 }
 
 int string_compare(AiStringObject *lhs, AiStringObject *rhs) {
@@ -246,28 +291,14 @@ long string_hash(AiStringObject *a) {
     return x;
 }
 
-AiObject *string_tostring(AiStringObject *a) {
+AiObject *string_str(AiStringObject *a) {
     if (CHECK_TYPE_STRING(a)) {
-        AiStringObject *str;
-        ssize_t size = STRING_LEN(a) + 2;
-        str = (AiStringObject *)AiMEM_ALLOC(sizeof(AiStringObject) + size);
-        INIT_OBJECT_VAR(str, &type_stringobject, size);
-        str->ob_shash = -1;
-        str->ob_sstate = SSTATE_NOT_INTERNED;
-
-        STRING_AS_CSTRING(str)[0] = '\'';
-        AiMEM_COPY(&STRING_AS_CSTRING(str)[1], STRING_AS_CSTRING(a), STRING_LEN(a));
-        STRING_AS_CSTRING(str)[STRING_LEN(str) - 1] = '\'';
-        STRING_AS_CSTRING(str)[STRING_LEN(str)] = 0;
-        return (AiObject *)str;
+        INC_REFCNT(a);
+        return (AiObject *)a;
     }
     else {
         return OB_TO_STRING(a);
     }
-}
-
-void string_free(void *p) {
-    AiMEM_FREE(p);
 }
 
 ssize_t string_length(AiStringObject *a) {
@@ -291,7 +322,7 @@ AiObject *string_concat(AiStringObject *lhs, AiStringObject *rhs) {
     }
     else {
         UNSUPPORTED_CONCAT(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
-        return NONE;
+        return NULL;
     }
 }
 
@@ -302,7 +333,7 @@ AiObject *string_getitem(AiStringObject *a, ssize_t index) {
     }
     else {
         RUNTIME_EXCEPTION("index out of range");
-        return NONE;
+        return NULL;
     }
 }
 
@@ -323,7 +354,7 @@ AiObject *string_slice(AiStringObject *a, ssize_t start, ssize_t end) {
     }
     else {
         RUNTIME_EXCEPTION("invalid range sliced");
-        return NONE;
+        return NULL;
     }
 }
 

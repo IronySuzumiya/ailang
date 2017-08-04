@@ -2,7 +2,7 @@
 #ifndef CELL_OBJECT_H
 #define CELL_OBJECT_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
 typedef struct _cellobject {
     OBJECT_HEAD

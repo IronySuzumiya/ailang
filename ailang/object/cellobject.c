@@ -2,22 +2,37 @@
 
 static void cell_dealloc(AiCellObject *cell);
 static int cell_compare(AiCellObject *lhs, AiCellObject *rhs);
-static void cell_free(void *p);
 
 AiTypeObject type_cellobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
-    "cell",
-    (destructor)cell_dealloc,
-    0,
-    (cmpfunc)cell_compare,
+    "cell",                             /* tp_name */
+    sizeof(AiCellObject),               /* tp_basesize */
+    0,                                  /* tp_itemsize */
+    (destructor)cell_dealloc,           /* tp_dealloc */
+    0,                                  /* tp_print */
+    (cmpfunc)cell_compare,              /* tp_compare */
 
-    0,
-    0,
-    0,
+    0,                                  /* tp_as_number */
+    0,                                  /* tp_as_sequence */
+    0,                                  /* tp_as_mapping */
 
-    0,
-    0,
-    (freefunc)cell_free,
+    0,                                  /* tp_hash */
+    0,                                  /* tp_call */
+    0,                                  /* tp_str */
+
+    0,                                  /* tp_getattr */
+    0,                                  /* tp_setattr */
+    0,//object_generic_getattr,             /* tp_getattro */
+    0,                                  /* tp_setattro */
+
+    0,                                  /* tp_flags */
+
+    0,                                  /* tp_iter */
+    0,                                  /* tp_iternext */
+
+    0,                                  /* tp_methods */
+    0,                                  /* tp_members */
+    0,//cell_getsetlist,                    /* tp_getset */
 };
 
 AiObject *cell_new(AiObject *ob) {
@@ -53,7 +68,7 @@ int cell_set(AiCellObject *cell, AiObject *ob) {
 
 void cell_dealloc(AiCellObject *cell) {
     XDEC_REFCNT(CELL_GET(cell));
-    OB_FREE(cell);
+    AiObject_GC_DEL(cell);
 }
 
 int cell_compare(AiCellObject *lhs, AiCellObject *rhs) {
@@ -71,8 +86,4 @@ int cell_compare(AiCellObject *lhs, AiCellObject *rhs) {
     else {
         return CELL_GET(lhs)->ob_type->tp_compare((AiObject *)lhs, (AiObject *)rhs);
     }
-}
-
-void cell_free(void *p) {
-    AiMEM_FREE(p);
 }

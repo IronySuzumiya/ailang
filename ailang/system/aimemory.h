@@ -2,7 +2,7 @@
 #ifndef AI_MEMORY_H
 #define AI_MEMORY_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
 #define AiMEM_ALLOC             mem_alloc
 #define AiMEM_FREE              mem_free
@@ -10,6 +10,8 @@
 #define AiMEM_COPY              mem_copy
 #define AiMEM_SET               mem_set
 #define AiObject_GC_NEW(type)   (mem_alloc(sizeof(type)))
+#define AiObject_GC_DEL         AiMEM_FREE
+#define AiObject_GC_FREE        AiMEM_FREE
 
 typedef struct _heap_list {
     void *mem;

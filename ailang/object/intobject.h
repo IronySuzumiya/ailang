@@ -2,7 +2,7 @@
 #ifndef INT_OBJECT_H
 #define INT_OBJECT_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
 #define NUM_POS_SMALL_INTOBJECT         257
 #define NUM_NEG_SMALL_INTOBJECT         7
@@ -26,14 +26,15 @@ typedef struct _intblock {
 }
 AiIntBlock;
 
-#define CHECK_TYPE_INT(a) CHECK_TYPE(a, &type_intobject)
+#define CHECK_TYPE_INT(a) CHECK_FAST_SUBCLASS(a, SUBCLASS_INT)
+#define CHECK_EXACT_TYPE_INT(a) CHECK_TYPE(a, &type_intobject)
 
 #define INT_UNARY_WITH_CHECK(ob, op)                                \
-    (CHECK_TYPE_INT(ob) ? int_from_long(op (ob)->ob_ival) : NULL)
+    (CHECK_TYPE_INT(ob) ? int_from_clong(op (ob)->ob_ival) : NULL)
 
 #define INT_BINARY_WITH_CHECK(lhs, rhs, op)                         \
     (CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs) ?                   \
-        int_from_long((lhs)->ob_ival op (rhs)->ob_ival) : NULL)
+        int_from_clong((lhs)->ob_ival op (rhs)->ob_ival) : NULL)
 
 #define INT_TO_CSTRING_BUFFER_SIZE 33
 
@@ -43,7 +44,7 @@ AiAPI_DATA(AiIntBlock *) block_list;
 AiAPI_DATA(AiIntObject *) free_list;
 AiAPI_DATA(AiTypeObject) type_intobject;
 AiAPI_DATA(AiIntObject *) small_intobject_buf[SMALL_INTOBJECT_BUF_SIZE];
-AiAPI_FUNC(AiObject *) int_from_long(long ival);
+AiAPI_FUNC(AiObject *) int_from_clong(long ival);
 AiAPI_FUNC(int) int_init(void);
 
 AiAPI_DATA(int) int_clear_blocks(void);

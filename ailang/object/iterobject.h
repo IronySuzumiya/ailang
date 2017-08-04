@@ -2,7 +2,7 @@
 #ifndef ITER_OBJECT_H
 #define ITER_OBJECT_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
 typedef struct _iterobject {
     OBJECT_HEAD

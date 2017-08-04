@@ -8,6 +8,15 @@ long pointer_hash(void *p) {
     return x == -1 ? -2 : x;
 }
 
+long object_hash(AiObject *ob) {
+    if (ob->ob_type->tp_hash) {
+        return ob->ob_type->tp_hash(ob);
+    }
+    else {
+        return -1;
+    }
+}
+
 int object_rich_compare(AiObject *lhs, AiObject *rhs, int op) {
     if (OB_TYPE(lhs) == OB_TYPE(rhs)) {
         switch (op) {
@@ -45,7 +54,7 @@ int object_rich_compare(AiObject *lhs, AiObject *rhs, int op) {
 
 AiObject *object_rich_compare_bool(AiObject *lhs, AiObject *rhs, int op) {
     int r = object_rich_compare(lhs, rhs, op);
-    return r > 0 ? AiTRUE : r == 0 ? AiFALSE : NULL;
+    return r > 0 ? GET_TRUE() : r == 0 ? GET_FALSE() : NULL;
 }
 
 AiObject *object_getiter(AiObject *sq) {

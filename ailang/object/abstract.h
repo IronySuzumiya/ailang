@@ -2,7 +2,7 @@
 #ifndef ABSTRACT_H
 #define ABSTRACT_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
 #define CMP_EQ          0
 #define CMP_NE          1
@@ -31,6 +31,7 @@
     ((sq)->ob_type->tp_as_sequence->sq_getitem(((AiObject *)(sq)), i))
 
 AiAPI_FUNC(long) pointer_hash(void *p);
+AiAPI_FUNC(long) object_hash(AiObject *ob);
 AiAPI_FUNC(int) object_rich_compare(AiObject *lhs, AiObject *rhs, int op);
 AiAPI_FUNC(AiObject *) object_rich_compare_bool(AiObject *lhs, AiObject *rhs, int op);
 AiAPI_FUNC(AiObject *) object_getiter(AiObject *sq);

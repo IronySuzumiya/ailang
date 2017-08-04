@@ -4,7 +4,7 @@ static AiObject *bool_and(AiBoolObject *lhs, AiBoolObject *rhs);
 static AiObject *bool_or(AiBoolObject *lhs, AiBoolObject *rhs);
 static AiObject *bool_not(AiBoolObject *ob);
 static void bool_print(AiBoolObject *ob, FILE *stream);
-static AiObject *bool_tostring(AiBoolObject *ob);
+static AiObject *bool_str(AiBoolObject *ob);
 
 static AiBoolObject _aitrue = {
     INIT_OBJECT_HEAD(&type_boolobject)
@@ -16,7 +16,7 @@ static AiBoolObject _aifalse = {
     0
 };
 
-static numbermethods bool_as_number = {
+static AiNumberMethods bool_as_number = {
     0,
     0,
     0,
@@ -44,22 +44,51 @@ static numbermethods bool_as_number = {
 
 AiTypeObject type_boolobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
-    "bool",
-    0,                              /* tp_dealloc */
-    (printfunc)bool_print,          /* tp_print */
-    0,                              /* tp_compare */
+    "bool",                             /* tp_name */
+    sizeof(AiBoolObject),               /* tp_basesize */
+    0,                                  /* tp_itemsize */
+    0,                                  /* tp_dealloc */
+    (printfunc)bool_print,              /* tp_print */
+    0,                                  /* tp_compare */
 
-    &bool_as_number,                /* tp_as_number */
-    0,                              /* tp_as_sequence */
-    0,                              /* tp_as_mapping */
+    &bool_as_number,                    /* tp_as_number */
+    0,                                  /* tp_as_sequence */
+    0,                                  /* tp_as_mapping */
 
-    0,                              /* tp_hash */
-    (unaryfunc)bool_tostring,      /* tp_tostring */
-    0,                              /* tp_free */
+    0,                                  /* tp_hash */
+    0,                                  /* tp_call */
+    (unaryfunc)bool_str,                /* tp_str */
+
+    0,                                  /* tp_getattr */
+    0,                                  /* tp_setattr */
+    0,                                  /* tp_getattro */
+    0,                                  /* tp_setattro */
+
+    SUBCLASS_INT | BASE_TYPE,           /* tp_flags */
+
+    0,                                  /* tp_iter */
+    0,                                  /* tp_iternext */
+
+    0,                                  /* tp_methods */
+    0,                                  /* tp_members */
+    0,                                  /* tp_getset */
+    &type_intobject,                    /* tp_base */
+    0,                                  /* tp_dict */
+    0,                                  /* tp_descr_get */
+    0,                                  /* tp_descr_set */
+    0,                                  /* tp_dictoffset */
+    0,                                  /* tp_init */
+    0,                                  /* tp_alloc */
+    0,//bool_new,                           /* tp_new */
+    0,                                  /* tp_free */
 };
 
 AiBoolObject *aitrue = &_aitrue;
 AiBoolObject *aifalse = &_aifalse;
+
+AiObject *bool_from_clong(long ival) {
+    return ival ? GET_TRUE() : GET_FALSE();
+}
 
 AiObject *bool_and(AiBoolObject *lhs, AiBoolObject *rhs) {
     if (!CHECK_TYPE_BOOL(lhs) || !CHECK_TYPE_BOOL(rhs)) {
@@ -97,7 +126,7 @@ void bool_print(AiBoolObject *ob, FILE *stream) {
     }
 }
 
-AiObject *bool_tostring(AiBoolObject *ob) {
+AiObject *bool_str(AiBoolObject *ob) {
     if (ob == aitrue) {
         return string_from_cstring("True");
     }

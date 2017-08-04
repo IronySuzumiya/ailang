@@ -2,7 +2,7 @@
 #ifndef TUPLE_OBJECT_H
 #define TUPLE_OBJECT_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
 typedef struct _tupleobject {
     OBJECT_VAR_HEAD

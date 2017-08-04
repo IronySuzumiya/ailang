@@ -1,162 +1,160 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="源文件">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="object">
+      <UniqueIdentifier>{3c28b143-7e2a-4c72-bb09-a105e55f54e3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    <Filter Include="include">
+      <UniqueIdentifier>{8a2eff41-a881-4cb5-8682-a8e9e3849afb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="资源文件">
+    <Filter Include="system">
+      <UniqueIdentifier>{3b6da318-2aa7-49e9-a29b-013b4fb54869}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{4e6de576-7583-4fb4-9487-a63e9a9272ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="测试">
-      <UniqueIdentifier>{4e6de576-7583-4fb4-9487-a63e9a9272ff}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="object\intobject.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="object\object.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="object\typeobject.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="object\stringobject.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="object\dictobject.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="object\listobject.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="system\aimemory.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="test\test.c">
-      <Filter>测试</Filter>
-    </ClCompile>
-    <ClCompile Include="object\codeobject.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="object\boolobject.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="object\tupleobject.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="object\frameobject.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="system\aieval.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="system\aistate.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="object\iterobject.c">
-      <Filter>源文件</Filter>
+      <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="object\abstract.c">
-      <Filter>源文件</Filter>
+      <Filter>object</Filter>
     </ClCompile>
-    <ClCompile Include="system\aimarshal.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="object\exceptionobject.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="object\tracebackobject.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="object\functionobject.c">
-      <Filter>源文件</Filter>
+    <ClCompile Include="object\boolobject.c">
+      <Filter>object</Filter>
     </ClCompile>
     <ClCompile Include="object\cellobject.c">
-      <Filter>源文件</Filter>
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\codeobject.c">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\dictobject.c">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\exceptionobject.c">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\frameobject.c">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\functionobject.c">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\intobject.c">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\iterobject.c">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\listobject.c">
+      <Filter>object</Filter>
     </ClCompile>
     <ClCompile Include="object\moduleobject.c">
-      <Filter>源文件</Filter>
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\object.c">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\stringobject.c">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\tracebackobject.c">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\tupleobject.c">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\typeobject.c">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="system\aieval.c">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="system\aimemory.c">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="system\aistate.c">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="system\aimarshal.c">
+      <Filter>system</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="system\utils.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="object\abstract.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="object\intobject.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="object\object.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="object\typeobject.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ailang.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="object\stringobject.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="object\dictobject.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="object\listobject.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="system\aimemory.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="object\codeobject.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="object\boolobject.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="object\tupleobject.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="object\frameobject.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="aiconfig.h">
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="system\aieval.h">
-      <Filter>头文件</Filter>
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="system\aistate.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="ailang.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="system\aimemory.h">
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="system\aiopcode.h">
-      <Filter>头文件</Filter>
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="object\iterobject.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="system\aistate.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="object\abstract.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="system\aimarshal.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="object\exceptionobject.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="object\tracebackobject.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="object\functionobject.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="object\boolobject.h">
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="object\cellobject.h">
-      <Filter>头文件</Filter>
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\codeobject.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\dictobject.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\exceptionobject.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\frameobject.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\functionobject.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\intobject.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\iterobject.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\listobject.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="system\aimarshal.h">
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="object\moduleobject.h">
-      <Filter>头文件</Filter>
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\object.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\stringobject.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\tracebackobject.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\tupleobject.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -2,9 +2,9 @@
 #ifndef DICT_OBJECT_H
 #define DICT_OBJECT_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
-#define DICT_SMALL_TABLE_SIZE 8
+#define DICT_SMALLTABLE_SIZE 8
 
 typedef struct _dictentry {
     long me_hash;
@@ -22,14 +22,14 @@ typedef struct _dictobject {
     ssize_t ma_mask;
     AiDictEntry *ma_table;
     lookupfunc ma_lookup;
-    AiDictEntry ma_smalltable[DICT_SMALL_TABLE_SIZE];
+    AiDictEntry ma_smalltable[DICT_SMALLTABLE_SIZE];
 }
 AiDictObject;
 
 #define INIT_NONZERO_DICT_SLOTS(mp)                 \
     WRAP(                                           \
         (mp)->ma_table = (mp)->ma_smalltable;       \
-        (mp)->ma_mask = DICT_SMALL_TABLE_SIZE - 1;  \
+        (mp)->ma_mask = DICT_SMALLTABLE_SIZE - 1;   \
     )
 
 #define EMPTY_TO_MINSIZE(mp)                                            \
@@ -43,7 +43,8 @@ AiDictObject;
 
 #define PERTURB_SHIFT 5
 
-#define CHECK_TYPE_DICT(ob) CHECK_TYPE(ob, &type_dictobject)
+#define CHECK_EXACT_TYPE_DICT(ob) CHECK_TYPE(ob, &type_dictobject)
+#define CHECK_TYPE_DICT(ob) CHECK_FAST_SUBCLASS(ob, SUBCLASS_DICT)
 
 #define DICT_SIZE(ob) (((AiDictObject *)(ob))->ma_used)
 
@@ -55,7 +56,7 @@ AiAPI_FUNC(AiObject *) dict_getitem(AiDictObject *mp, AiObject *key);
 AiAPI_FUNC(int) dict_setitem(AiDictObject *mp, AiObject *key, AiObject *value);
 AiAPI_FUNC(int) dict_insert(AiDictObject *mp, AiObject *key, long hash, AiObject *value);
 AiAPI_FUNC(int) dict_delitem(AiDictObject *mp, AiObject *key);
-AiAPI_FUNC(AiObject *) dict_tostring(AiDictObject *mp);
+AiAPI_FUNC(AiObject *) dict_str(AiDictObject *mp);
 
 AiAPI_FUNC(int) dict_clear_free_dicts_and_dummy(void);
 

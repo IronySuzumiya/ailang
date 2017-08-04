@@ -2,7 +2,7 @@
 #ifndef AI_STATE_H
 #define AI_STATE_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
 typedef struct _is {
     struct _is *next;

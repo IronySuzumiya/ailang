@@ -155,7 +155,7 @@ AiObject *threadstate_current_frame() {
             AiObject *id;
             AiObject *frame = (AiObject *)t->frame;
             if (frame) {
-                id = int_from_long(t->thread_id);
+                id = int_from_clong(t->thread_id);
                 dict_setitem((AiDictObject *)result, id, frame);
                 DEC_REFCNT(id);
             }

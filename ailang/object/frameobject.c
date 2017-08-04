@@ -1,11 +1,40 @@
 #include "../ailang.h"
 
+static void frame_dealloc(AiFrameObject *f);
+
 // TODO
 static AiObject *builtin_object;
 
 AiTypeObject type_frameobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
-    "frame",
+    "frame",                            /* tp_name */
+    sizeof(AiFrameObject),              /* tp_basicsize */
+    sizeof(AiObject *),                 /* tp_itemsize */
+    (destructor)frame_dealloc,          /* tp_dealloc */
+    0,                                  /* tp_print */
+    0,                                  /* tp_compare */
+
+    0,                                  /* tp_as_number */
+    0,                                  /* tp_as_sequence */
+    0,                                  /* tp_as_mapping */
+
+    0,                                  /* tp_hash */
+    0,                                  /* tp_call */
+    0,                                  /* tp_str */
+
+    0,                                  /* tp_getattr */
+    0,                                  /* tp_setattr */
+    0,//object_generic_getattr,             /* tp_getattro */
+    0,//object_generic_setattr,             /* tp_setattro */
+
+    0,                                  /* tp_flags */
+
+    0,                                  /* tp_iter */
+    0,                                  /* tp_iternext */
+
+    0,//frame_methods,                      /* tp_methods */
+    0,//frame_memberlist,                   /* tp_members */
+    0,//frame_getsetlist,                   /* tp_getset */
 };
 
 AiFrameObject *frame_new(AiThreadState *tstate, AiCodeObject *code,
@@ -89,4 +118,27 @@ AiTryBlock *frame_pop_block(AiFrameObject *f) {
 
 AiTryBlock *frame_peek_block(AiFrameObject *f) {
     return &f->f_blockstack[f->f_iblock];
+}
+
+void frame_dealloc(AiFrameObject *f) {
+    AiObject **p, **valuestack;
+    AiCodeObject *co;
+
+    valuestack = f->f_valuestack;
+    for (p = f->f_localsplus; p < valuestack; ++p) {
+        OB_CLEAR(*p);
+    }
+    if (f->f_stacktop) {
+        for (p = valuestack; p < f->f_stacktop; ++p) {
+            XDEC_REFCNT(*p);
+        }
+    }
+
+    XDEC_REFCNT(f->f_back);
+    DEC_REFCNT(f->f_builtins);
+    DEC_REFCNT(f->f_globals);
+    OB_CLEAR(f->f_locals);
+    DEC_REFCNT(f->f_code);
+
+    AiObject_GC_DEL(f);
 }

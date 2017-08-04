@@ -257,7 +257,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             break;
 
         case CONTINUE_LOOP:
-            retval = int_from_long(oparg);
+            retval = int_from_clong(oparg);
             why = WHY_CONTINUE;
             break;
 
@@ -399,7 +399,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case BINARY_ADD:
         {
-            numbermethods *nb;
+            AiNumberMethods *nb;
             w = POP();
             v = POP();
             nb = v->ob_type->tp_as_number;
@@ -418,7 +418,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case BINARY_SUBTRACT:
         {
-            numbermethods *nb;
+            AiNumberMethods *nb;
             w = POP();
             v = POP();
             nb = v->ob_type->tp_as_number;
@@ -437,7 +437,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case BINARY_MULTIPLY:
         {
-            numbermethods *nb;
+            AiNumberMethods *nb;
             w = POP();
             v = POP();
             nb = v->ob_type->tp_as_number;
@@ -456,7 +456,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case BINARY_DIVIDE:
         {
-            numbermethods *nb;
+            AiNumberMethods *nb;
             w = POP();
             v = POP();
             nb = v->ob_type->tp_as_number;
@@ -475,7 +475,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case BINARY_POWER:
         {
-            numbermethods *nb;
+            AiNumberMethods *nb;
             w = POP();
             v = POP();
             nb = v->ob_type->tp_as_number;
@@ -494,7 +494,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case BINARY_MODULO:
         {
-            numbermethods *nb;
+            AiNumberMethods *nb;
             w = POP();
             v = POP();
             nb = v->ob_type->tp_as_number;
@@ -513,7 +513,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case UNARY_POSITIVE:
         {
-            numbermethods *nb;
+            AiNumberMethods *nb;
             v = POP();
             nb = v->ob_type->tp_as_number;
             if (nb && nb->nb_positive) {
@@ -530,7 +530,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case UNARY_NEGATIVE:
         {
-            numbermethods *nb;
+            AiNumberMethods *nb;
             v = POP();
             nb = v->ob_type->tp_as_number;
             if (nb && nb->nb_negative) {
@@ -547,7 +547,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case BINARY_LSHIFT:
         {
-            numbermethods *nb;
+            AiNumberMethods *nb;
             w = POP();
             v = POP();
             nb = v->ob_type->tp_as_number;
@@ -566,7 +566,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case BINARY_RSHIFT:
         {
-            numbermethods *nb;
+            AiNumberMethods *nb;
             w = POP();
             v = POP();
             nb = v->ob_type->tp_as_number;
@@ -585,7 +585,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case BINARY_AND:
         {
-            numbermethods *nb;
+            AiNumberMethods *nb;
             w = POP();
             v = POP();
             nb = v->ob_type->tp_as_number;
@@ -604,7 +604,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case BINARY_OR:
         {
-            numbermethods *nb;
+            AiNumberMethods *nb;
             w = POP();
             v = POP();
             nb = v->ob_type->tp_as_number;
@@ -623,7 +623,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case UNARY_NOT:
         {
-            numbermethods *nb;
+            AiNumberMethods *nb;
             v = POP();
             nb = v->ob_type->tp_as_number;
             if (nb && nb->nb_not) {
@@ -640,7 +640,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case BINARY_XOR:
         {
-            numbermethods *nb;
+            AiNumberMethods *nb;
             w = POP();
             v = POP();
             nb = v->ob_type->tp_as_number;
@@ -711,7 +711,7 @@ AiObject *eval_frame(AiFrameObject *f) {
                     if (why & (WHY_RETURN | WHY_CONTINUE)) {
                         PUSH(retval);
                     }
-                    v = int_from_long((long)why);
+                    v = int_from_clong((long)why);
                     PUSH(v);
                 }
                 why = WHY_NOT;

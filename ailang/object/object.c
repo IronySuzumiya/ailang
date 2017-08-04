@@ -4,16 +4,18 @@ static void none_print(AiNoneObject *ob, FILE *stream);
 
 AiTypeObject type_noneobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
-    "none",                         /* tp_name */
+    "nonetype",                     /* tp_name */
+    0,                              /* tp_basicsize */
+    0,                              /* tp_itemsize */
     0,                              /* tp_dealloc */
     (printfunc)none_print,          /* tp_print */
     0,                              /* tp_compare */
+
     0,                              /* tp_as_number */
     0,                              /* tp_as_sequence */
     0,                              /* tp_as_mapping */
+
     (hashfunc)pointer_hash,         /* tp_hash */
-    0,                              /* tp_tostring */
-    0,                              /* tp_free */
 };
 
 AiNoneObject _none = {

@@ -4,12 +4,11 @@ static void list_dealloc(AiListObject *list);
 static void list_print(AiListObject *list, FILE *stream);
 static int list_compare(AiListObject *lhs, AiListObject *rhs);
 static ssize_t list_size(AiListObject *list);
-static void list_free(void *p);
 
 static AiListObject *free_lists[NUMBER_FREE_LISTS_MAX];
 static int number_free_lists;
 
-static sequencemethods list_as_sequence = {
+static AiSequenceMethods list_as_sequence = {
     (lengthfunc)list_size,
     (binaryfunc)list_extend,
     (ssizeargfunc)list_getitem,
@@ -20,18 +19,43 @@ static sequencemethods list_as_sequence = {
 
 AiTypeObject type_listobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
-    "list",
-    (destructor)list_dealloc,
-    (printfunc)list_print,
-    (cmpfunc)list_compare,
+    "list",                             /* tp_name */
+    sizeof(AiListObject),               /* tp_basesize */
+    0,                                  /* tp_itemsize */
+    (destructor)list_dealloc,           /* tp_dealloc */
+    (printfunc)list_print,              /* tp_print */
+    (cmpfunc)list_compare,              /* tp_compare */
 
-    0,
-    &list_as_sequence,
-    0,
+    0,                                  /* tp_as_number */
+    &list_as_sequence,                  /* tp_as_sequence */
+    0,                                  /* tp_as_mapping */
 
-    (hashfunc)pointer_hash,
-    (unaryfunc)list_tostring,
-    (freefunc)list_free,
+    0,//(hashfunc)object_unhashable,        /* tp_hash */
+    0,                                  /* tp_call */
+    (unaryfunc)list_str,                /* tp_str */
+
+    0,                                  /* tp_getattr */
+    0,                                  /* tp_setattr */
+    0,//object_generic_getattr,             /* tp_getattro */
+    0,                                  /* tp_setattro */
+
+    SUBCLASS_LIST | BASE_TYPE,          /* tp_flags */
+
+    0,//list_iter,                          /* tp_iter */
+    0,                                  /* tp_iternext */
+
+    0,//list_methods,                       /* tp_methods */
+    0,                                  /* tp_members */
+    0,                                  /* tp_getset */
+    0,                                  /* tp_base */
+    0,                                  /* tp_dict */
+    0,                                  /* tp_descr_get */
+    0,                                  /* tp_descr_set */
+    0,                                  /* tp_dictoffset */
+    0,//(initproc)list_init,                /* tp_init */
+    0,//type_generic_alloc,                 /* tp_alloc */
+    0,//type_generic_new                    /* tp_new */
+    AiObject_GC_DEL,                    /* tp_free */
 };
 
 AiObject * list_new(ssize_t size) {
@@ -131,7 +155,7 @@ int list_contains(AiListObject *list, AiObject *item) {
     return 0;
 }
 
-AiObject *list_tostring(AiListObject *list) {
+AiObject *list_str(AiListObject *list) {
     AiListObject *strlist;
     AiStringObject *str;
     AiStringObject *item;
@@ -273,8 +297,4 @@ int list_compare(AiListObject *lhs, AiListObject *rhs) {
         }
     }
     return LIST_SIZE(lhs) > LIST_SIZE(rhs) ? 1 : LIST_SIZE(lhs) < LIST_SIZE(rhs) ? -1 : 0;
-}
-
-void list_free(void *p) {
-    AiMEM_FREE(p);
 }

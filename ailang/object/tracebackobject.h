@@ -2,7 +2,7 @@
 #ifndef TRACEBACK_OBJECT_H
 #define TRACEBACK_OBJECT_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
 typedef struct _tracebackobject {
     OBJECT_HEAD

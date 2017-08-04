@@ -122,7 +122,7 @@ void w_object(AiObject *v, AicFile *p) {
                 w_long(w, p);
             }
             else {
-                o = int_from_long((long)DICT_SIZE(p->strings));
+                o = int_from_clong((long)DICT_SIZE(p->strings));
                 dict_setitem((AiDictObject *)p->strings, v, o);
                 XDEC_REFCNT(o);
                 w_byte(TYPE_INTERNED, p);
@@ -193,7 +193,7 @@ void write_object_to_file(AiObject *x, FILE *fp) {
     DEC_REFCNT(af.strings);
 }
 
-AiObject *write_object_tostring(AiObject *x) {
+AiObject *write_object_to_string(AiObject *x) {
     AicFile af;
     af.fp = NULL;
     af.str = string_from_cstring_with_size(NULL, 50);
@@ -274,7 +274,7 @@ AiObject *r_object(AicFile *p) {
         retval = GET_TRUE();
         break;
     case TYPE_INT:
-        retval = int_from_long(r_long(p));
+        retval = int_from_clong(r_long(p));
         break;
     case TYPE_INTERNED:
     case TYPE_STRING:

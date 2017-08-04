@@ -2,7 +2,7 @@
 #ifndef FRAME_OBJECT_H
 #define FRAME_OBJECT_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
 typedef struct _tryblock {
     int b_type;

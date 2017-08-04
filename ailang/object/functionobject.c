@@ -1,22 +1,46 @@
 #include "../ailang.h"
 
 static void function_dealloc(AiFunctionObject *func);
-static void function_free(void *p);
 
 AiTypeObject type_functionobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
-    "function",
-    (destructor)function_dealloc,
-    0,
-    0,
+    "function",                         /* tp_name */
+    sizeof(AiFunctionObject),           /* tp_basicsize */
+    0,                                  /* tp_itemsize */
+    (destructor)function_dealloc,       /* tp_dealloc */
+    0,                                  /* tp_print */
+    0,                                  /* tp_compare */
 
-    0,
-    0,
-    0,
+    0,                                  /* tp_as_number */
+    0,                                  /* tp_as_sequence */
+    0,                                  /* tp_as_mapping */
 
-    0,
-    0,
-    (freefunc)function_free,
+    0,                                  /* tp_hash */
+    0,//function_call,                      /* tp_call */
+    0,                                  /* tp_str */
+
+    0,                                  /* tp_getattr */
+    0,                                  /* tp_setattr */
+    0,//object_generic_getattr,             /* tp_getattro */
+    0,//object_generic_setattr,             /* tp_setattro */
+
+    0,                                  /* tp_flags */
+
+    0,                                  /* tp_iter */
+    0,                                  /* tp_iternext */
+
+    0,                                  /* tp_methods */
+    0,//function_memberlist,                /* tp_members */
+    0,//function_getsetlist,                /* tp_getset */
+    0,                                  /* tp_base */
+    0,                                  /* tp_dict */
+    0,//function_descr_get,                 /* tp_descr_get */
+    0,                                  /* tp_descr_set */
+    offsetof(
+        AiFunctionObject, func_dict),   /* tp_dictoffset */
+    0,                                  /* tp_init */
+    0,                                  /* tp_alloc */
+    0,//function_new,                       /* tp_new */
 };
 
 AiObject *function_new(AiObject *code, AiObject *globals) {
@@ -104,9 +128,5 @@ void function_dealloc(AiFunctionObject *func) {
     XDEC_REFCNT(func->func_doc);
     XDEC_REFCNT(func->func_dict);
     XDEC_REFCNT(func->func_closure);
-    OB_FREE(func);
-}
-
-void function_free(void *p) {
-    AiMEM_FREE(p);
+    AiObject_GC_DEL(func);
 }

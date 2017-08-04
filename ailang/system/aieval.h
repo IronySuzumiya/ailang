@@ -2,7 +2,7 @@
 #ifndef AI_EVAL_H
 #define AI_EVAL_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
 AiAPI_FUNC(AiObject *) eval_frame(AiFrameObject *f);
 AiAPI_FUNC(AiObject *) eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,

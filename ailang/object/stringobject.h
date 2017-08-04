@@ -2,7 +2,7 @@
 #ifndef STRING_OBJECT_H
 #define STRING_OBJECT_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
 typedef struct _stringobject {
     OBJECT_VAR_HEAD
@@ -18,7 +18,8 @@ enum stringobject_sstate {
     SSTATE_INTERNED_IMMORTAL
 };
 
-#define CHECK_TYPE_STRING(a) CHECK_TYPE(a, &type_stringobject)
+#define CHECK_TYPE_STRING(a) CHECK_FAST_SUBCLASS(a, SUBCLASS_STRING)
+#define CHECK_EXACT_TYPE_STRING(a) CHECK_TYPE(a, &type_stringobject)
 
 #define CHECK_STRING_INTERNED(s) (((AiStringObject *)s)->ob_sstate)
 
@@ -32,6 +33,9 @@ enum stringobject_sstate {
     CHECK_TYPE_STRING(lhs) && CHECK_TYPE_STRING(rhs)                \
         && !strcmp(STRING_AS_CSTRING(lhs), STRING_AS_CSTRING(rhs))
 
+#define STRING_OBJECT_SIZE (offsetof(AiStringObject, ob_sval) + 1)
+
+AiAPI_DATA(AiTypeObject) type_basestringobject;
 AiAPI_DATA(AiTypeObject) type_stringobject;
 AiAPI_DATA(AiStringObject *) nullstring;
 AiAPI_FUNC(AiObject *) string_from_cstring(char *sval);

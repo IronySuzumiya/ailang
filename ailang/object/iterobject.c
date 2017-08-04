@@ -5,21 +5,31 @@ static AiObject *iter_iter(AiIterObject *iter);
 
 AiTypeObject type_iterobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
-    "iterator",
-    (destructor)iter_dealloc,
-    0,
-    0,
+    "iterator",                         /* tp_name */
+    sizeof(AiIterObject),               /* tp_basicsize */
+    0,                                  /* tp_itemsize */
+    (destructor)iter_dealloc,           /* tp_dealloc */
+    0,                                  /* tp_print */
+    0,                                  /* tp_compare */
 
-    0,
-    0,
-    0,
+    0,                                  /* tp_as_number */
+    0,                                  /* tp_as_sequence */
+    0,                                  /* tp_as_mapping */
 
-    0,
-    0,
-    0,
+    0,                                  /* tp_hash */
+    0,                                  /* tp_call */
+    0,                                  /* tp_str */
 
-    (unaryfunc)iter_iter,
-    (unaryfunc)iter_iternext,
+    0,                                  /* tp_getattr */
+    0,                                  /* tp_setattr */
+    0,//object_generic_getattr,             /* tp_getattro */
+    0,                                  /* tp_setattro */
+
+    0,                                  /* tp_flags */
+
+    (unaryfunc)iter_iter,               /* tp_iter */
+    (unaryfunc)iter_iternext,           /* tp_iternext */
+    0,//iter_methods,                       /* tp_methods */
 };
 
 AiObject *iter_new(AiObject *seq) {

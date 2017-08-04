@@ -2,7 +2,7 @@
 #ifndef MODULE_OBJECT_H
 #define MODULE_OBJECT_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
 typedef struct _moduleobject {
     OBJECT_HEAD

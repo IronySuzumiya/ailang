@@ -8,6 +8,12 @@ static AiObject _type_error = {
     INIT_OBJECT_HEAD(&type_exceptionobject)
 };
 
+AiTypeObject type_baseexceptionobject = {
+    INIT_OBJECT_VAR_HEAD(NULL, 0)
+    EXC_MODULE_NAME "BaseException",    /* tp_name */
+    
+};
+
 AiTypeObject type_exceptionobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
     "exception",

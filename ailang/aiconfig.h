@@ -1,9 +1,14 @@
 #pragma once
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef AI_CONFIG_H
+#define AI_CONFIG_H
 
-#include <stdio.h>
-#include <stdarg.h>
+#ifdef _DEBUG
+#define AI_DEBUG
+#endif
+
+#define AI_MAGIC (0x23 | (0x33 << 8))
+
+typedef __int64 ssize_t;
 
 #define AiAPI_FUNC(RTYPE) RTYPE
 #define AiAPI_DATA(RTYPE) extern RTYPE

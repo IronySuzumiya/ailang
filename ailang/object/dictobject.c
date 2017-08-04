@@ -4,24 +4,24 @@ static ssize_t dict_size(AiDictObject *mp);
 static int dict_resize(AiDictObject *mp, ssize_t minused);
 static void dict_dealloc(AiDictObject *mp);
 static void dict_print(AiDictObject *mp, FILE *stream);
-static void dict_free(void *p);
 
 static AiObject *dummy;
 static AiDictEntry *freeslot;
 static AiDictObject *free_dicts[NUMBER_FREE_DICTS_MAX];
 static int number_free_dicts;
 
-static mappingmethods dict_as_mapping = {
+static AiMappingMethods dict_as_mapping = {
     (lengthfunc)dict_size,
     (binaryfunc)dict_getitem,
     (mpsetitemfunc)dict_setitem,
-    (mpinsertfunc)dict_insert,
     (enquiry2)dict_delitem,
 };
 
 AiTypeObject type_dictobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
     "dict",                                     /* tp_name */
+    sizeof(AiDictObject),                       /* tp_basesize */
+    0,                                          /* tp_itemsize */
     (destructor)dict_dealloc,                   /* tp_dealloc */
     (printfunc)dict_print,                      /* tp_print */
     0,                                          /* tp_compare */
@@ -30,9 +30,32 @@ AiTypeObject type_dictobject = {
     0,                                          /* tp_as_sequence */
     &dict_as_mapping,                           /* tp_as_mapping */
 
-    (hashfunc)pointer_hash,                     /* tp_hash */
-    (unaryfunc)dict_tostring,                  /* tp_tostring */
-    (freefunc)dict_free,                        /* tp_free */
+    0,//(hashfunc)object_unhashable,                /* tp_hash */
+    0,                                          /* tp_call */
+    (unaryfunc)dict_str,                        /* tp_str */
+
+    0,                                          /* tp_getattr */
+    0,                                          /* tp_setattr */
+    0,//object_generic_getattr,                     /* tp_getattro */
+    0,                                          /* tp_setattro */
+
+    SUBCLASS_DICT | BASE_TYPE,                  /* tp_flags */
+
+    0,//(unaryfunc)dict_iter,                       /* tp_iter */
+    0,                                          /* tp_iternext */
+
+    0,//dict_methods,                               /* tp_methods */
+    0,                                          /* tp_members */
+    0,                                          /* tp_getset */
+    0,                                          /* tp_base */
+    0,                                          /* tp_dict */
+    0,                                          /* tp_descr_get */
+    0,                                          /* tp_descr_set */
+    0,                                          /* tp_dictoffset */
+    0,//dict_init,                                  /* tp_init */
+    0,//type_generic_alloc,                         /* tp_alloc */
+    0,//dict_new,                                   /* tp_new */
+    AiObject_GC_DEL,                            /* tp_free */
 };
 
 AiObject *dummy;
@@ -250,7 +273,7 @@ int dict_delitem(AiDictObject *mp, AiObject *key) {
     return 0;
 }
 
-AiObject *dict_tostring(AiDictObject *mp) {
+AiObject *dict_str(AiDictObject *mp) {
     AiDictEntry *ep;
     ssize_t used = DICT_SIZE(mp);
     char *p;
@@ -381,17 +404,17 @@ int dict_resize(AiDictObject *mp, ssize_t minused) {
     AiDictEntry *old_table;
     AiDictEntry *new_table;
     AiDictEntry *ep;
-    AiDictEntry small_copy[DICT_SMALL_TABLE_SIZE];
+    AiDictEntry small_copy[DICT_SMALLTABLE_SIZE];
     ssize_t newsize;
     ssize_t i;
     int old_table_is_smalltable;
 
-    for (newsize = DICT_SMALL_TABLE_SIZE;
+    for (newsize = DICT_SMALLTABLE_SIZE;
         newsize <= minused && newsize > 0; newsize <<= 1);
     old_table = mp->ma_table;
     old_table_is_smalltable = old_table == mp->ma_smalltable;
 
-    if (newsize == DICT_SMALL_TABLE_SIZE) {
+    if (newsize == DICT_SMALLTABLE_SIZE) {
         new_table = mp->ma_smalltable;
         if (new_table == old_table) {
             if (mp->ma_fill == DICT_SIZE(mp)) {
@@ -476,8 +499,4 @@ void dict_print(AiDictObject *mp, FILE *stream) {
         }
     }
     fputs("}", stream);
-}
-
-void dict_free(void *p) {
-    AiMEM_FREE(p);
 }

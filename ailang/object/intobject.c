@@ -5,8 +5,8 @@ static void int_print(AiIntObject *ob, FILE *stream);
 static int int_compare(AiIntObject *lhs, AiIntObject *rhs);
 static long int_hash(AiIntObject *ob);
 static void int_to_cstring(AiIntObject *ob, char *buffer, int radix);
-static AiObject *int_tostring_with_radix(AiIntObject *ob, int radix);
-static AiObject *int_tostring(AiIntObject *ob);
+static AiObject *int_str_with_radix(AiIntObject *ob, int radix);
+static AiObject *int_str(AiIntObject *ob);
 static AiObject *int_add(AiIntObject *lhs, AiIntObject *rhs);
 static AiObject *int_sub(AiIntObject *lhs, AiIntObject *rhs);
 static AiObject *int_mul(AiIntObject *lhs, AiIntObject *rhs);
@@ -25,7 +25,7 @@ static AiObject *int_not(AiIntObject *ob);
 static AiObject *int_xor(AiIntObject *lhs, AiIntObject *rhs);
 static AiIntObject *fill_free_list(void);
 
-static numbermethods int_as_number = {
+static AiNumberMethods int_as_number = {
     (binaryfunc)int_add,
     (binaryfunc)int_sub,
     (binaryfunc)int_mul,
@@ -54,6 +54,8 @@ static numbermethods int_as_number = {
 AiTypeObject type_intobject = {
     INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
     "int",                          /* tp_name */
+    sizeof(AiIntObject),            /* tp_basicsize */
+    0,                              /* tp_itemsize */
     (destructor)int_dealloc,        /* tp_dealloc */
     (printfunc)int_print,           /* tp_print */
     (cmpfunc)int_compare,           /* tp_compare */
@@ -63,8 +65,30 @@ AiTypeObject type_intobject = {
     0,                              /* tp_as_mapping */
 
     (hashfunc)int_hash,             /* tp_hash */
-    (unaryfunc)int_tostring,       /* tp_tostring */
-    0,                              /* tp_free */
+    0,                              /* tp_call */
+    (unaryfunc)int_str,             /* tp_str */
+
+    0,                              /* tp_getattr */
+    0,                              /* tp_setattr */
+    0,//object_generic_getattr,         /* tp_getattro */
+    0,                              /* tp_setattro */
+
+    SUBCLASS_INT | BASE_TYPE,       /* tp_flags */
+
+    0,                              /* tp_iter */
+    0,                              /* tp_iternext */
+
+    0,//int_methods,                    /* tp_methods */
+    0,                              /* tp_members */
+    0,//int_getset,                     /* tp_getset */
+    0,                              /* tp_base */
+    0,                              /* tp_dict */
+    0,                              /* tp_descr_get */
+    0,                              /* tp_descr_set */
+    0,                              /* tp_dictoffset */
+    0,                              /* tp_init */
+    0,                              /* tp_alloc */
+    0,//int_new,                        /* tp_new */
 };
 
 AiIntBlock *block_list;
@@ -72,7 +96,7 @@ AiIntObject *free_list;
 
 AiIntObject *small_intobject_buf[SMALL_INTOBJECT_BUF_SIZE];
 
-AiObject *int_from_long(long ival) {
+AiObject *int_from_clong(long ival) {
     AiIntObject *v = 0;
     if (ival >= -NUM_NEG_SMALL_INTOBJECT && ival < NUM_POS_SMALL_INTOBJECT) {
         v = small_intobject_buf[SMALL_INTOBJECT_INDEX(ival)];
@@ -121,8 +145,8 @@ int int_clear_blocks(void) {
 }
 
 void int_dealloc(AiIntObject *ob) {
-    if (CHECK_TYPE_INT(ob)) {
-        ob->ob_type = (AiTypeObject *)free_list;
+    if (CHECK_EXACT_TYPE_INT(ob)) {
+        OB_TYPE(ob) = (AiTypeObject *)free_list;
         free_list = ob;
     }
     else {
@@ -131,7 +155,7 @@ void int_dealloc(AiIntObject *ob) {
 }
 
 void int_print(AiIntObject *ob, FILE *stream) {
-    fprintf(stream, "%d", ob->ob_ival);
+    fprintf(stream, "%ld", ob->ob_ival);
 }
 
 int int_compare(AiIntObject *lhs, AiIntObject *rhs) {
@@ -147,14 +171,14 @@ void int_to_cstring(AiIntObject *ob, char *buffer, int radix) {
     _ltoa_s(ob->ob_ival, buffer, INT_TO_CSTRING_BUFFER_SIZE, radix);
 }
 
-AiObject *int_tostring_with_radix(AiIntObject *ob, int radix) {
+AiObject *int_str_with_radix(AiIntObject *ob, int radix) {
     char buffer[INT_TO_CSTRING_BUFFER_SIZE];
     int_to_cstring(ob, buffer, radix);
     return string_from_cstring(buffer);
 }
 
-AiObject *int_tostring(AiIntObject *ob) {
-    return int_tostring_with_radix(ob, 10);
+AiObject *int_str(AiIntObject *ob) {
+    return int_str_with_radix(ob, 10);
 }
 
 AiObject *int_add(AiIntObject *lhs, AiIntObject *rhs) {
@@ -163,8 +187,8 @@ AiObject *int_add(AiIntObject *lhs, AiIntObject *rhs) {
         return r;
     }
     else {
-        UNSUPPORTED_ADD(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
-        return NONE;
+        UNSUPPORTED_ADD(lhs, rhs);
+        return NULL;
     }
 }
 
@@ -174,8 +198,8 @@ AiObject *int_sub(AiIntObject *lhs, AiIntObject *rhs) {
         return r;
     }
     else {
-        UNSUPPORTED_SUB(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
-        return NONE;
+        UNSUPPORTED_SUB(lhs, rhs);
+        return NULL;
     }
 }
 
@@ -185,8 +209,8 @@ AiObject *int_mul(AiIntObject *lhs, AiIntObject *rhs) {
         return r;
     }
     else {
-        UNSUPPORTED_MUL(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
-        return NONE;
+        UNSUPPORTED_MUL(lhs, rhs);
+        return NULL;
     }
 }
 
@@ -196,8 +220,8 @@ AiObject *int_div(AiIntObject *lhs, AiIntObject *rhs) {
         return r;
     }
     else {
-        UNSUPPORTED_DIV(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
-        return NONE;
+        UNSUPPORTED_DIV(lhs, rhs);
+        return NULL;
     }
 }
 
@@ -207,54 +231,59 @@ AiObject *int_mod(AiIntObject *lhs, AiIntObject *rhs) {
         return r;
     }
     else {
-        UNSUPPORTED_MOD(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
-        return NONE;
+        UNSUPPORTED_MOD(lhs, rhs);
+        return NULL;
     }
 }
 
 AiObject *int_pow(AiIntObject *lhs, AiIntObject *rhs) {
     if (CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs)) {
-        return int_from_long((long)pow(lhs->ob_ival, rhs->ob_ival));
+        return int_from_clong((long)pow(lhs->ob_ival, rhs->ob_ival));
     }
     else {
-        UNSUPPORTED_POW(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
-        return NONE;
+        UNSUPPORTED_POW(lhs, rhs);
+        return NULL;
     }
 }
 
 AiObject *int_pos(AiIntObject *ob) {
     if (CHECK_TYPE_INT(ob)) {
-        return int_from_long(ob->ob_ival);
+        return int_from_clong(ob->ob_ival);
     }
     else {
-        UNSUPPORTED_POS(OB_TYPENAME(ob));
-        return NONE;
+        UNSUPPORTED_POS(ob);
+        return NULL;
     }
 }
 
 AiObject *int_neg(AiIntObject *ob) {
     if (CHECK_TYPE_INT(ob)) {
-        return int_from_long(-ob->ob_ival);
+        return int_from_clong(-ob->ob_ival);
     }
     else {
-        UNSUPPORTED_NEG(OB_TYPENAME(ob));
-        return NONE;
+        UNSUPPORTED_NEG(ob);
+        return NULL;
     }
 }
 
 AiObject *int_abs(AiIntObject *ob) {
     if (CHECK_TYPE_INT(ob)) {
-        return int_from_long(ob->ob_ival >= 0 ? ob->ob_ival : -ob->ob_ival);
+        return int_from_clong(ob->ob_ival >= 0 ? ob->ob_ival : -ob->ob_ival);
     }
     else {
-        UNSUPPORTED_ABS(OB_TYPENAME(ob));
-        return NONE;
+        UNSUPPORTED_ABS(ob);
+        return NULL;
     }
 }
 
 int int_nonzero(AiIntObject *ob) {
-    return CHECK_TYPE_INT(ob) ?
-        (ob->ob_ival != 0 ? 1 : 0) : ob->ob_type->tp_as_number->nb_nonzero((AiObject *)ob);
+    if (CHECK_TYPE_INT(ob)) {
+        return ob->ob_ival ? 1 : 0;
+    }
+    else {
+        UNSUPPORTED_NONZERO(ob);
+        return NULL;
+    }
 }
 
 AiObject *int_shl(AiIntObject *lhs, AiIntObject *rhs) {
@@ -263,8 +292,8 @@ AiObject *int_shl(AiIntObject *lhs, AiIntObject *rhs) {
         return r;
     }
     else {
-        UNSUPPORTED_SHL(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
-        return NONE;
+        UNSUPPORTED_SHL(lhs, rhs);
+        return NULL;
     }
 }
 
@@ -274,8 +303,8 @@ AiObject *int_shr(AiIntObject *lhs, AiIntObject *rhs) {
         return r;
     }
     else {
-        UNSUPPORTED_SHR(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
-        return NONE;
+        UNSUPPORTED_SHR(lhs, rhs);
+        return NULL;
     }
 }
 
@@ -285,8 +314,8 @@ AiObject *int_and(AiIntObject *lhs, AiIntObject *rhs) {
         return r;
     }
     else {
-        UNSUPPORTED_AND(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
-        return NONE;
+        UNSUPPORTED_AND(lhs, rhs);
+        return NULL;
     }
 }
 
@@ -296,8 +325,8 @@ AiObject *int_or(AiIntObject *lhs, AiIntObject *rhs) {
         return r;
     }
     else {
-        UNSUPPORTED_OR(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
-        return NONE;
+        UNSUPPORTED_OR(lhs, rhs);
+        return NULL;
     }
 }
 
@@ -307,8 +336,8 @@ AiObject *int_not(AiIntObject *ob) {
         return r;
     }
     else {
-        UNSUPPORTED_NOT(OB_TYPENAME(ob));
-        return NONE;
+        UNSUPPORTED_NOT(ob);
+        return NULL;
     }
 }
 
@@ -318,8 +347,8 @@ AiObject *int_xor(AiIntObject *lhs, AiIntObject *rhs) {
         return r;
     }
     else {
-        UNSUPPORTED_XOR(OB_TYPENAME(lhs), OB_TYPENAME(rhs));
-        return NONE;
+        UNSUPPORTED_XOR(lhs, rhs);
+        return NULL;
     }
 }
 

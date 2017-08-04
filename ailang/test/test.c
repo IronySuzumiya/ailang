@@ -4,14 +4,14 @@
 #include <crtdbg.h>
 
 void testobject(AiThreadState *t) {
-    AiObject *v1 = int_from_long(998);
-    AiObject *v2 = int_from_long(-33);
+    AiObject *v1 = int_from_clong(998);
+    AiObject *v2 = int_from_clong(-33);
     AiObject *v3 = v1->ob_type->tp_as_number->nb_divide(v1, v2);
     OB_PRINT_STDOUT(v1);
     OB_PRINT_STDOUT(v2);
     OB_PRINT_STDOUT(v3);
     DEC_REFCNT(v2);
-    v2 = int_from_long(-56);
+    v2 = int_from_clong(-56);
     OB_PRINT_STDOUT(v2);
 
     AiObject *s1 = string_from_cstring("Hello World");
@@ -28,7 +28,7 @@ void testobject(AiThreadState *t) {
     list_setitem(list, 2, v3);
     list_setitem(list, 3, s1);
 
-    AiStringObject *liststr = (AiStringObject *)list_tostring(list);
+    AiStringObject *liststr = (AiStringObject *)list_str(list);
 
     OB_PRINT_STDOUT(liststr);
 
@@ -37,7 +37,7 @@ void testobject(AiThreadState *t) {
     dict_setitem(dict, s1, v1);
     dict_setitem(dict, v2, v3);
 
-    AiStringObject *dictstr = (AiStringObject *)dict_tostring(dict);
+    AiStringObject *dictstr = (AiStringObject *)dict_str(dict);
 
     OB_PRINT_STDOUT(dictstr);
 

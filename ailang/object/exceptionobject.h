@@ -2,7 +2,7 @@
 #ifndef EXCEPTION_OBJECT_H
 #define EXCEPTION_OBJECT_H
 
-#include "../system/utils.h"
+#include "../aiconfig.h"
 
 #define RUNTIME_EXCEPTION runtime_exception_store
 
@@ -14,22 +14,22 @@
     TYPE_ERROR                              \
     ("unsupported binary operation '%s' "   \
         "between '%s' and '%s'",            \
-        op, lhs, rhs)
+        op, OB_TYPENAME(lhs), OB_TYPENAME(rhs))
 
 #define UNSUPPORTED_UNARY(a, op)            \
     TYPE_ERROR                              \
     ("unsupported unary operation '%s' "    \
-        "on '%s'", op, a)
+        "on '%s'", op, OB_TYPENAME(a))
 
 #define UNSUPPORTED_1ARG_BUILTINFUNC(a, func)   \
     TYPE_ERROR                                  \
     ("unsupported built-in function '%s' "      \
-        "on '%s'", func, a)
+        "on '%s'", func, OB_TYPENAME(a))
 
 #define UNSUPPORTED_2ARG_BUILTINFUNC(a, b, func)    \
     TYPE_ERROR                                      \
     ("unsupported built-in function '%s' "          \
-        "on '%s' and '%s'", func, a, b)
+        "on '%s' and '%s'", func, OB_TYPENAME(a), OB_TYPENAME(b))
 
 #define UNSUPPORTED_ADD(lhs, rhs)           \
     UNSUPPORTED_BINARY(lhs, rhs, "+")
@@ -57,6 +57,9 @@
 
 #define UNSUPPORTED_ABS(a)                  \
     UNSUPPORTED_1ARG_BUILTINFUNC(a, "abs")
+
+#define UNSUPPORTED_NONZERO(a)              \
+    UNSUPPORTED_UNARY(a, "?")
 
 #define UNSUPPORTED_SHL(lhs, rhs)           \
     UNSUPPORTED_BINARY(lhs, rhs, "<<")
@@ -103,11 +106,50 @@
 #define UNSUPPORTED_LE(lhs, rhs)            \
     UNSUPPORTED_BINARY(lhs, rhs, "<=")
 
+#define EXCEPTION_HEAD  \
+    OBJECT_HEAD         \
+    AiObject *dict;     \
+    AiObject *args;     \
+    AiObject *message;
+
+#define EXC_MODULE_NAME "exception."
+
+typedef struct _baseexceptionobject {
+    EXCEPTION_HEAD
+}
+AiBaseExceptionObject;
+
+typedef struct _syntaxerrorobject {
+    EXCEPTION_HEAD
+    AiObject *msg;
+    AiObject *filename;
+    AiObject *lineno;
+    AiObject *offset;
+    AiObject *text;
+    AiObject *print_file_and_line;
+}
+AiSyntaxErrorObject;
+
+typedef struct _systemexitobject {
+    EXCEPTION_HEAD
+    AiObject *code;
+}
+AiSystemExitObject;
+
+typedef struct _environmenterrorobject {
+    EXCEPTION_HEAD
+    AiObject *myerrno;
+    AiObject *strerror;
+    AiObject *filename;
+}
+AiEnvironmentErrorObject;
+
 #define EXCEPTION_OCCURRED() (threadstate_get()->curexc_type)
 
 AiAPI_DATA(struct _typeobject) type_exceptionobject;
 AiAPI_DATA(AiObject *) runtime_exception;
 AiAPI_DATA(AiObject *) type_error;
+
 AiAPI_FUNC(void) exception_restore(AiObject *type, AiObject *value, AiObject *traceback);
 AiAPI_FUNC(void) exception_setobject(AiObject *exception, AiObject *value);
 AiAPI_FUNC(void) exception_setstring(AiObject *exception, char *string);

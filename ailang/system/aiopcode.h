@@ -2,8 +2,6 @@
 #ifndef AI_OPCODE_H
 #define AI_OPCODE_H
 
-#include "../system/utils.h"
-
 #define STOP_CODE               0
 #define POP_TOP                 1
 #define ROT_TWO                 2
