@@ -1,7 +1,7 @@
 #include "../ailang.h"
 
 AiTypeObject type_tracebackobject = {
-    INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    INIT_AiVarObject_HEAD(&type_typeobject, 0)
     "traceback",
 };
 
@@ -16,7 +16,7 @@ void traceback_here(AiFrameObject *frame) {
 AiTracebackObject *traceback_new(AiTracebackObject *next, AiFrameObject *frame) {
     AiTracebackObject *tb;
     tb = AiObject_GC_NEW(AiTracebackObject);
-    INIT_OBJECT(tb, &type_tracebackobject);
+    INIT_AiObject(tb, &type_tracebackobject);
     tb->tb_next = next;
     tb->tb_frame = frame;
     tb->tb_lasti = frame->f_lasti;

@@ -22,6 +22,7 @@ static AiObject *int_shr(AiIntObject *lhs, AiIntObject *rhs);
 static AiObject *int_and(AiIntObject *lhs, AiIntObject *rhs);
 static AiObject *int_or(AiIntObject *lhs, AiIntObject *rhs);
 static AiObject *int_not(AiIntObject *ob);
+static AiObject *int_invert(AiIntObject *ob);
 static AiObject *int_xor(AiIntObject *lhs, AiIntObject *rhs);
 static AiIntObject *fill_free_list(void);
 
@@ -43,16 +44,16 @@ static AiNumberMethods int_as_number = {
     (binaryfunc)int_shr,
     (binaryfunc)int_and,
     (binaryfunc)int_or,
-    (unaryfunc)int_not,
     (binaryfunc)int_xor,
+    (unaryfunc)int_not,
+    (unaryfunc)int_invert,
 
-    0,
     0,
     0,
 };
 
 AiTypeObject type_intobject = {
-    INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    INIT_AiVarObject_HEAD(&type_typeobject, 0)
     "int",                          /* tp_name */
     sizeof(AiIntObject),            /* tp_basicsize */
     0,                              /* tp_itemsize */
@@ -110,7 +111,7 @@ AiObject *int_from_clong(long ival) {
         }
         v = free_list;
         free_list = (AiIntObject *)v->ob_type;
-        INIT_OBJECT(v, &type_intobject);
+        INIT_AiObject(v, &type_intobject);
         v->ob_ival = ival;
         return (AiObject *)v;
     }
@@ -125,7 +126,7 @@ int int_init() {
         }
         v = free_list;
         free_list = (AiIntObject *)v->ob_type;
-        INIT_OBJECT(v, &type_intobject);
+        INIT_AiObject(v, &type_intobject);
         v->ob_ival = i;
         small_intobject_buf[SMALL_INTOBJECT_INDEX(i)] = v;
     }
@@ -282,7 +283,7 @@ int int_nonzero(AiIntObject *ob) {
     }
     else {
         UNSUPPORTED_NONZERO(ob);
-        return NULL;
+        return -1;
     }
 }
 
@@ -330,8 +331,19 @@ AiObject *int_or(AiIntObject *lhs, AiIntObject *rhs) {
     }
 }
 
+AiObject *int_xor(AiIntObject *lhs, AiIntObject *rhs) {
+    AiObject *r = INT_BINARY_WITH_CHECK(lhs, rhs, ^);
+    if (r) {
+        return r;
+    }
+    else {
+        UNSUPPORTED_XOR(lhs, rhs);
+        return NULL;
+    }
+}
+
 AiObject *int_not(AiIntObject *ob) {
-    AiObject *r = INT_UNARY_WITH_CHECK(ob, ~);
+    AiObject *r = INT_UNARY_WITH_CHECK(ob, !);
     if (r) {
         return r;
     }
@@ -341,13 +353,13 @@ AiObject *int_not(AiIntObject *ob) {
     }
 }
 
-AiObject *int_xor(AiIntObject *lhs, AiIntObject *rhs) {
-    AiObject *r = INT_BINARY_WITH_CHECK(lhs, rhs, ^);
+AiObject *int_invert(AiIntObject *ob) {
+    AiObject *r = INT_UNARY_WITH_CHECK(ob, ~);
     if (r) {
         return r;
     }
     else {
-        UNSUPPORTED_XOR(lhs, rhs);
+        UNSUPPORTED_NOT(ob);
         return NULL;
     }
 }

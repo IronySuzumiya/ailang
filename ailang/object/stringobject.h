@@ -5,7 +5,7 @@
 #include "../aiconfig.h"
 
 typedef struct _stringobject {
-    OBJECT_VAR_HEAD
+    AiVarObject_HEAD
     long ob_shash;
     int ob_sstate;
     char ob_sval[1];

@@ -11,7 +11,7 @@ static AiObject *string_str(AiStringObject *a);
 static ssize_t string_length(AiStringObject *a);
 
 AiTypeObject type_basestringobject = {
-    INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    INIT_AiVarObject_HEAD(&type_typeobject, 0)
     "basestring",                   /* tp_name */
     0,                              /* tp_basesize */
     0,                              /* tp_itemsize */
@@ -50,11 +50,6 @@ AiTypeObject type_basestringobject = {
     //basestring_new,                 /* tp_new */
 };
 
-static AiNumberMethods string_as_number = {
-    (binaryfunc)string_concat,
-    0,
-};
-
 // string object is immutable
 static AiSequenceMethods string_as_sequence = {
     (lengthfunc)string_length,
@@ -66,7 +61,7 @@ static AiSequenceMethods string_as_sequence = {
 };
 
 AiTypeObject type_stringobject = {
-    INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    INIT_AiVarObject_HEAD(&type_typeobject, 0)
     "string",                                   /* tp_name */
     STRING_OBJECT_SIZE,                         /* tp_basicsize */
     sizeof(char),                               /* tp_itemsize */
@@ -74,7 +69,7 @@ AiTypeObject type_stringobject = {
     (printfunc)string_print,                    /* tp_print */
     (cmpfunc)string_compare,                    /* tp_compare */
 
-    &string_as_number,                          /* tp_as_number */
+    0,                                          /* tp_as_number */
     &string_as_sequence,                        /* tp_as_sequence */
     0,                                          /* tp_as_mapping */
 
@@ -215,7 +210,7 @@ AiObject *_string_from_cstring_with_size(char *sval, ssize_t size) {
     }
     else {
         a = AiMEM_ALLOC(sizeof(AiStringObject) + size);
-        INIT_OBJECT_VAR(a, &type_stringobject, size);
+        INIT_AiVarObject(a, &type_stringobject, size);
         a->ob_shash = -1;
         a->ob_sstate = SSTATE_NOT_INTERNED;
         if (sval)
@@ -311,7 +306,7 @@ AiObject *string_concat(AiStringObject *lhs, AiStringObject *rhs) {
         ssize_t size = STRING_LEN(lhs) + STRING_LEN(rhs);
 
         a = (AiStringObject *)AiMEM_ALLOC(sizeof(AiStringObject) + size);
-        INIT_OBJECT_VAR(a, &type_stringobject, size);
+        INIT_AiVarObject(a, &type_stringobject, size);
         a->ob_shash = -1;
         a->ob_sstate = SSTATE_NOT_INTERNED;
 

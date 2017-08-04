@@ -16,7 +16,7 @@ AiDictEntry;
 typedef AiDictEntry *(*lookupfunc)(struct _dictobject *mp, AiObject *key, long hash);
 
 typedef struct _dictobject {
-    OBJECT_HEAD
+    AiObject_HEAD
     ssize_t ma_fill;
     ssize_t ma_used;
     ssize_t ma_mask;

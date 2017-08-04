@@ -5,7 +5,7 @@
 #include "../aiconfig.h"
 
 typedef struct _tupleobject {
-    OBJECT_VAR_HEAD
+    AiVarObject_HEAD
     AiObject **ob_item;
 }
 AiTupleObject;

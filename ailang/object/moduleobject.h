@@ -5,7 +5,7 @@
 #include "../aiconfig.h"
 
 typedef struct _moduleobject {
-    OBJECT_HEAD
+    AiObject_HEAD
     AiObject *md_dict;
 }
 AiModuleObject;

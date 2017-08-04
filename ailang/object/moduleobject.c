@@ -1,7 +1,7 @@
 #include "../ailang.h"
 
 AiTypeObject type_moduleobject = {
-    INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    INIT_AiVarObject_HEAD(&type_typeobject, 0)
     "module",
 
 };

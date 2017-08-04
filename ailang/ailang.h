@@ -23,6 +23,9 @@
 #include "object\abstract.h"
 #include "system\aistate.h"
 
+#include "object\methodobject.h"
+#include "object\descrobject.h"
+
 #include "object\intobject.h"
 #include "object\boolobject.h"
 #include "object\stringobject.h"

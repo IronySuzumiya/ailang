@@ -5,7 +5,7 @@
 #include "../aiconfig.h"
 
 typedef struct _cellobject {
-    OBJECT_HEAD
+    AiObject_HEAD
     AiObject *ob_ref;
 }
 AiCellObject;

@@ -5,7 +5,7 @@
 #include "../aiconfig.h"
 
 typedef struct _codeobject {
-    OBJECT_HEAD
+    AiObject_HEAD
     int co_argcount;
     int co_nlocals;
     int co_stacksize;

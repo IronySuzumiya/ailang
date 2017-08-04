@@ -85,6 +85,12 @@
     <ClCompile Include="system\aimarshal.c">
       <Filter>system</Filter>
     </ClCompile>
+    <ClCompile Include="object\descrobject.c">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="object\methodobject.c">
+      <Filter>object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="object\abstract.h">
@@ -154,6 +160,12 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="object\tupleobject.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\descrobject.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\methodobject.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

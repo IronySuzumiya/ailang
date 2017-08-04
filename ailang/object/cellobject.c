@@ -4,7 +4,7 @@ static void cell_dealloc(AiCellObject *cell);
 static int cell_compare(AiCellObject *lhs, AiCellObject *rhs);
 
 AiTypeObject type_cellobject = {
-    INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    INIT_AiVarObject_HEAD(&type_typeobject, 0)
     "cell",                             /* tp_name */
     sizeof(AiCellObject),               /* tp_basesize */
     0,                                  /* tp_itemsize */
@@ -39,7 +39,7 @@ AiObject *cell_new(AiObject *ob) {
     AiCellObject *cell;
 
     cell = (AiCellObject *)AiObject_GC_NEW(AiCellObject);
-    INIT_OBJECT(cell, &type_cellobject);
+    INIT_AiObject(cell, &type_cellobject);
     cell->ob_ref = ob;
     XINC_REFCNT(ob);
 

@@ -4,7 +4,7 @@ static void iter_dealloc(AiIterObject *iter);
 static AiObject *iter_iter(AiIterObject *iter);
 
 AiTypeObject type_iterobject = {
-    INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    INIT_AiVarObject_HEAD(&type_typeobject, 0)
     "iterator",                         /* tp_name */
     sizeof(AiIterObject),               /* tp_basicsize */
     0,                                  /* tp_itemsize */
@@ -40,7 +40,7 @@ AiObject *iter_new(AiObject *seq) {
         return NULL;
     }
     it = AiObject_GC_NEW(AiIterObject);
-    INIT_OBJECT(it, &type_iterobject);
+    INIT_AiObject(it, &type_iterobject);
     it->it_index = 0;
     INC_REFCNT(seq);
     it->it_seq = (AiListObject *)seq;

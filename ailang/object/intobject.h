@@ -11,7 +11,7 @@
 #define SMALL_INTOBJECT_INDEX(x)        ((x) + NUM_NEG_SMALL_INTOBJECT)
 
 typedef struct _intobject {
-    OBJECT_HEAD
+    AiObject_HEAD
     long ob_ival;
 }
 AiIntObject;

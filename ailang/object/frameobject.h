@@ -12,7 +12,7 @@ typedef struct _tryblock {
 AiTryBlock;
 
 typedef struct _frameobject {
-    OBJECT_VAR_HEAD
+    AiVarObject_HEAD
     struct _frameobject *f_back;
     AiCodeObject *f_code;
     AiObject *f_builtins;

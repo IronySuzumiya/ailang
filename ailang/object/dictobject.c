@@ -18,7 +18,7 @@ static AiMappingMethods dict_as_mapping = {
 };
 
 AiTypeObject type_dictobject = {
-    INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    INIT_AiVarObject_HEAD(&type_typeobject, 0)
     "dict",                                     /* tp_name */
     sizeof(AiDictObject),                       /* tp_basesize */
     0,                                          /* tp_itemsize */
@@ -160,7 +160,7 @@ AiObject *dict_new() {
     else {
         mp = AiObject_GC_NEW(AiDictObject);
         AiMEM_SET(mp, 0, sizeof(AiDictObject));
-        INIT_OBJECT(mp, &type_dictobject);
+        INIT_AiObject(mp, &type_dictobject);
         EMPTY_TO_MINSIZE(mp);
     }
     mp->ma_lookup = (lookupfunc)dict_lookup_with_string;

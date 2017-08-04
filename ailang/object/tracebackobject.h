@@ -5,7 +5,7 @@
 #include "../aiconfig.h"
 
 typedef struct _tracebackobject {
-    OBJECT_HEAD
+    AiObject_HEAD
     struct _tracebackobject *tb_next;
     AiFrameObject *tb_frame;
     int tb_lasti;

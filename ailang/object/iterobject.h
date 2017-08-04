@@ -5,7 +5,7 @@
 #include "../aiconfig.h"
 
 typedef struct _iterobject {
-    OBJECT_HEAD
+    AiObject_HEAD
     long it_index;
     AiListObject *it_seq;
 }

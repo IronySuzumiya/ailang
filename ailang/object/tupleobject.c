@@ -19,7 +19,7 @@ static AiSequenceMethods tuple_as_sequence = {
 };
 
 AiTypeObject type_tupleobject = {
-    INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    INIT_AiVarObject_HEAD(&type_typeobject, 0)
     "tuple",                            /* tp_name */
     sizeof(AiTupleObject),              /* tp_basicsize */
     sizeof(AiObject *),                 /* tp_itemsize */
@@ -69,11 +69,11 @@ AiObject *tuple_new(ssize_t size) {
     else if (size < NUMBER_FREE_TUPLES_MAX && (tp = free_tuples[size])) {
         free_tuples[size] = (AiTupleObject *)tp->ob_type;
         --number_free_tuples[size];
-        INIT_OBJECT_VAR(tp, &type_tupleobject, size);
+        INIT_AiVarObject(tp, &type_tupleobject, size);
     }
     else {
         tp = AiObject_GC_NEW(AiTupleObject);
-        INIT_OBJECT_VAR(tp, &type_tupleobject, size);
+        INIT_AiVarObject(tp, &type_tupleobject, size);
         tp->ob_item = AiMEM_ALLOC(size * sizeof(AiObject *));
     }
     for (ssize_t i = 0; i < size; ++i) {

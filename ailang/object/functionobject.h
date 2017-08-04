@@ -5,7 +5,7 @@
 #include "../aiconfig.h"
 
 typedef struct _functionobject {
-    OBJECT_HEAD
+    AiObject_HEAD
     AiObject *func_code;
     AiObject *func_globals;
     AiObject *func_defaults;

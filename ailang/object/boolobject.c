@@ -7,12 +7,12 @@ static void bool_print(AiBoolObject *ob, FILE *stream);
 static AiObject *bool_str(AiBoolObject *ob);
 
 static AiBoolObject _aitrue = {
-    INIT_OBJECT_HEAD(&type_boolobject)
+    INIT_AiObject_HEAD(&type_boolobject)
     1
 };
 
 static AiBoolObject _aifalse = {
-    INIT_OBJECT_HEAD(&type_boolobject)
+    INIT_AiObject_HEAD(&type_boolobject)
     0
 };
 
@@ -34,16 +34,16 @@ static AiNumberMethods bool_as_number = {
     0,
     (binaryfunc)bool_and,
     (binaryfunc)bool_or,
+    0,
     (unaryfunc)bool_not,
     0,
 
     0,
     0,
-    0,
 };
 
 AiTypeObject type_boolobject = {
-    INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    INIT_AiVarObject_HEAD(&type_typeobject, 0)
     "bool",                             /* tp_name */
     sizeof(AiBoolObject),               /* tp_basesize */
     0,                                  /* tp_itemsize */

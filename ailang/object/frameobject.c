@@ -6,7 +6,7 @@ static void frame_dealloc(AiFrameObject *f);
 static AiObject *builtin_object;
 
 AiTypeObject type_frameobject = {
-    INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    INIT_AiVarObject_HEAD(&type_typeobject, 0)
     "frame",                            /* tp_name */
     sizeof(AiFrameObject),              /* tp_basicsize */
     sizeof(AiObject *),                 /* tp_itemsize */
@@ -69,7 +69,7 @@ AiFrameObject *frame_new(AiThreadState *tstate, AiCodeObject *code,
 
     extras = code->co_stacksize + code->co_nlocals + ncells + nfrees;
     f = AiMEM_ALLOC(sizeof(AiFrameObject) + extras - 1);
-    INIT_OBJECT_VAR(f, &type_frameobject, extras);
+    INIT_AiVarObject(f, &type_frameobject, extras);
 
     f->f_code = code;
     INC_REFCNT(code);
@@ -122,7 +122,6 @@ AiTryBlock *frame_peek_block(AiFrameObject *f) {
 
 void frame_dealloc(AiFrameObject *f) {
     AiObject **p, **valuestack;
-    AiCodeObject *co;
 
     valuestack = f->f_valuestack;
     for (p = f->f_localsplus; p < valuestack; ++p) {

@@ -3,7 +3,7 @@
 static void function_dealloc(AiFunctionObject *func);
 
 AiTypeObject type_functionobject = {
-    INIT_OBJECT_VAR_HEAD(&type_typeobject, 0)
+    INIT_AiVarObject_HEAD(&type_typeobject, 0)
     "function",                         /* tp_name */
     sizeof(AiFunctionObject),           /* tp_basicsize */
     0,                                  /* tp_itemsize */
@@ -49,7 +49,7 @@ AiObject *function_new(AiObject *code, AiObject *globals) {
     AiObject *consts;
     AiObject *module;
     AiFunctionObject *func = AiObject_GC_NEW(AiFunctionObject);
-    INIT_OBJECT(func, &type_functionobject);
+    INIT_AiObject(func, &type_functionobject);
 
     func->func_weakreflist = NULL;
     func->func_code = code;

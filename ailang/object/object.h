@@ -4,12 +4,12 @@
 
 #include "../aiconfig.h"
 
-#define OBJECT_HEAD                 \
+#define AiObject_HEAD               \
     ssize_t ob_refcnt;              \
     struct _typeobject *ob_type;
 
-#define OBJECT_VAR_HEAD \
-    OBJECT_HEAD         \
+#define AiVarObject_HEAD    \
+    AiObject_HEAD           \
     ssize_t ob_size;
 
 #define OB_REFCNT(ob)       (((AiObject*)(ob))->ob_refcnt)
@@ -18,8 +18,8 @@
 #define OB_TYPENAME(ob)     (OB_TYPE(ob)->tp_name)
 #define OB_DEALLOC(ob)      (OB_TYPE(ob)->tp_dealloc((AiObject *)(ob)))
 
-#define INIT_OBJECT_HEAD(type)              1, type,
-#define INIT_OBJECT_VAR_HEAD(type, size)    INIT_OBJECT_HEAD(type) size,
+#define INIT_AiObject_HEAD(type)            1, type,
+#define INIT_AiVarObject_HEAD(type, size)   INIT_AiObject_HEAD(type) size,
 
 #define INIT_REFCNT(ob)     (OB_REFCNT(ob) = 1)
 #define INC_REFCNT(ob)      (++OB_REFCNT(ob))
@@ -33,15 +33,15 @@
     if(!ob);                        \
     else DEC_REFCNT(ob)
 
-#define INIT_OBJECT(ob, type)       \
+#define INIT_AiObject(ob, type)     \
     WRAP(                           \
         OB_TYPE(ob) = (type);       \
         INIT_REFCNT(ob);            \
     )
-#define INIT_OBJECT_VAR(ob, type, size) \
-    WRAP(                               \
-        INIT_OBJECT(ob, type);          \
-        OB_SIZE(ob) = (size);           \
+#define INIT_AiVarObject(ob, type, size)    \
+    WRAP(                                   \
+        INIT_AiObject(ob, type);            \
+        OB_SIZE(ob) = (size);               \
     )
 
 #define CHECK_TYPE(ob, type)        \
@@ -54,12 +54,12 @@
 #define OB_CLEAR(ob) WRAP(DEC_REFCNT(ob); (ob) = NULL;)
 
 typedef struct _object {
-    OBJECT_HEAD
+    AiObject_HEAD
 }
 AiObject;
 
 typedef struct _varobject {
-    OBJECT_VAR_HEAD
+    AiVarObject_HEAD
 }
 AiVarObject;
 
@@ -111,11 +111,11 @@ typedef struct _numbermethods {
     binaryfunc nb_shr;
     binaryfunc nb_and;
     binaryfunc nb_or;
-    unaryfunc nb_not;
     binaryfunc nb_xor;
+    unaryfunc nb_not;
+    unaryfunc nb_invert;
 
     unaryfunc nb_int;
-    unaryfunc nb_long;
     unaryfunc nb_float;
 }
 AiNumberMethods;
@@ -138,21 +138,12 @@ typedef struct _mappingmethods {
 }
 AiMappingMethods;
 
-typedef struct {
-    OBJECT_HEAD
-}
-AiNoneObject;
-
-#define CHECK_TYPE_NONE(a) CHECK_TYPE(a, &type_noneobject)
-#define NONE ((AiObject *)none)
-#define GET_NONE() (INC_REFCNT(none), NONE)
-
 #define OBJECT_HASH(ob)                                 \
     ((ob)->ob_type->tp_hash ?                           \
         (ob)->ob_type->tp_hash((AiObject *)(ob)) : -1)
 
 typedef struct _typeobject {
-    OBJECT_VAR_HEAD
+    AiVarObject_HEAD
     char *tp_name;
     ssize_t tp_basicsize;
     ssize_t tp_itemsize;
@@ -179,7 +170,6 @@ typedef struct _typeobject {
     unaryfunc tp_iter;
     unaryfunc tp_iternext;
 
-    /* for user's classes */
     struct _methoddef *tp_methods;
     struct _memberdef *tp_members;
     struct _getsetdef *tp_getset;
@@ -211,6 +201,19 @@ typedef struct _heaptypeobject {
 }
 AiHeapTypeObject;
 
+#define CHECK_TYPE_NONE(a) CHECK_TYPE(a, &type_noneobject)
+#define NONE (&none)
+#define GET_NONE() (INC_REFCNT(&none), NONE)
+
+#define AiNotImplemented (&notimplemented)
+#define GET_AiNotImplemented() (INC_REFCNT(&notimplemented), NONE)
+
+AiAPI_DATA(AiTypeObject) type_noneobject;
+AiAPI_DATA(AiTypeObject) type_notimplementedobject;
+AiAPI_DATA(AiTypeObject) type_baseobject;
+AiAPI_DATA(AiObject) none;
+AiAPI_DATA(AiObject) notimplemented;
+
 #define SUBCLASS_INT        (1L<<0)
 #define SUBCLASS_FLOAT      (1L<<1)
 #define SUBCLASS_LIST       (1L<<2)
@@ -224,12 +227,9 @@ AiHeapTypeObject;
 #define HEAP_TYPE           (1L<<9)
 
 #define CHECK_FAST_SUBCLASS(ob, base) ((ob)->ob_type->tp_flags & (base))
-
 #define CHECK_TYPE_TYPE(a) CHECK_TYPE(a, &type_typeobject)
 
 AiAPI_DATA(AiTypeObject) type_typeobject;
-
-AiAPI_DATA(struct _typeobject) type_noneobject;
-AiAPI_DATA(AiNoneObject *) none;
+AiAPI_FUNC(int) AiType_Ready(AiTypeObject *type);
 
 #endif

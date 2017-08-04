@@ -106,8 +106,8 @@
 #define UNSUPPORTED_LE(lhs, rhs)            \
     UNSUPPORTED_BINARY(lhs, rhs, "<=")
 
-#define EXCEPTION_HEAD  \
-    OBJECT_HEAD         \
+#define AiException_HEAD  \
+    AiObject_HEAD         \
     AiObject *dict;     \
     AiObject *args;     \
     AiObject *message;
@@ -115,12 +115,12 @@
 #define EXC_MODULE_NAME "exception."
 
 typedef struct _baseexceptionobject {
-    EXCEPTION_HEAD
+    AiException_HEAD
 }
 AiBaseExceptionObject;
 
 typedef struct _syntaxerrorobject {
-    EXCEPTION_HEAD
+    AiException_HEAD
     AiObject *msg;
     AiObject *filename;
     AiObject *lineno;
@@ -131,13 +131,13 @@ typedef struct _syntaxerrorobject {
 AiSyntaxErrorObject;
 
 typedef struct _systemexitobject {
-    EXCEPTION_HEAD
+    AiException_HEAD
     AiObject *code;
 }
 AiSystemExitObject;
 
 typedef struct _environmenterrorobject {
-    EXCEPTION_HEAD
+    AiException_HEAD
     AiObject *myerrno;
     AiObject *strerror;
     AiObject *filename;
