@@ -13,7 +13,7 @@ static long r_long(AicFile *p);
 static long read_long_from_file(FILE *fp);
 static AiObject *r_object(AicFile *p);
 
-void write_compiled_module(AiCodeObject *co, char *path, struct stat *srcstat, time_t mtime) {
+void Marshal_Write_Compiled_Module(AiCodeObject *co, char *path, struct stat *srcstat, time_t mtime) {
     FILE *fp;
     mode_t mode = srcstat->st_mode & S_IEXEC;
     mode |= _S_IWRITE;
@@ -115,15 +115,15 @@ void w_object(AiObject *v, AicFile *p) {
     }
     else if (CHECK_TYPE_STRING(v)) {
         if (p->strings && CHECK_STRING_INTERNED(v)) {
-            AiObject *o = dict_getitem((AiDictObject *)p->strings, v);
+            AiObject *o = AiDict_GetItem((AiDictObject *)p->strings, v);
             if (o) {
                 long w = INT_AS_CLONG(o);
                 w_byte(TYPE_STRINGREF, p);
                 w_long(w, p);
             }
             else {
-                o = int_from_clong((long)DICT_SIZE(p->strings));
-                dict_setitem((AiDictObject *)p->strings, v, o);
+                o = AiInt_From_Long((long)DICT_SIZE(p->strings));
+                AiDict_SetItem((AiDictObject *)p->strings, v, o);
                 XDEC_REFCNT(o);
                 w_byte(TYPE_INTERNED, p);
                 w_pstring(STRING_AS_CSTRING(v), STRING_LEN(v), p);
@@ -140,7 +140,7 @@ void w_object(AiObject *v, AicFile *p) {
         n = LIST_SIZE(v);
         w_long((long)n, p);
         for (ssize_t i = 0; i < LIST_SIZE(v); ++i) {
-            w_object(list_getitem((AiListObject *)v, i), p);
+            w_object(AiList_GetItem((AiListObject *)v, i), p);
         }
     }
     else if (CHECK_TYPE_DICT(v)) {
@@ -188,7 +188,7 @@ void write_object_to_file(AiObject *x, FILE *fp) {
     af.fp = fp;
     af.error = AFERR_OK;
     af.depth = 0;
-    af.strings = dict_new();
+    af.strings = AiDict_New();
     w_object(x, &af);
     DEC_REFCNT(af.strings);
 }
@@ -196,12 +196,12 @@ void write_object_to_file(AiObject *x, FILE *fp) {
 AiObject *write_object_to_string(AiObject *x) {
     AicFile af;
     af.fp = NULL;
-    af.str = string_from_cstring_with_size(NULL, 50);
+    af.str = AiString_From_StringAndSize(NULL, 50);
     af.ptr = STRING_AS_CSTRING(af.str);
     af.end = af.ptr + STRING_LEN(af.str);
     af.error = AFERR_OK;
     af.depth = 0;
-    af.strings = dict_new();
+    af.strings = AiDict_New();
 
     w_object(x, &af);
 
@@ -217,7 +217,7 @@ ssize_t r_string(char *s, ssize_t n, AicFile *p) {
         return fread(s, 1, (size_t)n, p->fp);
     else if (p->end - p->ptr < n)
         n = p->end - p->ptr;
-    AiMEM_COPY(s, p->ptr, n);
+    AiMem_Copy(s, p->ptr, n);
     p->ptr += n;
     return n;
 }
@@ -274,12 +274,12 @@ AiObject *r_object(AicFile *p) {
         retval = GET_TRUE();
         break;
     case TYPE_INT:
-        retval = int_from_clong(r_long(p));
+        retval = AiInt_From_Long(r_long(p));
         break;
     case TYPE_INTERNED:
     case TYPE_STRING:
         n = r_long(p);
-        v = string_from_cstring_with_size((char *)NULL, n);
+        v = AiString_From_StringAndSize((char *)NULL, n);
         if (r_string(STRING_AS_CSTRING(v), n, p) != n) {
             DEC_REFCNT(v);
             FATAL_ERROR("EOF read where object expected");
@@ -287,28 +287,28 @@ AiObject *r_object(AicFile *p) {
             break;
         }
         if (type == TYPE_INTERNED) {
-            string_intern((AiStringObject **)&v);
+            AiString_Intern((AiStringObject **)&v);
             list_append((AiListObject *)p->strings, v);
         }
         retval = v;
         break;
     case TYPE_STRINGREF:
         n = r_long(p);
-        v = list_getitem((AiListObject *)p->strings, n);
+        v = AiList_GetItem((AiListObject *)p->strings, n);
         INC_REFCNT(v);
         retval = v;
         break;
     case TYPE_LIST:
         n = r_long(p);
-        v = list_new(n);
+        v = AiList_New(n);
         for (ssize_t i = 0; i < n; ++i) {
             v2 = r_object(p);
-            list_setitem((AiListObject *)v, i, v2);
+            LIST_SETITEM(v, i, v2);
         }
         retval = v;
         break;
     case TYPE_DICT:
-        v = dict_new();
+        v = AiDict_New();
         for (;;) {
             AiObject *key, *value;
             key = r_object(p);
@@ -317,7 +317,7 @@ AiObject *r_object(AicFile *p) {
             }
             value = r_object(p);
             if (value) {
-                dict_setitem((AiDictObject *)v, key, value);
+                AiDict_SetItem((AiDictObject *)v, key, value);
             }
             DEC_REFCNT(key);
             XDEC_REFCNT(value);
@@ -349,7 +349,7 @@ AiObject *r_object(AicFile *p) {
             firstlineno = (int)r_long(p);
             lnotab = r_object(p);
 
-            v = code_new(argcount, nlocals, stacksize, flags,
+            v = AiCode_New(argcount, nlocals, stacksize, flags,
                 code, consts, names, varnames,
                 freevars, cellvars, filename, name,
                 firstlineno, lnotab);
@@ -380,7 +380,7 @@ AiObject *read_object_from_file(FILE *fp) {
     AiObject *r;
 
     af.fp = fp;
-    af.strings = list_new(0);
+    af.strings = AiList_New(0);
     af.depth = 0;
     af.ptr = af.end = NULL;
     r = r_object(&af);
@@ -396,7 +396,7 @@ AiObject *read_object_from_cstring(char *s, ssize_t len) {
     rf.fp = NULL;
     rf.ptr = s;
     rf.end = s + len;
-    rf.strings = list_new(0);
+    rf.strings = AiList_New(0);
     rf.depth = 0;
     r = r_object(&rf);
     DEC_REFCNT(rf.strings);

@@ -35,15 +35,15 @@ AiCodeObject;
 
 #define CO_MAXBLOCKS    20
 
-#define CHECK_TYPE_CODE(ob) CHECK_TYPE(ob, &type_codeobject)
+#define CHECK_TYPE_CODE(ob) CHECK_TYPE(ob, &AiType_Code)
 #define CODE_GETNUMFREE(ob) (TUPLE_SIZE(((AiCodeObject *)(ob))->co_freevars))
 
-AiAPI_DATA(struct _typeobject) type_codeobject;
-AiAPI_FUNC(AiObject *) code_new(int argcount, int nlocals, int stacksize, int flags,
+AiAPI_DATA(struct _typeobject) AiType_Code;
+AiAPI_FUNC(AiObject *) AiCode_New(int argcount, int nlocals, int stacksize, int flags,
     AiObject *code, AiObject *consts, AiObject *names,
     AiObject *varnames, AiObject *freevars, AiObject *cellvars,
     AiObject *filename, AiObject *name, int firstlineno,
     AiObject *lnotab);
-AiAPI_FUNC(int) code_addr2line(AiCodeObject *co, int addrq);
+AiAPI_FUNC(int) AiCode_Addr2Line(AiCodeObject *co, int addrq);
 
 #endif

@@ -1,11 +1,11 @@
 #include "../ailang.h"
 
-long object_unhashable(AiObject *p) {
+long AiObject_Unhashable(AiObject *p) {
     RUNTIME_EXCEPTION("unhashable type");
     return -1;
 }
 
-long pointer_hash(void *p) {
+long Pointer_Hash(void *p) {
     long x;
     size_t y = (size_t)p;
     y = (y >> 4) | (y << (8 * sizeof(void *) - 4));
@@ -13,7 +13,7 @@ long pointer_hash(void *p) {
     return x == -1 ? -2 : x;
 }
 
-long object_hash(AiObject *ob) {
+long AiObject_Generic_Hash(AiObject *ob) {
     if (ob->ob_type->tp_hash) {
         return ob->ob_type->tp_hash(ob);
     }
@@ -22,7 +22,7 @@ long object_hash(AiObject *ob) {
     }
 }
 
-int object_rich_compare(AiObject *lhs, AiObject *rhs, int op) {
+int AiObject_Rich_Compare(AiObject *lhs, AiObject *rhs, int op) {
     if (OB_TYPE(lhs) == OB_TYPE(rhs)) {
         switch (op) {
         case CMP_EQ:
@@ -42,11 +42,11 @@ int object_rich_compare(AiObject *lhs, AiObject *rhs, int op) {
         case CMP_IS_NOT:
             return lhs != rhs;
         case CMP_IN:
-            return sequence_contains(rhs, lhs);
+            return AiSequence_Contains(rhs, lhs);
         case CMP_NOT_IN:
-            return !sequence_contains(rhs, lhs);
+            return !AiSequence_Contains(rhs, lhs);
         case CMP_EXC_MATCH:
-            return exception_matches(lhs, rhs);
+            return AiException_Matches(lhs, rhs);
         default:
             FATAL_ERROR("internal error: invalid compare option");
             return -1;
@@ -57,14 +57,14 @@ int object_rich_compare(AiObject *lhs, AiObject *rhs, int op) {
     }
 }
 
-AiObject *object_rich_compare_bool(AiObject *lhs, AiObject *rhs, int op) {
-    int r = object_rich_compare(lhs, rhs, op);
+AiObject *AiObject_Rich_Compare_Bool(AiObject *lhs, AiObject *rhs, int op) {
+    int r = AiObject_Rich_Compare(lhs, rhs, op);
     return r > 0 ? GET_TRUE() : r == 0 ? GET_FALSE() : NULL;
 }
 
-AiObject *object_getiter(AiObject *sq) {
+AiObject *AiObject_Generic_Getiter(AiObject *sq) {
     if (CHECK_ITERABLE(sq)) {
-        return iter_new(sq);
+        return AiSeqiter_New(sq);
     }
     else {
         RUNTIME_EXCEPTION("only sequence supported");
@@ -72,7 +72,7 @@ AiObject *object_getiter(AiObject *sq) {
     }
 }
 
-ssize_t sequence_size(AiObject *sq) {
+ssize_t AiSequence_Getsize(AiObject *sq) {
     if (CHECK_SEQUENCE(sq)) {
         return SEQUENCE_SIZE(sq);
     }
@@ -82,7 +82,7 @@ ssize_t sequence_size(AiObject *sq) {
     }
 }
 
-AiObject *sequence_getitem(AiObject *sq, ssize_t index) {
+AiObject *AiSequence_Getitem(AiObject *sq, ssize_t index) {
     if (CHECK_ITERABLE(sq)) {
         return SEQUENCE_GETITEM(sq, index);
     }
@@ -92,7 +92,7 @@ AiObject *sequence_getitem(AiObject *sq, ssize_t index) {
     }
 }
 
-int sequence_contains(AiObject *sq, AiObject *item) {
+int AiSequence_Contains(AiObject *sq, AiObject *item) {
     if (CHECK_SEQUENCE(sq)) {
         return sq->ob_type->tp_as_sequence->sq_contains(sq, item);
     }

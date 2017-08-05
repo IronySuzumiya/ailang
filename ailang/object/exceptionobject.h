@@ -144,19 +144,20 @@ typedef struct _environmenterrorobject {
 }
 AiEnvironmentErrorObject;
 
-#define EXCEPTION_OCCURRED() (threadstate_get()->curexc_type)
+#define EXCEPTION_OCCURRED() (AiThreadState_Get()->curexc_type)
 
-AiAPI_DATA(struct _typeobject) type_exceptionobject;
+AiAPI_DATA(AiTypeObject) AiType_BaseException;
+AiAPI_DATA(AiTypeObject) AiType_Exception;
 AiAPI_DATA(AiObject *) runtime_exception;
 AiAPI_DATA(AiObject *) type_error;
 
-AiAPI_FUNC(void) exception_restore(AiObject *type, AiObject *value, AiObject *traceback);
-AiAPI_FUNC(void) exception_setobject(AiObject *exception, AiObject *value);
-AiAPI_FUNC(void) exception_setstring(AiObject *exception, char *string);
-AiAPI_FUNC(void) exception_clear();
-AiAPI_FUNC(void) exception_fetch(AiObject **type, AiObject **value, AiObject **tb);
-AiAPI_FUNC(int) exceptionclass_check(AiObject *exception);
-AiAPI_FUNC(int) exception_matches(AiObject *err, AiObject *exc);
+AiAPI_FUNC(void) AiException_Restore(AiObject *type, AiObject *value, AiObject *traceback);
+AiAPI_FUNC(void) AiException_SetObject(AiObject *exception, AiObject *value);
+AiAPI_FUNC(void) AiException_SetString(AiObject *exception, char *string);
+AiAPI_FUNC(void) AiException_Clear();
+AiAPI_FUNC(void) AiException_Fetch(AiObject **type, AiObject **value, AiObject **tb);
+AiAPI_FUNC(int) AiExceptionClass_Check(AiObject *exception);
+AiAPI_FUNC(int) AiException_Matches(AiObject *err, AiObject *exc);
 
 AiAPI_FUNC(void) runtime_exception_store(char *msg, ...);
 AiAPI_FUNC(void) type_error_restore(char *msg, ...);

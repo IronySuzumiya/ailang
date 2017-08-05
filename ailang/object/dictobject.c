@@ -1,5 +1,6 @@
 #include "../ailang.h"
 
+static AiObject *dict_str(AiDictObject *mp);
 static ssize_t dict_size(AiDictObject *mp);
 static int dict_resize(AiDictObject *mp, ssize_t minused);
 static void dict_dealloc(AiDictObject *mp);
@@ -12,13 +13,13 @@ static int number_free_dicts;
 
 static AiMappingMethods dict_as_mapping = {
     (lengthfunc)dict_size,
-    (binaryfunc)dict_getitem,
-    (mpsetitemfunc)dict_setitem,
-    (enquiry2)dict_delitem,
+    (binaryfunc)AiDict_GetItem,
+    (mpsetitemfunc)AiDict_SetItem,
+    (enquiry2)AiDict_DelItem,
 };
 
-AiTypeObject type_dictobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_Dict = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "dict",                                     /* tp_name */
     sizeof(AiDictObject),                       /* tp_basesize */
     0,                                          /* tp_itemsize */
@@ -30,13 +31,13 @@ AiTypeObject type_dictobject = {
     0,                                          /* tp_as_sequence */
     &dict_as_mapping,                           /* tp_as_mapping */
 
-    0,//(hashfunc)object_unhashable,                /* tp_hash */
+    0,//(hashfunc)AiObject_Unhashable,                /* tp_hash */
     0,                                          /* tp_call */
     (unaryfunc)dict_str,                        /* tp_str */
 
     0,                                          /* tp_getattr */
     0,                                          /* tp_setattr */
-    0,//object_generic_getattr,                     /* tp_getattro */
+    0,//AiObject_Generic_Getattr,                     /* tp_getattro */
     0,                                          /* tp_setattro */
 
     SUBCLASS_DICT | BASE_TYPE,                  /* tp_flags */
@@ -53,14 +54,14 @@ AiTypeObject type_dictobject = {
     0,                                          /* tp_descr_set */
     0,                                          /* tp_dictoffset */
     0,//dict_init,                                  /* tp_init */
-    0,//type_generic_alloc,                         /* tp_alloc */
-    0,//dict_new,                                   /* tp_new */
-    AiObject_GC_DEL,                            /* tp_free */
+    0,//AiType_Generic_Alloc,                         /* tp_alloc */
+    0,//dict_New,                                   /* tp_new */
+    AiObject_GC_Del,                            /* tp_free */
 };
 
 AiObject *dummy;
 
-AiDictEntry *dict_lookup(AiDictObject *mp, AiObject *key, long hash) {
+AiDictEntry *AiDict_Lookup(AiDictObject *mp, AiObject *key, long hash) {
     size_t perturb;
     size_t mask = (size_t)mp->ma_mask;
     size_t i = hash & mask;
@@ -74,7 +75,7 @@ AiDictEntry *dict_lookup(AiDictObject *mp, AiObject *key, long hash) {
     }
     else {
         if (ep->me_hash == hash) {
-            if (object_rich_compare(ep->me_key, key, CMP_EQ) > 0) {
+            if (AiObject_Rich_Compare(ep->me_key, key, CMP_EQ) > 0) {
                 return ep;
             }
         }
@@ -90,7 +91,7 @@ AiDictEntry *dict_lookup(AiDictObject *mp, AiObject *key, long hash) {
             return ep;
         }
         else if (ep->me_hash == hash && ep->me_key != dummy) {
-            if (object_rich_compare(ep->me_key, key, CMP_EQ) > 0) {
+            if (AiObject_Rich_Compare(ep->me_key, key, CMP_EQ) > 0) {
                 return ep;
             }
         }
@@ -100,15 +101,15 @@ AiDictEntry *dict_lookup(AiDictObject *mp, AiObject *key, long hash) {
     }
 }
 
-AiDictEntry *dict_lookup_with_string(AiDictObject *mp, AiStringObject *key, long hash) {
+AiDictEntry *AiDict_Lookup_String(AiDictObject *mp, AiStringObject *key, long hash) {
     size_t perturb;
     size_t mask = (size_t)mp->ma_mask;
     size_t i = (size_t)(hash & mask);
     AiDictEntry *ep = &mp->ma_table[i];
 
     if (!CHECK_TYPE_STRING(key)) {
-        mp->ma_lookup = dict_lookup;
-        return dict_lookup(mp, (AiObject *)key, hash);
+        mp->ma_lookup = AiDict_Lookup;
+        return AiDict_Lookup(mp, (AiObject *)key, hash);
     }
 
     if (!ep->me_key || ep->me_key == (AiObject *)key) {
@@ -145,10 +146,10 @@ AiDictEntry *dict_lookup_with_string(AiDictObject *mp, AiStringObject *key, long
     }
 }
 
-AiObject *dict_new() {
+AiObject *AiDict_New() {
     AiDictObject *mp;
     if (!dummy) {
-        dummy = string_from_cstring("<Akari~~~>");
+        dummy = AiString_From_String("<Akari~~~>");
     }
     if (number_free_dicts) {
         mp = free_dicts[--number_free_dicts];
@@ -158,16 +159,16 @@ AiObject *dict_new() {
         }
     }
     else {
-        mp = AiObject_GC_NEW(AiDictObject);
-        AiMEM_SET(mp, 0, sizeof(AiDictObject));
-        INIT_AiObject(mp, &type_dictobject);
+        mp = AiObject_GC_New(AiDictObject);
+        AiMem_Set(mp, 0, sizeof(AiDictObject));
+        INIT_AiObject(mp, &AiType_Dict);
         EMPTY_TO_MINSIZE(mp);
     }
-    mp->ma_lookup = (lookupfunc)dict_lookup_with_string;
+    mp->ma_lookup = (lookupfunc)AiDict_Lookup_String;
     return (AiObject *)mp;
 }
 
-AiObject *dict_getitem(AiDictObject *mp, AiObject *key) {
+AiObject *AiDict_GetItem(AiDictObject *mp, AiObject *key) {
     long hash;
 
     if (CHECK_TYPE_STRING(key)) {
@@ -187,7 +188,7 @@ AiObject *dict_getitem(AiDictObject *mp, AiObject *key) {
     return mp->ma_lookup(mp, key, hash)->me_value;
 }
 
-int dict_setitem(AiDictObject *mp, AiObject *key, AiObject *value) {
+int AiDict_SetItem(AiDictObject *mp, AiObject *key, AiObject *value) {
     long hash;
     ssize_t used;
 
@@ -205,7 +206,7 @@ int dict_setitem(AiDictObject *mp, AiObject *key, AiObject *value) {
         }
     }
     used = DICT_SIZE(mp);
-    dict_insert(mp, key, hash, value);
+    AiDict_Insert(mp, key, hash, value);
 
     if (DICT_SIZE(mp) > used && mp->ma_fill * 3 >= (mp->ma_mask + 1) * 2) {
         return dict_resize(mp, DICT_SIZE(mp) * (DICT_SIZE(mp) > 50000 ? 2 : 4));
@@ -215,7 +216,7 @@ int dict_setitem(AiDictObject *mp, AiObject *key, AiObject *value) {
     }
 }
 
-int dict_insert(AiDictObject *mp, AiObject *key, long hash, AiObject *value) {
+int AiDict_Insert(AiDictObject *mp, AiObject *key, long hash, AiObject *value) {
     AiObject *old_value;
     AiDictEntry *ep;
 
@@ -244,7 +245,7 @@ int dict_insert(AiDictObject *mp, AiObject *key, long hash, AiObject *value) {
     return 0;
 }
 
-int dict_delitem(AiDictObject *mp, AiObject *key) {
+int AiDict_DelItem(AiDictObject *mp, AiObject *key) {
     long hash;
     AiDictEntry *ep;
     AiObject *old_key, *old_value;
@@ -285,7 +286,7 @@ AiObject *dict_str(AiDictObject *mp) {
     AiStringObject *split;
 
     if (DICT_SIZE(mp) == 0) {
-        return string_from_cstring("{}");
+        return AiString_From_String("{}");
     }
     else if (DICT_SIZE(mp) == 1) {
         for (ep = mp->ma_table; ; ++ep) {
@@ -295,14 +296,14 @@ AiObject *dict_str(AiDictObject *mp) {
                 break;
             }
         }
-        str = (AiStringObject *)string_from_cstring_with_size(NULL, STRING_LEN(key) + STRING_LEN(value) + 2 + 2);
+        str = (AiStringObject *)AiString_From_StringAndSize(NULL, STRING_LEN(key) + STRING_LEN(value) + 2 + 2);
         STRING_AS_CSTRING(str)[0] = '{';
         p = &STRING_AS_CSTRING(str)[1];
-        AiMEM_COPY(p, STRING_AS_CSTRING(key), STRING_LEN(key));
+        AiMem_Copy(p, STRING_AS_CSTRING(key), STRING_LEN(key));
         p += STRING_LEN(key);
         *p++ = ':';
         *p++ = ' ';
-        AiMEM_COPY(p, STRING_AS_CSTRING(value), STRING_LEN(value));
+        AiMem_Copy(p, STRING_AS_CSTRING(value), STRING_LEN(value));
         STRING_AS_CSTRING(str)[STRING_LEN(str) - 1] = '}';
 
         DEC_REFCNT(key);
@@ -311,7 +312,7 @@ AiObject *dict_str(AiDictObject *mp) {
         return (AiObject *)str;
     }
 
-    strlist = (AiListObject *)list_new(DICT_SIZE(mp));
+    strlist = (AiListObject *)AiList_New(DICT_SIZE(mp));
 
     for (ep = mp->ma_table; ; ++ep) {
         if (ep->me_key && ep->me_value) {
@@ -322,15 +323,15 @@ AiObject *dict_str(AiDictObject *mp) {
             break;
         }
     }
-    strlist->ob_item[0] = string_from_cstring_with_size(NULL, STRING_LEN(key) + STRING_LEN(value) + 2 + 1);
+    strlist->ob_item[0] = AiString_From_StringAndSize(NULL, STRING_LEN(key) + STRING_LEN(value) + 2 + 1);
     str = (AiStringObject *)(strlist->ob_item[0]);
     STRING_AS_CSTRING(str)[0] = '{';
     p = &STRING_AS_CSTRING(str)[1];
-    AiMEM_COPY(p, STRING_AS_CSTRING(key), STRING_LEN(key));
+    AiMem_Copy(p, STRING_AS_CSTRING(key), STRING_LEN(key));
     p += STRING_LEN(key);
     *p++ = ':';
     *p++ = ' ';
-    AiMEM_COPY(p, STRING_AS_CSTRING(value), STRING_LEN(value));
+    AiMem_Copy(p, STRING_AS_CSTRING(value), STRING_LEN(value));
 
     DEC_REFCNT(key);
     DEC_REFCNT(value);
@@ -342,14 +343,14 @@ AiObject *dict_str(AiDictObject *mp) {
             key = (AiStringObject *)OB_TO_STRING(ep->me_key);
             value = (AiStringObject *)OB_TO_STRING(ep->me_value);
 
-            strlist->ob_item[i] = string_from_cstring_with_size(NULL, STRING_LEN(key) + STRING_LEN(value) + 2);
+            strlist->ob_item[i] = AiString_From_StringAndSize(NULL, STRING_LEN(key) + STRING_LEN(value) + 2);
             str = (AiStringObject *)(strlist->ob_item[i]);
             p = STRING_AS_CSTRING(str);
-            AiMEM_COPY(p, STRING_AS_CSTRING(key), STRING_LEN(key));
+            AiMem_Copy(p, STRING_AS_CSTRING(key), STRING_LEN(key));
             p += STRING_LEN(key);
             *p++ = ':';
             *p++ = ' ';
-            AiMEM_COPY(p, STRING_AS_CSTRING(value), STRING_LEN(value));
+            AiMem_Copy(p, STRING_AS_CSTRING(value), STRING_LEN(value));
 
             DEC_REFCNT(key);
             DEC_REFCNT(value);
@@ -364,20 +365,20 @@ AiObject *dict_str(AiDictObject *mp) {
             break;
         }
     }
-    strlist->ob_item[LIST_SIZE(strlist) - 1] = string_from_cstring_with_size(NULL, STRING_LEN(key) + STRING_LEN(value) + 2 + 1);
+    strlist->ob_item[LIST_SIZE(strlist) - 1] = AiString_From_StringAndSize(NULL, STRING_LEN(key) + STRING_LEN(value) + 2 + 1);
     str = (AiStringObject *)(strlist->ob_item[LIST_SIZE(strlist) - 1]);
     p = STRING_AS_CSTRING(str);
-    AiMEM_COPY(p, STRING_AS_CSTRING(key), STRING_LEN(key));
+    AiMem_Copy(p, STRING_AS_CSTRING(key), STRING_LEN(key));
     p += STRING_LEN(key);
     *p++ = ':';
     *p++ = ' ';
-    AiMEM_COPY(p, STRING_AS_CSTRING(value), STRING_LEN(value));
+    AiMem_Copy(p, STRING_AS_CSTRING(value), STRING_LEN(value));
     STRING_AS_CSTRING(str)[STRING_LEN(str) - 1] = '}';
 
     DEC_REFCNT(key);
     DEC_REFCNT(value);
 
-    split = (AiStringObject *)string_from_cstring(", ");
+    split = (AiStringObject *)AiString_From_String(", ");
     str = (AiStringObject *)string_join(split, (AiObject *)strlist);
 
     DEC_REFCNT(split);
@@ -386,12 +387,12 @@ AiObject *dict_str(AiDictObject *mp) {
     return (AiObject *)str;
 }
 
-int dict_clear_free_dicts_and_dummy() {
+int AiDict_ClearAllMemory() {
     while (number_free_dicts--) {
-        AiMEM_FREE(free_dicts[number_free_dicts]);
+        AiMem_Free(free_dicts[number_free_dicts]);
     }
     if (dummy) {
-        AiMEM_FREE(dummy);
+        AiMem_Free(dummy);
     }
     return 0;
 }
@@ -421,18 +422,18 @@ int dict_resize(AiDictObject *mp, ssize_t minused) {
                 return 0;
             }
             else {
-                AiMEM_COPY(small_copy, old_table, sizeof(small_copy));
+                AiMem_Copy(small_copy, old_table, sizeof(small_copy));
                 old_table = small_copy;
             }
         }
     }
     else {
-        new_table = AiMEM_ALLOC(sizeof(AiDictEntry) * newsize);
+        new_table = AiMem_Alloc(sizeof(AiDictEntry) * newsize);
     }
 
     mp->ma_table = new_table;
     mp->ma_mask = newsize - 1;
-    AiMEM_SET(new_table, 0, sizeof(AiDictEntry) * newsize);
+    AiMem_Set(new_table, 0, sizeof(AiDictEntry) * newsize);
     DICT_SIZE(mp) = 0;
     i = mp->ma_fill;
     mp->ma_fill = 0;
@@ -440,7 +441,7 @@ int dict_resize(AiDictObject *mp, ssize_t minused) {
     for (ep = old_table; i > 0; ++ep) {
         if (ep->me_value) {
             --i;
-            dict_insert(mp, ep->me_key, ep->me_hash, ep->me_value);
+            AiDict_Insert(mp, ep->me_key, ep->me_hash, ep->me_value);
         }
         else if (ep->me_key) {
             --i;
@@ -449,7 +450,7 @@ int dict_resize(AiDictObject *mp, ssize_t minused) {
         }
     }
     if (old_table_is_smalltable) {
-        AiMEM_FREE(old_table);
+        AiMem_Free(old_table);
     }
     return 0;
 }
@@ -466,7 +467,7 @@ void dict_dealloc(AiDictObject *mp) {
         }
     }
     if (mp->ma_table != mp->ma_smalltable) {
-        AiMEM_FREE(mp->ma_table);
+        AiMem_Free(mp->ma_table);
     }
     if (CHECK_EXACT_TYPE_DICT(mp) && number_free_dicts < NUMBER_FREE_DICTS_MAX) {
         free_dicts[number_free_dicts++] = mp;

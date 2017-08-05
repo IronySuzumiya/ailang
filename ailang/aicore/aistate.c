@@ -2,10 +2,10 @@
 
 static AiInterpreterState *interp_head;
 
-AiThreadState *threadstate_current;
+AiThreadState *AiThreadState_Current;
 
-AiInterpreterState *interpreterstate_new() {
-    AiInterpreterState *interp = (AiInterpreterState *)AiMEM_ALLOC(sizeof(AiInterpreterState));
+AiInterpreterState *AiInterpreterState_New() {
+    AiInterpreterState *interp = (AiInterpreterState *)AiMem_Alloc(sizeof(AiInterpreterState));
 
     interp->modules = NULL;
     interp->sysdict = NULL;
@@ -18,10 +18,10 @@ AiInterpreterState *interpreterstate_new() {
     return interp;
 }
 
-void interpreterstate_clear(AiInterpreterState *interp) {
+void AiInterpreterState_Clear(AiInterpreterState *interp) {
     AiThreadState *p = interp->tstate_head;
     while (p) {
-        threadstate_clear(p);
+        AiThreadState_Clear(p);
         p = p->next;
     }
     OB_CLEAR(interp->modules);
@@ -29,11 +29,11 @@ void interpreterstate_clear(AiInterpreterState *interp) {
     OB_CLEAR(interp->builtins);
 }
 
-void interpreterstate_delete(AiInterpreterState *interp) {
+void AiInterpreterState_Delete(AiInterpreterState *interp) {
     AiInterpreterState **p;
     AiThreadState *t;
     while (t = interp->tstate_head) {
-        threadstate_delete(t);
+        AiThreadState_Delete(t);
     }
     for (p = &interp_head; ; p = &(*p)->next) {
         if (!(*p)) {
@@ -47,11 +47,11 @@ void interpreterstate_delete(AiInterpreterState *interp) {
     if (interp->tstate_head)
         FATAL_ERROR("remaining threads");
     *p = interp->next;
-    AiMEM_FREE(interp);
+    AiMem_Free(interp);
 }
 
-AiThreadState *threadstate_new(AiInterpreterState *interp) {
-    AiThreadState *tstate = (AiThreadState *)AiMEM_ALLOC(sizeof(AiThreadState));
+AiThreadState *AiThreadState_New(AiInterpreterState *interp) {
+    AiThreadState *tstate = (AiThreadState *)AiMem_Alloc(sizeof(AiThreadState));
 
     tstate->interp = interp;
 
@@ -75,7 +75,7 @@ AiThreadState *threadstate_new(AiInterpreterState *interp) {
     return tstate;
 }
 
-void threadstate_clear(AiThreadState *tstate) {
+void AiThreadState_Clear(AiThreadState *tstate) {
     if (tstate->frame == NULL)
         fprintf(stderr, "warning: thread still has a frame\n");
 
@@ -92,12 +92,12 @@ void threadstate_clear(AiThreadState *tstate) {
     OB_CLEAR(tstate->exc_traceback);
 }
 
-void threadstate_delete(AiThreadState *tstate) {
+void AiThreadState_Delete(AiThreadState *tstate) {
     AiInterpreterState *interp;
     AiThreadState **p;
     AiThreadState *prev_p = NULL;
 
-    if (tstate == threadstate_current)
+    if (tstate == AiThreadState_Current)
         FATAL_ERROR("tstate is still current");
 
     if (!tstate)
@@ -118,36 +118,36 @@ void threadstate_delete(AiThreadState *tstate) {
             FATAL_ERROR("circular list(!) and tstate not found.");
     }
     *p = tstate->next;
-    AiMEM_FREE(tstate);
+    AiMem_Free(tstate);
 }
 
-AiThreadState *threadstate_get() {
-    if (!threadstate_current)
+AiThreadState *AiThreadState_Get() {
+    if (!AiThreadState_Current)
         FATAL_ERROR("PyThreadState_Get: no current thread");
-    return threadstate_current;
+    return AiThreadState_Current;
 }
 
 
-AiThreadState *threadstate_swap(AiThreadState *newts) {
-    AiThreadState *oldts = threadstate_current;
-    threadstate_current = newts;
+AiThreadState *AiThreadState_Swap(AiThreadState *newts) {
+    AiThreadState *oldts = AiThreadState_Current;
+    AiThreadState_Current = newts;
     return oldts;
 }
 
-AiObject *threadstate_getdict() {
-    if (!threadstate_current)
+AiObject *AiThreadState_Getdict() {
+    if (!AiThreadState_Current)
         return NULL;
-    if (!threadstate_current->dict) {
-        threadstate_current->dict = dict_new();
+    if (!AiThreadState_Current->dict) {
+        AiThreadState_Current->dict = AiDict_New();
     }
-    return threadstate_current->dict;
+    return AiThreadState_Current->dict;
 }
 
-AiObject *threadstate_current_frame() {
+AiObject *AiThreadState_Current_Frame() {
     AiObject *result = NULL;
     AiInterpreterState *i;
 
-    result = dict_new();
+    result = AiDict_New();
 
     for (i = interp_head; i; i = i->next) {
         AiThreadState *t;
@@ -155,8 +155,8 @@ AiObject *threadstate_current_frame() {
             AiObject *id;
             AiObject *frame = (AiObject *)t->frame;
             if (frame) {
-                id = int_from_clong(t->thread_id);
-                dict_setitem((AiDictObject *)result, id, frame);
+                id = AiInt_From_Long(t->thread_id);
+                AiDict_SetItem((AiDictObject *)result, id, frame);
                 DEC_REFCNT(id);
             }
         }

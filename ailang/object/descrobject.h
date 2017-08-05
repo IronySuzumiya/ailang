@@ -61,9 +61,16 @@ AiGetSetDescrObject;
 
 typedef struct _wrapperdescrobject {
     AiDescr_HEAD
-    struct _wrapperbase *d_base;
+    struct wrapperbase *d_base;
     void *d_wrapped;
 }
 AiWrapperDescrObject;
+
+AiAPI_DATA(AiTypeObject) AiType_MethodDescr;
+AiAPI_DATA(AiTypeObject) AiType_ClassMethodDescr;
+AiAPI_DATA(AiTypeObject) AiType_MemberDescr;
+AiAPI_DATA(AiTypeObject) AiType_GetSetDescr;
+AiAPI_DATA(AiTypeObject) AiType_WrapperDescr;
+AiAPI_FUNC(AiObject *) AiDescr_NewWrapper(AiTypeObject *type, struct wrapperbase *base, void *wrapped);
 
 #endif

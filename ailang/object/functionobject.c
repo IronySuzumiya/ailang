@@ -2,8 +2,8 @@
 
 static void function_dealloc(AiFunctionObject *func);
 
-AiTypeObject type_functionobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_Function = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "function",                         /* tp_name */
     sizeof(AiFunctionObject),           /* tp_basicsize */
     0,                                  /* tp_itemsize */
@@ -21,8 +21,8 @@ AiTypeObject type_functionobject = {
 
     0,                                  /* tp_getattr */
     0,                                  /* tp_setattr */
-    0,//object_generic_getattr,             /* tp_getattro */
-    0,//object_generic_setattr,             /* tp_setattro */
+    0,//AiObject_Generic_Getattr,             /* tp_getattro */
+    0,//AiObject_Generic_Setattr,             /* tp_setattro */
 
     0,                                  /* tp_flags */
 
@@ -43,13 +43,13 @@ AiTypeObject type_functionobject = {
     0,//function_new,                       /* tp_new */
 };
 
-AiObject *function_new(AiObject *code, AiObject *globals) {
+AiObject *AiFunction_New(AiObject *code, AiObject *globals) {
     static AiObject *__name__ = NULL;
     AiObject *doc;
     AiObject *consts;
     AiObject *module;
-    AiFunctionObject *func = AiObject_GC_NEW(AiFunctionObject);
-    INIT_AiObject(func, &type_functionobject);
+    AiFunctionObject *func = AiObject_GC_New(AiFunctionObject);
+    INIT_AiObject(func, &AiType_Function);
 
     func->func_weakreflist = NULL;
     func->func_code = code;
@@ -62,7 +62,7 @@ AiObject *function_new(AiObject *code, AiObject *globals) {
     func->func_closure = NULL;
     consts = ((AiCodeObject *)code)->co_consts;
     if (tuple_size((AiTupleObject *)consts) >= 1) {
-        doc = tuple_getitem((AiTupleObject *)consts, 0);
+        doc = AiTuple_GetItem((AiTupleObject *)consts, 0);
         if (!CHECK_TYPE_STRING(doc)) {
             doc = NONE;
         }
@@ -75,10 +75,10 @@ AiObject *function_new(AiObject *code, AiObject *globals) {
     func->func_dict = NULL;
     func->func_module = NULL;
     if (!__name__) {
-        __name__ = string_from_cstring("__name__");
-        string_intern((AiStringObject **)&__name__);
+        __name__ = AiString_From_String("__name__");
+        AiString_Intern((AiStringObject **)&__name__);
     }
-    module = dict_getitem((AiDictObject *)globals, __name__);
+    module = AiDict_GetItem((AiDictObject *)globals, __name__);
     if (module) {
         INC_REFCNT(module);
         func->func_module = module;
@@ -86,7 +86,7 @@ AiObject *function_new(AiObject *code, AiObject *globals) {
     return (AiObject *)func;
 }
 
-int function_setdefaults(AiFunctionObject *func, AiObject *defaults) {
+int AiFunction_SetDefaults(AiFunctionObject *func, AiObject *defaults) {
     if (defaults == NONE) {
         defaults = NULL;
     }
@@ -102,7 +102,7 @@ int function_setdefaults(AiFunctionObject *func, AiObject *defaults) {
     return 0;
 }
 
-int function_setclosure(AiFunctionObject *func, AiObject *closure) {
+int AiFunction_SetClosure(AiFunctionObject *func, AiObject *closure) {
     if (closure == NONE) {
         closure = NULL;
     }
@@ -128,5 +128,5 @@ void function_dealloc(AiFunctionObject *func) {
     XDEC_REFCNT(func->func_doc);
     XDEC_REFCNT(func->func_dict);
     XDEC_REFCNT(func->func_closure);
-    AiObject_GC_DEL(func);
+    AiObject_GC_Del(func);
 }

@@ -15,9 +15,9 @@
 
 typedef AiIntObject AiBoolObject;
 
-AiAPI_DATA(AiTypeObject) type_boolobject;
+AiAPI_DATA(AiTypeObject) AiType_Bool;
 AiAPI_DATA(AiBoolObject *) aitrue;
 AiAPI_DATA(AiBoolObject *) aifalse;
-AiAPI_FUNC(AiObject *) bool_from_clong(long ival);
+AiAPI_FUNC(AiObject *) AiBool_From_Long(long ival);
 
 #endif

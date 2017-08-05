@@ -1,12 +1,13 @@
 #include "../ailang.h"
 
-static void iter_dealloc(AiIterObject *iter);
-static AiObject *iter_iter(AiIterObject *iter);
+static void iter_dealloc(AiSeqiterObject *iter);
+static AiObject *iter_iter(AiSeqiterObject *iter);
+static AiObject *seqiter_iternext(AiSeqiterObject *iter);
 
-AiTypeObject type_iterobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_Seqiter = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "iterator",                         /* tp_name */
-    sizeof(AiIterObject),               /* tp_basicsize */
+    sizeof(AiSeqiterObject),               /* tp_basicsize */
     0,                                  /* tp_itemsize */
     (destructor)iter_dealloc,           /* tp_dealloc */
     0,                                  /* tp_print */
@@ -22,25 +23,25 @@ AiTypeObject type_iterobject = {
 
     0,                                  /* tp_getattr */
     0,                                  /* tp_setattr */
-    0,//object_generic_getattr,             /* tp_getattro */
+    0,//AiObject_Generic_Getattr,             /* tp_getattro */
     0,                                  /* tp_setattro */
 
     0,                                  /* tp_flags */
 
     (unaryfunc)iter_iter,               /* tp_iter */
-    (unaryfunc)iter_iternext,           /* tp_iternext */
+    (unaryfunc)seqiter_iternext,           /* tp_iternext */
     0,//iter_methods,                       /* tp_methods */
 };
 
-AiObject *iter_new(AiObject *seq) {
-    AiIterObject *it;
+AiObject *AiSeqiter_New(AiObject *seq) {
+    AiSeqiterObject *it;
 
     if (!CHECK_ITERABLE(seq)) {
         RUNTIME_EXCEPTION("object cannot be iterated");
         return NULL;
     }
-    it = AiObject_GC_NEW(AiIterObject);
-    INIT_AiObject(it, &type_iterobject);
+    it = AiObject_GC_New(AiSeqiterObject);
+    INIT_AiObject(it, &AiType_Seqiter);
     it->it_index = 0;
     INC_REFCNT(seq);
     it->it_seq = (AiListObject *)seq;
@@ -48,7 +49,7 @@ AiObject *iter_new(AiObject *seq) {
     return (AiObject *)it;
 }
 
-AiObject *iter_iternext(AiIterObject *iter) {
+AiObject *seqiter_iternext(AiSeqiterObject *iter) {
     if (!iter->it_seq) {
         return NULL;
     }
@@ -62,12 +63,12 @@ AiObject *iter_iternext(AiIterObject *iter) {
     }
 }
 
-void iter_dealloc(AiIterObject *iter) {
+void iter_dealloc(AiSeqiterObject *iter) {
     XDEC_REFCNT(iter->it_seq);
-    AiMEM_FREE(iter);
+    AiMem_Free(iter);
 }
 
-AiObject *iter_iter(AiIterObject *iter) {
+AiObject *iter_iter(AiSeqiterObject *iter) {
     INC_REFCNT(iter);
     return (AiObject *)iter;
 }

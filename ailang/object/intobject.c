@@ -26,6 +26,10 @@ static AiObject *int_invert(AiIntObject *ob);
 static AiObject *int_xor(AiIntObject *lhs, AiIntObject *rhs);
 static AiIntObject *fill_free_list(void);
 
+static AiIntBlock *block_list;
+static AiIntObject *free_list;
+static AiIntObject *small_intobject_buf[SMALL_INTOBJECT_BUF_SIZE];
+
 static AiNumberMethods int_as_number = {
     (binaryfunc)int_add,
     (binaryfunc)int_sub,
@@ -52,8 +56,8 @@ static AiNumberMethods int_as_number = {
     0,
 };
 
-AiTypeObject type_intobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_Int = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "int",                          /* tp_name */
     sizeof(AiIntObject),            /* tp_basicsize */
     0,                              /* tp_itemsize */
@@ -71,7 +75,7 @@ AiTypeObject type_intobject = {
 
     0,                              /* tp_getattr */
     0,                              /* tp_setattr */
-    0,//object_generic_getattr,         /* tp_getattro */
+    0,//AiObject_Generic_Getattr,         /* tp_getattro */
     0,                              /* tp_setattro */
 
     SUBCLASS_INT | BASE_TYPE,       /* tp_flags */
@@ -92,12 +96,7 @@ AiTypeObject type_intobject = {
     0,//int_new,                        /* tp_new */
 };
 
-AiIntBlock *block_list;
-AiIntObject *free_list;
-
-AiIntObject *small_intobject_buf[SMALL_INTOBJECT_BUF_SIZE];
-
-AiObject *int_from_clong(long ival) {
+AiObject *AiInt_From_Long(long ival) {
     AiIntObject *v = 0;
     if (ival >= -NUM_NEG_SMALL_INTOBJECT && ival < NUM_POS_SMALL_INTOBJECT) {
         v = small_intobject_buf[SMALL_INTOBJECT_INDEX(ival)];
@@ -111,13 +110,13 @@ AiObject *int_from_clong(long ival) {
         }
         v = free_list;
         free_list = (AiIntObject *)v->ob_type;
-        INIT_AiObject(v, &type_intobject);
+        INIT_AiObject(v, &AiType_Int);
         v->ob_ival = ival;
         return (AiObject *)v;
     }
 }
 
-int int_init() {
+int AiInt_Init() {
     AiIntObject *v;
     for (long i = -NUM_NEG_SMALL_INTOBJECT; i < NUM_POS_SMALL_INTOBJECT; ++i) {
         if (!free_list && !(free_list = fill_free_list())) {
@@ -126,20 +125,20 @@ int int_init() {
         }
         v = free_list;
         free_list = (AiIntObject *)v->ob_type;
-        INIT_AiObject(v, &type_intobject);
+        INIT_AiObject(v, &AiType_Int);
         v->ob_ival = i;
         small_intobject_buf[SMALL_INTOBJECT_INDEX(i)] = v;
     }
     return 0;
 }
 
-int int_clear_blocks(void) {
+int AiInt_ClearAllMemory(void) {
     AiIntBlock *s = block_list;
     AiIntBlock *n = s;
 
     while (s) {
         n = s->next;
-        AiMEM_FREE(s);
+        AiMem_Free(s);
         s = n;
     }
     return 0;
@@ -175,7 +174,7 @@ void int_to_cstring(AiIntObject *ob, char *buffer, int radix) {
 AiObject *int_str_with_radix(AiIntObject *ob, int radix) {
     char buffer[INT_TO_CSTRING_BUFFER_SIZE];
     int_to_cstring(ob, buffer, radix);
-    return string_from_cstring(buffer);
+    return AiString_From_String(buffer);
 }
 
 AiObject *int_str(AiIntObject *ob) {
@@ -218,7 +217,7 @@ AiObject *int_mul(AiIntObject *lhs, AiIntObject *rhs) {
 AiObject *int_div(AiIntObject *lhs, AiIntObject *rhs) {
     if (CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs)) {
         if (rhs->ob_ival) {
-            return int_from_clong(lhs->ob_ival / rhs->ob_ival);
+            return AiInt_From_Long(lhs->ob_ival / rhs->ob_ival);
         }
         else {
             RUNTIME_EXCEPTION("division by zero");
@@ -234,7 +233,7 @@ AiObject *int_div(AiIntObject *lhs, AiIntObject *rhs) {
 AiObject *int_mod(AiIntObject *lhs, AiIntObject *rhs) {
     if (CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs)) {
         if (rhs->ob_ival) {
-            return int_from_clong(lhs->ob_ival % rhs->ob_ival);
+            return AiInt_From_Long(lhs->ob_ival % rhs->ob_ival);
         }
         else {
             RUNTIME_EXCEPTION("modulo by zero");
@@ -249,7 +248,7 @@ AiObject *int_mod(AiIntObject *lhs, AiIntObject *rhs) {
 
 AiObject *int_pow(AiIntObject *lhs, AiIntObject *rhs) {
     if (CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs)) {
-        return int_from_clong((long)pow(lhs->ob_ival, rhs->ob_ival));
+        return AiInt_From_Long((long)pow(lhs->ob_ival, rhs->ob_ival));
     }
     else {
         UNSUPPORTED_POW(lhs, rhs);
@@ -259,7 +258,7 @@ AiObject *int_pow(AiIntObject *lhs, AiIntObject *rhs) {
 
 AiObject *int_pos(AiIntObject *ob) {
     if (CHECK_TYPE_INT(ob)) {
-        return int_from_clong(ob->ob_ival);
+        return AiInt_From_Long(ob->ob_ival);
     }
     else {
         UNSUPPORTED_POS(ob);
@@ -269,7 +268,7 @@ AiObject *int_pos(AiIntObject *ob) {
 
 AiObject *int_neg(AiIntObject *ob) {
     if (CHECK_TYPE_INT(ob)) {
-        return int_from_clong(-ob->ob_ival);
+        return AiInt_From_Long(-ob->ob_ival);
     }
     else {
         UNSUPPORTED_NEG(ob);
@@ -279,7 +278,7 @@ AiObject *int_neg(AiIntObject *ob) {
 
 AiObject *int_abs(AiIntObject *ob) {
     if (CHECK_TYPE_INT(ob)) {
-        return int_from_clong(ob->ob_ival >= 0 ? ob->ob_ival : -ob->ob_ival);
+        return AiInt_From_Long(ob->ob_ival >= 0 ? ob->ob_ival : -ob->ob_ival);
     }
     else {
         UNSUPPORTED_ABS(ob);
@@ -376,7 +375,7 @@ AiObject *int_invert(AiIntObject *ob) {
 
 AiIntObject *fill_free_list() {
     AiIntObject *p, *q;
-    p = AiObject_GC_NEW(AiIntBlock);
+    p = AiObject_GC_New(AiIntBlock);
     if (!p) {
         return NULL;
     }

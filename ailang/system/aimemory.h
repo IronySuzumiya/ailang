@@ -4,14 +4,14 @@
 
 #include "../aiconfig.h"
 
-#define AiMEM_ALLOC             mem_alloc
-#define AiMEM_FREE              mem_free
-#define AiMEM_REALLOC           mem_realloc
-#define AiMEM_COPY              mem_copy
-#define AiMEM_SET               mem_set
-#define AiObject_GC_NEW(type)   (mem_alloc(sizeof(type)))
-#define AiObject_GC_DEL         AiMEM_FREE
-#define AiObject_GC_FREE        AiMEM_FREE
+#define AiMem_Alloc             mem_alloc
+#define AiMem_Free              mem_free
+#define AiMem_Realloc           mem_realloc
+#define AiMem_Copy              mem_copy
+#define AiMem_Set               mem_set
+#define AiObject_GC_New(type)   (mem_alloc(sizeof(type)))
+#define AiObject_GC_Del         AiMem_Free
+#define AiObject_GC_Free        AiMem_Free
 
 typedef struct _heap_list {
     void *mem;

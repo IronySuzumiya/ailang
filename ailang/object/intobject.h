@@ -27,26 +27,23 @@ typedef struct _intblock {
 AiIntBlock;
 
 #define CHECK_TYPE_INT(a) CHECK_FAST_SUBCLASS(a, SUBCLASS_INT)
-#define CHECK_EXACT_TYPE_INT(a) CHECK_TYPE(a, &type_intobject)
+#define CHECK_EXACT_TYPE_INT(a) CHECK_TYPE(a, &AiType_Int)
 
 #define INT_UNARY_WITH_CHECK(ob, op)                                \
-    (CHECK_TYPE_INT(ob) ? int_from_clong(op (ob)->ob_ival) : NULL)
+    (CHECK_TYPE_INT(ob) ? AiInt_From_Long(op (ob)->ob_ival) : NULL)
 
 #define INT_BINARY_WITH_CHECK(lhs, rhs, op)                         \
     (CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs) ?                   \
-        int_from_clong((lhs)->ob_ival op (rhs)->ob_ival) : NULL)
+        AiInt_From_Long((lhs)->ob_ival op (rhs)->ob_ival) : NULL)
 
 #define INT_TO_CSTRING_BUFFER_SIZE 33
 
 #define INT_AS_CLONG(ob) (((AiIntObject *)(ob))->ob_ival)
 
-AiAPI_DATA(AiIntBlock *) block_list;
-AiAPI_DATA(AiIntObject *) free_list;
-AiAPI_DATA(AiTypeObject) type_intobject;
-AiAPI_DATA(AiIntObject *) small_intobject_buf[SMALL_INTOBJECT_BUF_SIZE];
-AiAPI_FUNC(AiObject *) int_from_clong(long ival);
-AiAPI_FUNC(int) int_init(void);
+AiAPI_DATA(AiTypeObject) AiType_Int;
+AiAPI_FUNC(AiObject *) AiInt_From_Long(long ival);
+AiAPI_FUNC(int) AiInt_Init(void);
 
-AiAPI_DATA(int) int_clear_blocks(void);
+AiAPI_DATA(int) AiInt_ClearAllMemory(void);
 
 #endif

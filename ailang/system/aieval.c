@@ -14,7 +14,7 @@ static enum why_code do_raise(AiObject *type, AiObject *value, AiObject *tb);
 static AiObject *call_function(AiObject ***pp_stack, int oparg);
 static AiObject *fast_function(AiObject *func, AiObject ***pp_stack, int n, int na, int nk);
 
-AiObject *eval_frame(AiFrameObject *f) {
+AiObject *Eval_Frame(AiFrameObject *f) {
     AiObject **stack_pointer;
     unsigned char *next_instr;
     int opcode;
@@ -31,7 +31,7 @@ AiObject *eval_frame(AiFrameObject *f) {
     AiObject *names;
     AiObject *consts;
     char *filename;
-    AiThreadState *tstate = threadstate_get();
+    AiThreadState *tstate = AiThreadState_Get();
 
     if (!f) {
         return NULL;
@@ -109,21 +109,21 @@ AiObject *eval_frame(AiFrameObject *f) {
             w = TUPLE_GETITEM(names, oparg);
             v = POP();
             if (x = f->f_locals) {
-                dict_setitem((AiDictObject *)x, w, v);
+                AiDict_SetItem((AiDictObject *)x, w, v);
             }
             DEC_REFCNT(v);
             break;
 
         case BUILD_MAP:
-            x = dict_new();
+            x = AiDict_New();
             PUSH(x);
             continue;
 
         case BUILD_LIST:
-            x = list_new(oparg);
+            x = AiList_New(oparg);
             while (--oparg >= 0) {
                 w = POP();
-                list_setitem((AiListObject *)x, oparg, w);
+                AiList_SetItem((AiListObject *)x, oparg, w);
             }
             PUSH(x);
             break;
@@ -150,7 +150,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             x = w = POP();
             v = POP();
             u = POP();
-            dict_setitem((AiDictObject *)v, w, u);
+            AiDict_SetItem((AiDictObject *)v, w, u);
             DEC_REFCNT(u);
             DEC_REFCNT(v);
             DEC_REFCNT(w);
@@ -159,11 +159,11 @@ AiObject *eval_frame(AiFrameObject *f) {
         case LOAD_NAME:
             w = TUPLE_GETITEM(names, oparg);
             v = f->f_locals;
-            x = dict_getitem((AiDictObject *)v, w);
+            x = AiDict_GetItem((AiDictObject *)v, w);
             if (!x) {
-                x = dict_getitem((AiDictObject *)f->f_globals, w);
+                x = AiDict_GetItem((AiDictObject *)f->f_globals, w);
                 if (!x) {
-                    x = dict_getitem((AiDictObject *)f->f_builtins, w);
+                    x = AiDict_GetItem((AiDictObject *)f->f_builtins, w);
                     if (!x) {
                         RUNTIME_EXCEPTION("unknown name %s", STRING_AS_CSTRING(w));
                         break;
@@ -177,7 +177,7 @@ AiObject *eval_frame(AiFrameObject *f) {
         case COMPARE_OP:
             w = POP();
             v = POP();
-            x = object_rich_compare_bool(v, w, oparg);
+            x = AiObject_Rich_Compare_Bool(v, w, oparg);
             DEC_REFCNT(w);
             DEC_REFCNT(v);
             if (x) {
@@ -209,12 +209,12 @@ AiObject *eval_frame(AiFrameObject *f) {
         case SETUP_LOOP:
         case SETUP_EXCEPT:
         case SETUP_FINALLY:
-            frame_setup_block(f, opcode, INSTR_OFFSET() + oparg, STACK_LEVEL());
+            AiFrame_Setup_Block(f, opcode, INSTR_OFFSET() + oparg, STACK_LEVEL());
             continue;
 
         case GET_ITER:
             v = POP();
-            x = object_getiter(v);
+            x = AiObject_Generic_Getiter(v);
             if (x) {
                 PUSH(x);
             }
@@ -244,7 +244,7 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case POP_BLOCK:
         {
-            AiTryBlock *b = frame_pop_block(f);
+            AiTryBlock *b = AiFrame_Pop_Block(f);
             while (STACK_LEVEL() > b->b_level) {
                 v = POP();
                 DEC_REFCNT(v);
@@ -257,7 +257,7 @@ AiObject *eval_frame(AiFrameObject *f) {
             break;
 
         case CONTINUE_LOOP:
-            retval = int_from_clong(oparg);
+            retval = AiInt_From_Long(oparg);
             why = WHY_CONTINUE;
             break;
 
@@ -290,10 +290,10 @@ AiObject *eval_frame(AiFrameObject *f) {
                 }
                 DEC_REFCNT(v);
             }
-            else if (exceptionclass_check(v) || CHECK_TYPE_STRING(v)) {
+            else if (AiExceptionClass_Check(v) || CHECK_TYPE_STRING(v)) {
                 w = POP();
                 u = POP();
-                exception_restore(v, w, u);
+                AiException_Restore(v, w, u);
                 why = WHY_RERAISE;
             }
             else if (v != NONE) {
@@ -305,15 +305,15 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case MAKE_FUNCTION:
             v = POP();
-            x = function_new(v, f->f_globals);
+            x = AiFunction_New(v, f->f_globals);
             DEC_REFCNT(v);
             if (x && oparg > 0) {
-                v = tuple_new(oparg);
+                v = AiTuple_New(oparg);
                 while (--oparg >= 0) {
                     w = POP();
                     TUPLE_SETITEM(v, oparg, w);
                 }
-                function_setdefaults((AiFunctionObject *)x, v);
+                AiFunction_SetDefaults((AiFunctionObject *)x, v);
                 DEC_REFCNT(v);
             }
             PUSH(x);
@@ -348,13 +348,13 @@ AiObject *eval_frame(AiFrameObject *f) {
         case STORE_DEREF:
             w = POP();
             x = freevars[oparg];
-            cell_set((AiCellObject *)x, w);
+            AiCell_Set((AiCellObject *)x, w);
             DEC_REFCNT(w);
             break;
 
         case LOAD_DEREF:
             x = freevars[oparg];
-            w = cell_get((AiCellObject *)x);
+            w = AiCell_Get((AiCellObject *)x);
             if (w) {
                 PUSH(w);
             }
@@ -378,19 +378,19 @@ AiObject *eval_frame(AiFrameObject *f) {
 
         case MAKE_CLOSURE:
             v = POP();
-            x = function_new(v, f->f_globals);
+            x = AiFunction_New(v, f->f_globals);
             DEC_REFCNT(v);
             if (x) {
                 v = POP();
-                function_setclosure((AiFunctionObject *)x, v);
+                AiFunction_SetClosure((AiFunctionObject *)x, v);
                 DEC_REFCNT(v);
                 if (oparg > 0) {
-                    v = tuple_new(oparg);
+                    v = AiTuple_New(oparg);
                     while (--oparg >= 0) {
                         w = POP();
                         TUPLE_SETITEM(v, oparg, w);
                     }
-                    function_setdefaults((AiFunctionObject *)x, v);
+                    AiFunction_SetDefaults((AiFunctionObject *)x, v);
                     DEC_REFCNT(v);
                 }
             }
@@ -669,13 +669,13 @@ AiObject *eval_frame(AiFrameObject *f) {
             }
         }
         if (why == WHY_EXCEPTION) {
-            traceback_here(f);
+            AiTraceback_Here(f);
         }
         if (why == WHY_RERAISE) {
             why = WHY_EXCEPTION;
         }
         while (why != WHY_NOT && f->f_iblock > 0) {
-            AiTryBlock *b = frame_peek_block(f);
+            AiTryBlock *b = AiFrame_Peek_Block(f);
             if (b->b_type == SETUP_LOOP && why == WHY_CONTINUE) {
                 why = WHY_NOT;
                 JUMPTO(INT_AS_CLONG(retval));
@@ -696,7 +696,7 @@ AiObject *eval_frame(AiFrameObject *f) {
                 || (b->b_type == SETUP_EXCEPT && why == WHY_EXCEPTION)) {
                 if (why == WHY_EXCEPTION) {
                     AiObject *type, *val, *tb;
-                    exception_fetch(&type, &val, &tb);
+                    AiException_Fetch(&type, &val, &tb);
                     if (!val) {
                         val = GET_NONE();
                     }
@@ -711,7 +711,7 @@ AiObject *eval_frame(AiFrameObject *f) {
                     if (why & (WHY_RETURN | WHY_CONTINUE)) {
                         PUSH(retval);
                     }
-                    v = int_from_clong((long)why);
+                    v = AiInt_From_Long((long)why);
                     PUSH(v);
                 }
                 why = WHY_NOT;
@@ -735,7 +735,7 @@ AiObject *eval_frame(AiFrameObject *f) {
     return retval;
 }
 
-AiObject *eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,
+AiObject *Eval_Code(AiCodeObject *co, AiObject *globals, AiObject *locals,
     AiObject **args, int argcount,
     AiObject **kws, int kwcount,
     AiObject **defs, int defcount,
@@ -743,9 +743,9 @@ AiObject *eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,
     AiFrameObject *f;
     AiObject *retval = NULL;
     AiObject **fastlocals, **freevars;
-    AiThreadState *tstate = threadstate_get();
+    AiThreadState *tstate = AiThreadState_Get();
 
-    f = frame_new(tstate, co, globals, locals);
+    f = AiFrame_New(tstate, co, globals, locals);
     fastlocals = f->f_localsplus;
     freevars = f->f_localsplus + co->co_nlocals;
     if (co->co_argcount > 0 || co->co_flags & (CO_VARARGS | CO_VARKEYWORDS)) {
@@ -769,11 +769,11 @@ AiObject *eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,
         }
         
         if (co->co_flags & CO_VARARGS) {
-            lst = tuple_new(argcount - nposargs);
+            lst = AiTuple_New(argcount - nposargs);
             SETLOCAL(co->co_argcount, lst);
         }
         if (co->co_flags & CO_VARKEYWORDS) {
-            kwdict = dict_new();
+            kwdict = AiDict_New();
             SETLOCAL(co->co_flags & CO_VARARGS ?
                 co->co_argcount + 1 : co->co_argcount, kwdict);
         }
@@ -800,7 +800,7 @@ AiObject *eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,
                 goto fail;
             }
             for (int j = 0; j < co->co_argcount; ++i) {
-                kw_found = object_rich_compare(
+                kw_found = AiObject_Rich_Compare(
                     TUPLE_GETITEM(co->co_varnames, j), keyword, CMP_EQ);
                 if (kw_found > 0) {
                     INC_REFCNT(value);
@@ -813,7 +813,7 @@ AiObject *eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,
                 }
             }
             if(!kw_found) {
-                dict_setitem((AiDictObject *)kwdict, keyword, value);
+                AiDict_SetItem((AiDictObject *)kwdict, keyword, value);
             }
         }
         if (argcount < co->co_argcount) {
@@ -863,13 +863,13 @@ AiObject *eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,
             for (int j = 0; j < nargs; ++j) {
                 if (!strcmp(STRING_AS_CSTRING(TUPLE_GETITEM(co->co_cellvars, i)),
                     STRING_AS_CSTRING(TUPLE_GETITEM(co->co_varnames, j)))) {
-                    SETLOCAL(co->co_nlocals + i, cell_new(GETLOCAL(j)));
+                    SETLOCAL(co->co_nlocals + i, AiCell_New(GETLOCAL(j)));
                     found = 1;
                     break;
                 }
             }
             if (!found) {
-                SETLOCAL(co->co_nlocals + i, cell_new(NULL));
+                SETLOCAL(co->co_nlocals + i, AiCell_New(NULL));
             }
         }
     }
@@ -882,7 +882,7 @@ AiObject *eval_code(AiCodeObject *co, AiObject *globals, AiObject *locals,
         }
     }
 
-    retval = eval_frame(f);
+    retval = Eval_Frame(f);
 
 fail:
     DEC_REFCNT(f);
@@ -891,7 +891,7 @@ fail:
 
 enum why_code do_raise(AiObject *type, AiObject *value, AiObject *tb) {
     if (!type) {
-        AiThreadState *tstate = threadstate_get();
+        AiThreadState *tstate = AiThreadState_Get();
         type = tstate->exc_type ? tstate->exc_type : NONE;
         value = tstate->exc_value;
         tb = tstate->exc_traceback;
@@ -938,7 +938,7 @@ enum why_code do_raise(AiObject *type, AiObject *value, AiObject *tb) {
         INC_REFCNT(type);
         DEC_REFCNT(tmp);
     }
-    exception_restore(type, value, tb);
+    AiException_Restore(type, value, tb);
     if (!tb) {
         return WHY_EXCEPTION;
     }
@@ -958,7 +958,6 @@ AiObject *call_function(AiObject ***pp_stack, int oparg) {
     int n = na + 2 * nk;
     AiObject **pfunc = (*pp_stack) - n - 1;
     AiObject *func = *pfunc;
-    AiObject *x, *w;
 
     if (CHECK_TYPE_FUNCTION(func) && nk == 0) {
         return fast_function(func, pp_stack, n, na, nk);
@@ -980,16 +979,16 @@ AiObject *fast_function(AiObject *func, AiObject ***pp_stack, int n, int na, int
         && co->co_flags == (CO_OPTIMIZED | CO_NEWLOCALS | CO_NOFREE)) {
         AiFrameObject *f;
         AiObject *retval;
-        AiThreadState *tstate = threadstate_get();
+        AiThreadState *tstate = AiThreadState_Get();
         AiObject **fastlocals, **stack;
 
-        f = frame_new(tstate, co, globals, NULL);
+        f = AiFrame_New(tstate, co, globals, NULL);
         fastlocals = f->f_localsplus;
         stack = (*pp_stack) - n;
         for (ssize_t i = 0; i < n; ++i) {
             fastlocals[i] = *stack++;
         }
-        retval = eval_frame(f);
+        retval = Eval_Frame(f);
 
         return retval;
     }
@@ -1000,7 +999,7 @@ AiObject *fast_function(AiObject *func, AiObject ***pp_stack, int n, int na, int
         d = &TUPLE_GETITEM(argdefs, 0);
         nd = (int)TUPLE_SIZE(argdefs);
     }
-    return eval_code(co, globals,
+    return Eval_Code(co, globals,
         NULL, (*pp_stack) - n, na,
         (*pp_stack) - 2 * nk, nk, d, nd,
         FUNCTION_GETCLOSURE(func));

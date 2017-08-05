@@ -1,27 +1,27 @@
 #include "../ailang.h"
 
-AiTypeObject type_moduleobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_Module = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "module",
 
 };
 
-AiObject *module_new(char *name) {
+AiObject *AiModule_New(char *name) {
     AiModuleObject *m;
     AiObject *namestr;
-    m = AiObject_GC_NEW(AiModuleObject);
-    namestr = string_from_cstring(name);
-    m->md_dict = dict_new();
+    m = AiObject_GC_New(AiModuleObject);
+    namestr = AiString_From_String(name);
+    m->md_dict = AiDict_New();
     // TODO
     DEC_REFCNT(namestr);
     return (AiObject *)m;
 }
 
-AiObject *module_getdict(AiModuleObject *m) {
+AiObject *AiModule_Getdict(AiModuleObject *m) {
     if (m->md_dict) {
         return m->md_dict;
     }
     else {
-        return m->md_dict = dict_new();
+        return m->md_dict = AiDict_New();
     }
 }

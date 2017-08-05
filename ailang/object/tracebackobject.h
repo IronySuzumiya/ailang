@@ -13,10 +13,10 @@ typedef struct _tracebackobject {
 }
 AiTracebackObject;
 
-#define CHECK_TYPE_TRACEBACK(ob) CHECK_TYPE(ob, &type_tracebackobject)
+#define CHECK_TYPE_TRACEBACK(ob) CHECK_TYPE(ob, &AiType_Traceback)
 
-AiAPI_DATA(AiTypeObject) type_tracebackobject;
-AiAPI_FUNC(void) traceback_here(AiFrameObject *frame);
-AiAPI_FUNC(AiTracebackObject *) traceback_new(AiTracebackObject *next, AiFrameObject *frame);
+AiAPI_DATA(AiTypeObject) AiType_Traceback;
+AiAPI_FUNC(void) AiTraceback_Here(AiFrameObject *frame);
+AiAPI_FUNC(AiTracebackObject *) AiTraceback_New(AiTracebackObject *next, AiFrameObject *frame);
 
 #endif

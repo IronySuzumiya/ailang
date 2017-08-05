@@ -34,7 +34,7 @@ AiDictObject;
 
 #define EMPTY_TO_MINSIZE(mp)                                            \
     WRAP(                                                               \
-        AiMEM_SET((mp)->ma_smalltable, 0, sizeof((mp)->ma_smalltable)); \
+        AiMem_Set((mp)->ma_smalltable, 0, sizeof((mp)->ma_smalltable)); \
         DICT_SIZE(mp) = (mp)->ma_fill = 0;                              \
         INIT_NONZERO_DICT_SLOTS(mp);                                    \
     )
@@ -43,21 +43,20 @@ AiDictObject;
 
 #define PERTURB_SHIFT 5
 
-#define CHECK_EXACT_TYPE_DICT(ob) CHECK_TYPE(ob, &type_dictobject)
+#define CHECK_EXACT_TYPE_DICT(ob) CHECK_TYPE(ob, &AiType_Dict)
 #define CHECK_TYPE_DICT(ob) CHECK_FAST_SUBCLASS(ob, SUBCLASS_DICT)
 
 #define DICT_SIZE(ob) (((AiDictObject *)(ob))->ma_used)
 
-AiAPI_DATA(AiTypeObject) type_dictobject;
-AiAPI_FUNC(AiDictEntry *) dict_lookup(AiDictObject *mp, AiObject *key, long hash);
-AiAPI_FUNC(AiDictEntry *) dict_lookup_with_string(AiDictObject *mp, AiStringObject *key, long hash);
-AiAPI_FUNC(AiObject *) dict_new(void);
-AiAPI_FUNC(AiObject *) dict_getitem(AiDictObject *mp, AiObject *key);
-AiAPI_FUNC(int) dict_setitem(AiDictObject *mp, AiObject *key, AiObject *value);
-AiAPI_FUNC(int) dict_insert(AiDictObject *mp, AiObject *key, long hash, AiObject *value);
-AiAPI_FUNC(int) dict_delitem(AiDictObject *mp, AiObject *key);
-AiAPI_FUNC(AiObject *) dict_str(AiDictObject *mp);
+AiAPI_DATA(AiTypeObject) AiType_Dict;
+AiAPI_FUNC(AiDictEntry *) AiDict_Lookup(AiDictObject *mp, AiObject *key, long hash);
+AiAPI_FUNC(AiDictEntry *) AiDict_Lookup_String(AiDictObject *mp, AiStringObject *key, long hash);
+AiAPI_FUNC(AiObject *) AiDict_New(void);
+AiAPI_FUNC(AiObject *) AiDict_GetItem(AiDictObject *mp, AiObject *key);
+AiAPI_FUNC(int) AiDict_SetItem(AiDictObject *mp, AiObject *key, AiObject *value);
+AiAPI_FUNC(int) AiDict_Insert(AiDictObject *mp, AiObject *key, long hash, AiObject *value);
+AiAPI_FUNC(int) AiDict_DelItem(AiDictObject *mp, AiObject *key);
 
-AiAPI_FUNC(int) dict_clear_free_dicts_and_dummy(void);
+AiAPI_FUNC(int) AiDict_ClearAllMemory(void);
 
 #endif

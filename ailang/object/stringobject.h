@@ -19,7 +19,7 @@ enum stringobject_sstate {
 };
 
 #define CHECK_TYPE_STRING(a) CHECK_FAST_SUBCLASS(a, SUBCLASS_STRING)
-#define CHECK_EXACT_TYPE_STRING(a) CHECK_TYPE(a, &type_stringobject)
+#define CHECK_EXACT_TYPE_STRING(a) CHECK_TYPE(a, &AiType_String)
 
 #define CHECK_STRING_INTERNED(s) (((AiStringObject *)s)->ob_sstate)
 
@@ -27,7 +27,7 @@ enum stringobject_sstate {
 
 #define STRING_LEN OB_SIZE
 
-#define NULL_STRING (string_from_cstring(""))
+#define NULL_STRING (AiString_From_String(""))
 
 #define STRING_EQUAL(lhs, rhs)                                      \
     CHECK_TYPE_STRING(lhs) && CHECK_TYPE_STRING(rhs)                \
@@ -35,19 +35,15 @@ enum stringobject_sstate {
 
 #define STRING_OBJECT_SIZE (offsetof(AiStringObject, ob_sval) + 1)
 
-AiAPI_DATA(AiTypeObject) type_basestringobject;
-AiAPI_DATA(AiTypeObject) type_stringobject;
+AiAPI_DATA(AiTypeObject) AiType_BaseString;
+AiAPI_DATA(AiTypeObject) AiType_String;
 AiAPI_DATA(AiStringObject *) nullstring;
-AiAPI_FUNC(AiObject *) string_from_cstring(char *sval);
-AiAPI_FUNC(AiObject *) string_from_cstring_with_size(char *sval, ssize_t size);
-AiAPI_FUNC(void) string_intern(AiStringObject **a);
-AiAPI_FUNC(void) string_intern_immortal(AiStringObject **a);
+AiAPI_FUNC(AiObject *) AiString_From_String(char *sval);
+AiAPI_FUNC(AiObject *) AiString_From_StringAndSize(char *sval, ssize_t size);
+AiAPI_FUNC(void) AiString_Intern(AiStringObject **a);
+AiAPI_FUNC(void) AiString_Intern_Immortal(AiStringObject **a);
 AiAPI_FUNC(AiObject *) string_join(AiStringObject *internal, AiObject *iter);
-AiAPI_FUNC(long) string_hash(AiStringObject *a);
-AiAPI_FUNC(AiObject *) string_concat(AiStringObject *lhs, AiStringObject *rhs);
-AiAPI_FUNC(AiObject *) string_getitem(AiStringObject *a, ssize_t index);
-AiAPI_FUNC(AiObject *) string_slice(AiStringObject *a, ssize_t start, ssize_t end);
-AiAPI_FUNC(int) string_contains(AiStringObject *a, AiStringObject *sub);
 AiAPI_FUNC(void) string_resize(AiStringObject **a, ssize_t newsize);
+AiAPI_FUNC(long) string_hash(AiStringObject *a);
 
 #endif

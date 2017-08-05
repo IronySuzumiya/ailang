@@ -25,19 +25,19 @@
     && (ob)->ob_type->tp_as_sequence->sq_getitem)
 
 #define SEQUENCE_SIZE(sq)           \
-    ((sq)->ob_type->tp_as_sequence->sq_length((AiObject *)sq))
+    ((sq)->ob_type->tp_as_sequence->sq_length((AiObject *)(sq)))
 
 #define SEQUENCE_GETITEM(sq, i)     \
     ((sq)->ob_type->tp_as_sequence->sq_getitem(((AiObject *)(sq)), i))
 
-AiAPI_FUNC(long) object_unhashable(AiObject *p);
-AiAPI_FUNC(long) pointer_hash(void *p);
-AiAPI_FUNC(long) object_hash(AiObject *ob);
-AiAPI_FUNC(int) object_rich_compare(AiObject *lhs, AiObject *rhs, int op);
-AiAPI_FUNC(AiObject *) object_rich_compare_bool(AiObject *lhs, AiObject *rhs, int op);
-AiAPI_FUNC(AiObject *) object_getiter(AiObject *sq);
-AiAPI_FUNC(ssize_t) sequence_size(AiObject *sq);
-AiAPI_FUNC(AiObject *) sequence_getitem(AiObject *sq, ssize_t index);
-AiAPI_FUNC(int) sequence_contains(AiObject *sq, AiObject *item);
+AiAPI_FUNC(long) AiObject_Unhashable(AiObject *p);
+AiAPI_FUNC(long) Pointer_Hash(void *p);
+AiAPI_FUNC(long) AiObject_Generic_Hash(AiObject *ob);
+AiAPI_FUNC(int) AiObject_Rich_Compare(AiObject *lhs, AiObject *rhs, int op);
+AiAPI_FUNC(AiObject *) AiObject_Rich_Compare_Bool(AiObject *lhs, AiObject *rhs, int op);
+AiAPI_FUNC(AiObject *) AiObject_Generic_Getiter(AiObject *sq);
+AiAPI_FUNC(ssize_t) AiSequence_Getsize(AiObject *sq);
+AiAPI_FUNC(AiObject *) AiSequence_Getitem(AiObject *sq, ssize_t index);
+AiAPI_FUNC(int) AiSequence_Contains(AiObject *sq, AiObject *item);
 
 #endif

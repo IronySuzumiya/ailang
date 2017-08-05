@@ -7,12 +7,12 @@ static void bool_print(AiBoolObject *ob, FILE *stream);
 static AiObject *bool_str(AiBoolObject *ob);
 
 static AiBoolObject _aitrue = {
-    INIT_AiObject_HEAD(&type_boolobject)
+    INIT_AiObject_HEAD(&AiType_Bool)
     1
 };
 
 static AiBoolObject _aifalse = {
-    INIT_AiObject_HEAD(&type_boolobject)
+    INIT_AiObject_HEAD(&AiType_Bool)
     0
 };
 
@@ -42,8 +42,8 @@ static AiNumberMethods bool_as_number = {
     0,
 };
 
-AiTypeObject type_boolobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_Bool = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "bool",                             /* tp_name */
     sizeof(AiBoolObject),               /* tp_basesize */
     0,                                  /* tp_itemsize */
@@ -72,7 +72,7 @@ AiTypeObject type_boolobject = {
     0,                                  /* tp_methods */
     0,                                  /* tp_members */
     0,                                  /* tp_getset */
-    &type_intobject,                    /* tp_base */
+    &AiType_Int,                    /* tp_base */
     0,                                  /* tp_dict */
     0,                                  /* tp_descr_get */
     0,                                  /* tp_descr_set */
@@ -86,7 +86,7 @@ AiTypeObject type_boolobject = {
 AiBoolObject *aitrue = &_aitrue;
 AiBoolObject *aifalse = &_aifalse;
 
-AiObject *bool_from_clong(long ival) {
+AiObject *AiBool_From_Long(long ival) {
     return ival ? GET_TRUE() : GET_FALSE();
 }
 
@@ -128,10 +128,10 @@ void bool_print(AiBoolObject *ob, FILE *stream) {
 
 AiObject *bool_str(AiBoolObject *ob) {
     if (ob == aitrue) {
-        return string_from_cstring("True");
+        return AiString_From_String("True");
     }
     else if (ob == aifalse) {
-        return string_from_cstring("False");
+        return AiString_From_String("False");
     }
     else {
         FATAL_ERROR("bad bool handling");

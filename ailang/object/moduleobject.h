@@ -10,10 +10,10 @@ typedef struct _moduleobject {
 }
 AiModuleObject;
 
-#define CHECK_TYPE_MODULE(ob) CHECK_TYPE(ob, &type_moduleobject)
+#define CHECK_TYPE_MODULE(ob) CHECK_TYPE(ob, &AiType_Module)
 
-AiAPI_DATA(AiTypeObject) type_moduleobject;
-AiAPI_FUNC(AiObject *) module_new(char *name);
-AiAPI_FUNC(AiObject *) module_getdict(AiModuleObject *m);
+AiAPI_DATA(AiTypeObject) AiType_Module;
+AiAPI_FUNC(AiObject *) AiModule_New(char *name);
+AiAPI_FUNC(AiObject *) AiModule_Getdict(AiModuleObject *m);
 
 #endif

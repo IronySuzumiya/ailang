@@ -30,13 +30,13 @@ typedef struct _frameobject {
 }
 AiFrameObject;
 
-#define CHECK_TYPE_FRAME(ob) CHECK_TYPE(ob, &type_frameobject)
+#define CHECK_TYPE_FRAME(ob) CHECK_TYPE(ob, &AiType_Frame)
 
-AiAPI_DATA(AiTypeObject) type_frameobject;
-AiAPI_FUNC(AiFrameObject *) frame_new(AiThreadState *tstate, AiCodeObject *code,
+AiAPI_DATA(AiTypeObject) AiType_Frame;
+AiAPI_FUNC(AiFrameObject *) AiFrame_New(AiThreadState *tstate, AiCodeObject *code,
     AiObject *globals, AiObject *locals);
-AiAPI_FUNC(void) frame_setup_block(AiFrameObject *f, int type, int handler, int level);
-AiAPI_FUNC(AiTryBlock *) frame_pop_block(AiFrameObject *f);
-AiAPI_FUNC(AiTryBlock *) frame_peek_block(AiFrameObject *f);
+AiAPI_FUNC(void) AiFrame_Setup_Block(AiFrameObject *f, int type, int handler, int level);
+AiAPI_FUNC(AiTryBlock *) AiFrame_Pop_Block(AiFrameObject *f);
+AiAPI_FUNC(AiTryBlock *) AiFrame_Peek_Block(AiFrameObject *f);
 
 #endif

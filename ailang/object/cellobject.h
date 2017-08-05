@@ -10,15 +10,15 @@ typedef struct _cellobject {
 }
 AiCellObject;
 
-#define CHECK_TYPE_CELL(ob) CHECK_TYPE(ob, &type_cellobject)
+#define CHECK_TYPE_CELL(ob) CHECK_TYPE(ob, &AiType_Cell)
 
 #define CELL_GET(cell) (((AiCellObject *)(cell))->ob_ref)
 #define CELL_SET(cell, ob) (CELL_GET(cell) = (ob))
 
-AiAPI_DATA(AiTypeObject) type_cellobject;
+AiAPI_DATA(AiTypeObject) AiType_Cell;
 
-AiAPI_FUNC(AiObject *) cell_new(AiObject *ob);
-AiAPI_FUNC(AiObject *) cell_get(AiCellObject *cell);
-AiAPI_FUNC(int) cell_set(AiCellObject *cell, AiObject *ob);
+AiAPI_FUNC(AiObject *) AiCell_New(AiObject *ob);
+AiAPI_FUNC(AiObject *) AiCell_Get(AiCellObject *cell);
+AiAPI_FUNC(int) AiCell_Set(AiCellObject *cell, AiObject *ob);
 
 #endif

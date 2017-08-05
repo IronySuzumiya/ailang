@@ -4,17 +4,16 @@
 
 #include "../aiconfig.h"
 
-typedef struct _iterobject {
+typedef struct _seqiterobject {
     AiObject_HEAD
     long it_index;
     AiListObject *it_seq;
 }
-AiIterObject;
+AiSeqiterObject;
 
-#define CHECK_TYPE_ITER(ob) CHECK_TYPE(ob, &type_iterobject)
+#define CHECK_TYPE_ITER(ob) CHECK_TYPE(ob, &AiType_Seqiter)
 
-AiAPI_DATA(AiTypeObject) type_iterobject;
-AiAPI_FUNC(AiObject *) iter_new(AiObject *seq);
-AiAPI_FUNC(AiObject *) iter_iternext(AiIterObject *iter);
+AiAPI_DATA(AiTypeObject) AiType_Seqiter;
+AiAPI_FUNC(AiObject *) AiSeqiter_New(AiObject *seq);
 
 #endif

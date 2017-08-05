@@ -201,16 +201,16 @@ typedef struct _heaptypeobject {
 }
 AiHeapTypeObject;
 
-#define CHECK_TYPE_NONE(a) CHECK_TYPE(a, &type_noneobject)
+#define CHECK_TYPE_NONE(a) CHECK_TYPE(a, &AiType_None)
 #define NONE (&none)
 #define GET_NONE() (INC_REFCNT(&none), NONE)
 
 #define AiNotImplemented (&notimplemented)
 #define GET_AiNotImplemented() (INC_REFCNT(&notimplemented), NONE)
 
-AiAPI_DATA(AiTypeObject) type_noneobject;
-AiAPI_DATA(AiTypeObject) type_notimplementedobject;
-AiAPI_DATA(AiTypeObject) type_baseobject;
+AiAPI_DATA(AiTypeObject) AiType_None;
+AiAPI_DATA(AiTypeObject) AiType_NotImplemented;
+AiAPI_DATA(AiTypeObject) AiType_BaseObject;
 AiAPI_DATA(AiObject) none;
 AiAPI_DATA(AiObject) notimplemented;
 
@@ -229,7 +229,7 @@ AiAPI_DATA(AiObject) notimplemented;
 #define CHECK_FAST_SUBCLASS(ob, base) ((ob)->ob_type->tp_flags & (base))
 #define CHECK_TYPE_TYPE(a) CHECK_FAST_SUBCLASS(a, SUBCLASS_TYPE)
 
-AiAPI_DATA(AiTypeObject) type_typeobject;
+AiAPI_DATA(AiTypeObject) AiType_Type;
 AiAPI_FUNC(int) AiType_Ready(AiTypeObject *type);
 
 #endif

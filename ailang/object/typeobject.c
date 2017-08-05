@@ -182,8 +182,8 @@ static void init_slotdefs() {
         return;
 
     for (slotdef *p = slotdefs; p->name; ++p) {
-        AiObject *str = string_from_cstring(p->name);
-        string_intern((AiStringObject **)&str);
+        AiObject *str = AiString_From_String(p->name);
+        AiString_Intern((AiStringObject **)&str);
         p->name_strobj = str;
     }
 
@@ -223,14 +223,14 @@ static int add_operators(AiTypeObject *type) {
     for (slotdef *p = slotdefs; p->name; ++p) {
         if (p->wrapper) {
             ptr = slotptr(type, p->offset);
-            if (ptr && *ptr && dict_getitem(dict, p->name_strobj)
-                && *ptr == object_unhashable) {
-                dict_setitem(dict, p->name_strobj, NONE);
+            if (ptr && *ptr && AiDict_GetItem(dict, p->name_strobj)
+                && *ptr == AiObject_Unhashable) {
+                AiDict_SetItem(dict, p->name_strobj, NONE);
             }
         }
         else {
-            descr = descr_newwrapper(type, p, *ptr);
-            dict_setitem(dict, p->name_strobj, descr);
+            descr = AiDescr_NewWrapper(type, p, *ptr);
+            AiDict_SetItem(dict, p->name_strobj, descr);
             DEC_REFCNT(descr);
         }
     }
@@ -240,8 +240,8 @@ static int add_operators(AiTypeObject *type) {
     return 0;
 }
 
-AiTypeObject type_typeobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_Type = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "type",                             /* tp_name */
     sizeof(AiHeapTypeObject),           /* tp_basicsize */
     0,//sizeof(AiMemberDef),            /* tp_itemsize */
@@ -253,7 +253,7 @@ AiTypeObject type_typeobject = {
     0,                                  /* tp_as_sequence */
     0,                                  /* tp_as_mapping */
 
-    (hashfunc)pointer_hash,             /* tp_hash */
+    (hashfunc)Pointer_Hash,             /* tp_hash */
     0,//(ternaryfunc)type_call,             /* tp_call */
     0,                                  /* tp_str */
 
@@ -278,7 +278,7 @@ AiTypeObject type_typeobject = {
     0,//type_init,                          /* tp_init */
     0,                                  /* tp_alloc */
     0,//type_new,                           /* tp_new */
-    AiObject_GC_DEL,                    /* tp_free */
+    AiObject_GC_Del,                    /* tp_free */
     0,//tp_is_gc,                           /* tp_is_gc */
 };
 
@@ -287,8 +287,8 @@ int AiType_Ready(AiTypeObject *type) {
     AiTypeObject *base;
 
     base = type->tp_base;
-    if (!base && type != &type_baseobject) {
-        base = type->tp_base = &type_baseobject;
+    if (!base && type != &AiType_BaseObject) {
+        base = type->tp_base = &AiType_BaseObject;
         INC_REFCNT(base);
     }
     if (base && !base->tp_dict) {
@@ -300,16 +300,16 @@ int AiType_Ready(AiTypeObject *type) {
     bases = type->tp_bases;
     if (!bases) {
         if (!base) {
-            bases = tuple_new(0);
+            bases = AiTuple_New(0);
         }
         else {
-            bases = tuple_pack(1, base);
+            bases = AiTuple_Pack(1, base);
         }
         type->tp_bases = bases;
     }
     dict = type->tp_dict;
     if (!dict) {
-        dict = dict_new();
+        dict = AiDict_New();
         type->tp_dict = dict;
     }
     add_operators(type);
@@ -380,7 +380,7 @@ int half_compare(AiObject *self, AiObject *other) {
 
     func = lookup_method(self, "__cmp__", &cmp_str);
     if(func) {
-        args = tuple_pack(1, other);
+        args = AiTuple_Pack(1, other);
         if (!args) {
             res = NULL;
         }

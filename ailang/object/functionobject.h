@@ -18,7 +18,7 @@ typedef struct _functionobject {
 }
 AiFunctionObject;
 
-#define CHECK_TYPE_FUNCTION(ob) CHECK_TYPE(ob, &type_functionobject)
+#define CHECK_TYPE_FUNCTION(ob) CHECK_TYPE(ob, &AiType_Function)
 
 #define FUNCTION_GETCODE(ob) (((AiFunctionObject *)(ob))->func_code)
 #define FUNCTION_GETGLOBALS(ob) (((AiFunctionObject *)(ob))->func_globals)
@@ -29,9 +29,9 @@ AiFunctionObject;
 #define FUNCTION_SETDEFAULTS(ob, v) (FUNCTION_GETDEFAULTS(ob) = (v))
 #define FUNCTION_SETCLOSURE(ob, v) (FUNCTION_GETCLOSURE(ob) = (v))
 
-AiAPI_DATA(AiTypeObject) type_functionobject;
-AiAPI_FUNC(AiObject *) function_new(AiObject *code, AiObject *globals);
-AiAPI_FUNC(int) function_setdefaults(AiFunctionObject *func, AiObject *defaults);
-AiAPI_FUNC(int) function_setclosure(AiFunctionObject *func, AiObject *closure);
+AiAPI_DATA(AiTypeObject) AiType_Function;
+AiAPI_FUNC(AiObject *) AiFunction_New(AiObject *code, AiObject *globals);
+AiAPI_FUNC(int) AiFunction_SetDefaults(AiFunctionObject *func, AiObject *defaults);
+AiAPI_FUNC(int) AiFunction_SetClosure(AiFunctionObject *func, AiObject *closure);
 
 #endif

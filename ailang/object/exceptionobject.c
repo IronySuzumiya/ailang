@@ -1,29 +1,29 @@
 #include "../ailang.h"
 
 static AiObject _runtime_exception = {
-    INIT_AiObject_HEAD(&type_exceptionobject)
+    INIT_AiObject_HEAD(&AiType_Exception)
 };
 
 static AiObject _type_error = {
-    INIT_AiObject_HEAD(&type_exceptionobject)
+    INIT_AiObject_HEAD(&AiType_Exception)
 };
 
-AiTypeObject type_baseexceptionobject = {
+AiTypeObject AiType_BaseException = {
     INIT_AiVarObject_HEAD(NULL, 0)
     EXC_MODULE_NAME "BaseException",    /* tp_name */
     
 };
 
-AiTypeObject type_exceptionobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_Exception = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "exception",
 };
 
-AiObject *runtime_exception;
-AiObject *type_error;
+AiObject *runtime_exception = &_runtime_exception;
+AiObject *type_error = &_type_error;
 
-void exception_restore(AiObject *type, AiObject *value, AiObject *traceback) {
-    AiThreadState *tstate = threadstate_get();
+void AiException_Restore(AiObject *type, AiObject *value, AiObject *traceback) {
+    AiThreadState *tstate = AiThreadState_Get();
 
     XDEC_REFCNT(tstate->curexc_type);
     XDEC_REFCNT(tstate->curexc_value);
@@ -34,24 +34,24 @@ void exception_restore(AiObject *type, AiObject *value, AiObject *traceback) {
     tstate->curexc_traceback = traceback;
 }
 
-void exception_setobject(AiObject *exception, AiObject *value) {
+void AiException_SetObject(AiObject *exception, AiObject *value) {
     XINC_REFCNT(exception);
     XINC_REFCNT(value);
-    exception_restore(exception, value, NULL);
+    AiException_Restore(exception, value, NULL);
 }
 
-void exception_setstring(AiObject *exception, char *string) {
-    AiObject *value = string_from_cstring(string);
-    exception_setobject(exception, value);
+void AiException_SetString(AiObject *exception, char *string) {
+    AiObject *value = AiString_From_String(string);
+    AiException_SetObject(exception, value);
     XDEC_REFCNT(value);
 }
 
-void exception_clear() {
-    exception_restore(NULL, NULL, NULL);
+void AiException_Clear() {
+    AiException_Restore(NULL, NULL, NULL);
 }
 
-void exception_fetch(AiObject **type, AiObject **value, AiObject **tb) {
-    AiThreadState *tstate = threadstate_get();
+void AiException_Fetch(AiObject **type, AiObject **value, AiObject **tb) {
+    AiThreadState *tstate = AiThreadState_Get();
 
     *type = tstate->curexc_type;
     *value = tstate->curexc_value;
@@ -62,20 +62,20 @@ void exception_fetch(AiObject **type, AiObject **value, AiObject **tb) {
     tstate->curexc_traceback = NULL;
 }
 
-int exceptionclass_check(AiObject *exception) {
+int AiExceptionClass_Check(AiObject *exception) {
     return exception == runtime_exception || exception == type_error;
 }
 
-int exception_matches(AiObject *err, AiObject *exc) {
+int AiException_Matches(AiObject *err, AiObject *exc) {
     if (CHECK_TYPE_TUPLE(exc)) {
         for (ssize_t i = 0; i < TUPLE_SIZE(exc); ++i) {
-            if (exception_matches(err, TUPLE_GETITEM(exc, i))) {
+            if (AiException_Matches(err, TUPLE_GETITEM(exc, i))) {
                 return 1;
             }
         }
         return 0;
     }
-    else if (exceptionclass_check(err) && exceptionclass_check(exc)) {
+    else if (AiExceptionClass_Check(err) && AiExceptionClass_Check(exc)) {
         return err == exc;
     }
     else {
@@ -89,7 +89,7 @@ void runtime_exception_store(char *msg, ...) {
     va_start(ap, msg);
 
     vsprintf_s(buffer, 100, msg, ap);
-    exception_setstring(runtime_exception, buffer);
+    AiException_SetString(runtime_exception, buffer);
 
     va_end(ap);
 }
@@ -100,7 +100,7 @@ void type_error_restore(char *msg, ...) {
     va_start(ap, msg);
 
     vsprintf_s(buffer, 100, msg, ap);
-    exception_setstring(type_error, buffer);
+    AiException_SetString(type_error, buffer);
 
     va_end(ap);
 }

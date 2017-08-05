@@ -3,15 +3,19 @@
 static AiStringObject *characters[UCHAR_MAX + 1];
 static AiDictObject *interned;
 
-static AiObject *_string_from_cstring_with_size(char *sval, ssize_t size);
+static AiObject *_AiString_From_StringAndSize(char *sval, ssize_t size);
+static AiObject *string_concat(AiStringObject *lhs, AiStringObject *rhs);
+static AiObject *string_getitem(AiStringObject *a, ssize_t index);
+static AiObject *string_slice(AiStringObject *a, ssize_t start, ssize_t end);
+static int string_contains(AiStringObject *a, AiStringObject *sub);
 static void string_dealloc(AiStringObject *a);
 static void string_print(AiStringObject *a, FILE *stream);
 static int string_compare(AiStringObject *lhs, AiStringObject *rhs);
 static AiObject *string_str(AiStringObject *a);
 static ssize_t string_length(AiStringObject *a);
 
-AiTypeObject type_basestringobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_BaseString = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "basestring",                   /* tp_name */
     0,                              /* tp_basesize */
     0,                              /* tp_itemsize */
@@ -60,8 +64,8 @@ static AiSequenceMethods string_as_sequence = {
     (enquiry2)string_contains,
 };
 
-AiTypeObject type_stringobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_String = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "string",                                   /* tp_name */
     STRING_OBJECT_SIZE,                         /* tp_basicsize */
     sizeof(char),                               /* tp_itemsize */
@@ -90,7 +94,7 @@ AiTypeObject type_stringobject = {
     0,//string_methods,                             /* tp_methods */
     0,                                          /* tp_members */
     0,                                          /* tp_getset */
-    &type_basestringobject,                     /* tp_base */
+    &AiType_BaseString,                     /* tp_base */
     0,                                          /* tp_dict */
     0,                                          /* tp_descr_get */
     0,                                          /* tp_descr_set */
@@ -98,22 +102,22 @@ AiTypeObject type_stringobject = {
     0,                                          /* tp_init */
     0,                                          /* tp_alloc */
     0,//string_new,                                 /* tp_new */
-    AiObject_GC_DEL,                            /* tp_free */
+    AiObject_GC_Del,                            /* tp_free */
 };
 
 AiStringObject *nullstring;
 
-AiObject *string_from_cstring(char *sval) {
-    return _string_from_cstring_with_size(sval, strlen(sval));
+AiObject *AiString_From_String(char *sval) {
+    return _AiString_From_StringAndSize(sval, strlen(sval));
 }
 
-AiObject *string_from_cstring_with_size(char *sval, ssize_t size) {
+AiObject *AiString_From_StringAndSize(char *sval, ssize_t size) {
     if (size < 0)
         size = 0;
-    return _string_from_cstring_with_size(sval, size);
+    return _AiString_From_StringAndSize(sval, size);
 }
 
-void string_intern(AiStringObject **a) {
+void AiString_Intern(AiStringObject **a) {
     AiObject *s = (AiObject *)(*a);
     AiObject *t;
 
@@ -122,23 +126,23 @@ void string_intern(AiStringObject **a) {
     }
 
     if (!interned) {
-        interned = (AiDictObject *)dict_new();
+        interned = (AiDictObject *)AiDict_New();
     }
 
-    if (t = dict_getitem(interned, s)) {
+    if (t = AiDict_GetItem(interned, s)) {
         INC_REFCNT(t);
         DEC_REFCNT(*a);
         *a = (AiStringObject *)t;
     }
     else {
-        dict_setitem(interned, s, s);
+        AiDict_SetItem(interned, s, s);
         s->ob_refcnt -= 2;
         CHECK_STRING_INTERNED(s) = SSTATE_INTERNED_MORTAL;
     }
 }
 
-void string_intern_immortal(AiStringObject **a) {
-    string_intern(a);
+void AiString_Intern_Immortal(AiStringObject **a) {
+    AiString_Intern(a);
     if (CHECK_STRING_INTERNED(*a) != SSTATE_INTERNED_IMMORTAL) {
         CHECK_STRING_INTERNED(*a) = SSTATE_INTERNED_IMMORTAL;
         INC_REFCNT(*a);
@@ -175,14 +179,14 @@ AiObject *string_join(AiStringObject *split, AiObject *iter) {
                 size += intersize + STRING_LEN(list->ob_item[i]);
             }
 
-            str = string_from_cstring_with_size(NULL, size);
+            str = AiString_From_StringAndSize(NULL, size);
             p = STRING_AS_CSTRING(str);
-            AiMEM_COPY(p, STRING_AS_CSTRING(list->ob_item[0]), STRING_LEN(list->ob_item[0]));
+            AiMem_Copy(p, STRING_AS_CSTRING(list->ob_item[0]), STRING_LEN(list->ob_item[0]));
             p += STRING_LEN(list->ob_item[0]);
             for (ssize_t i = 1; i < LIST_SIZE(list); ++i) {
-                AiMEM_COPY(p, STRING_AS_CSTRING(split), intersize);
+                AiMem_Copy(p, STRING_AS_CSTRING(split), intersize);
                 p += intersize;
-                AiMEM_COPY(p, STRING_AS_CSTRING(list->ob_item[i]), STRING_LEN(list->ob_item[i]));
+                AiMem_Copy(p, STRING_AS_CSTRING(list->ob_item[i]), STRING_LEN(list->ob_item[i]));
                 p += STRING_LEN(list->ob_item[i]);
             }
             *p = 0;
@@ -199,7 +203,7 @@ AiObject *string_join(AiStringObject *split, AiObject *iter) {
     }
 }
 
-AiObject *_string_from_cstring_with_size(char *sval, ssize_t size) {
+AiObject *_AiString_From_StringAndSize(char *sval, ssize_t size) {
     AiStringObject *a;
 
     if (size == 0 && (a = nullstring)) {
@@ -209,21 +213,21 @@ AiObject *_string_from_cstring_with_size(char *sval, ssize_t size) {
         return (AiObject *)a;
     }
     else {
-        a = AiMEM_ALLOC(sizeof(AiStringObject) + size);
-        INIT_AiVarObject(a, &type_stringobject, size);
+        a = AiMem_Alloc(sizeof(AiStringObject) + size);
+        INIT_AiVarObject(a, &AiType_String, size);
         a->ob_shash = -1;
         a->ob_sstate = SSTATE_NOT_INTERNED;
         if (sval)
-            AiMEM_COPY(STRING_AS_CSTRING(a), sval, size + 1);
+            AiMem_Copy(STRING_AS_CSTRING(a), sval, size + 1);
         else
-            AiMEM_SET(STRING_AS_CSTRING(a), 0, size + 1);
+            AiMem_Set(STRING_AS_CSTRING(a), 0, size + 1);
         if (size == 0) {
-            string_intern(&a);
+            AiString_Intern(&a);
             nullstring = a;
             INC_REFCNT(a);
         }
         else if (size == 1) {
-            string_intern(&a);
+            AiString_Intern(&a);
             characters[*sval & UCHAR_MAX] = a;
             INC_REFCNT(a);
         }
@@ -239,7 +243,7 @@ void string_dealloc(AiStringObject *a) {
             break;
         case SSTATE_INTERNED_MORTAL:
             a->ob_refcnt = 3;
-            if (dict_delitem(interned, (AiObject *)a)) {
+            if (AiDict_DelItem(interned, (AiObject *)a)) {
                 FATAL_ERROR("deletion of interned string failed");
             }
             break;
@@ -305,13 +309,13 @@ AiObject *string_concat(AiStringObject *lhs, AiStringObject *rhs) {
         AiStringObject *a;
         ssize_t size = STRING_LEN(lhs) + STRING_LEN(rhs);
 
-        a = (AiStringObject *)AiMEM_ALLOC(sizeof(AiStringObject) + size);
-        INIT_AiVarObject(a, &type_stringobject, size);
+        a = (AiStringObject *)AiMem_Alloc(sizeof(AiStringObject) + size);
+        INIT_AiVarObject(a, &AiType_String, size);
         a->ob_shash = -1;
         a->ob_sstate = SSTATE_NOT_INTERNED;
 
-        AiMEM_COPY(STRING_AS_CSTRING(a), STRING_AS_CSTRING(lhs), STRING_LEN(lhs));
-        AiMEM_COPY(STRING_AS_CSTRING(a) + STRING_LEN(lhs), STRING_AS_CSTRING(rhs), STRING_LEN(rhs));
+        AiMem_Copy(STRING_AS_CSTRING(a), STRING_AS_CSTRING(lhs), STRING_LEN(lhs));
+        AiMem_Copy(STRING_AS_CSTRING(a) + STRING_LEN(lhs), STRING_AS_CSTRING(rhs), STRING_LEN(rhs));
         STRING_AS_CSTRING(a)[size] = 0;
         return (AiObject *)a;
     }
@@ -324,7 +328,7 @@ AiObject *string_concat(AiStringObject *lhs, AiStringObject *rhs) {
 AiObject *string_getitem(AiStringObject *a, ssize_t index) {
     MAKE_INDEX_IN_RANGE(index, STRING_LEN(a));
     if (index < STRING_LEN(a)) {
-        return string_from_cstring_with_size(&STRING_AS_CSTRING(a)[index], 1);
+        return AiString_From_StringAndSize(&STRING_AS_CSTRING(a)[index], 1);
     }
     else {
         RUNTIME_EXCEPTION("index out of range");
@@ -344,7 +348,7 @@ AiObject *string_slice(AiStringObject *a, ssize_t start, ssize_t end) {
             return (AiObject *)a;
         }
         else {
-            return string_from_cstring_with_size(&STRING_AS_CSTRING(a)[start], end - start);
+            return AiString_From_StringAndSize(&STRING_AS_CSTRING(a)[start], end - start);
         }
     }
     else {
@@ -371,7 +375,7 @@ void string_resize(AiStringObject **a, ssize_t newsize) {
             break;
         case SSTATE_INTERNED_MORTAL:
             (*a)->ob_refcnt = 3;
-            if (dict_delitem(interned, (AiObject *)(*a))) {
+            if (AiDict_DelItem(interned, (AiObject *)(*a))) {
                 FATAL_ERROR("deletion of interned string failed");
             }
             break;
@@ -381,7 +385,7 @@ void string_resize(AiStringObject **a, ssize_t newsize) {
             FATAL_ERROR("Inconsistent interned string state");
         }
     }
-    *a = AiMEM_REALLOC(*a, sizeof(AiStringObject) + newsize);
+    *a = AiMem_Realloc(*a, sizeof(AiStringObject) + newsize);
     INIT_REFCNT(*a);
     STRING_LEN(*a) = newsize;
     STRING_AS_CSTRING(*a)[newsize] = 0;

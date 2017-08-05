@@ -2,18 +2,18 @@
 
 static void object_dealloc(AiObject *ob);
 
-AiTypeObject type_noneobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_None = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "nonetype",                     /* tp_name */
 };
 
-AiTypeObject type_notimplementedobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_NotImplemented = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "NotImplemented",
 };
 
-AiTypeObject type_baseobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_BaseObject = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "object",                           /* tp_name */
     sizeof(AiObject),                   /* tp_basicsize */
     0,                                  /* tp_itemsize */
@@ -25,14 +25,14 @@ AiTypeObject type_baseobject = {
     0,                                  /* tp_as_sequence */
     0,                                  /* tp_as_mapping */
 
-    (hashfunc)pointer_hash,             /* tp_hash */
+    (hashfunc)Pointer_Hash,             /* tp_hash */
     0,                                  /* tp_call */
     0,//object_str,                         /* tp_str */
 
     0,                                  /* tp_getattr */
     0,                                  /* tp_setattr */
-    0,//object_generic_getattr,             /* tp_getattro */
-    0,//object_generic_setattr,             /* tp_setattro */
+    0,//AiObject_Generic_Getattr,             /* tp_getattro */
+    0,//AiObject_Generic_Setattr,             /* tp_setattro */
 
     BASE_TYPE,                          /* tp_flags */
 
@@ -48,17 +48,17 @@ AiTypeObject type_baseobject = {
     0,                                  /* tp_descr_set */
     0,                                  /* tp_dictoffset */
     0,//object_init,                        /* tp_init */
-    0,//type_generic_alloc,                 /* tp_alloc */
+    0,//AiType_Generic_Alloc,                 /* tp_alloc */
     0,//object_new,                         /* tp_new */
-    AiObject_GC_DEL,                    /* tp_free */
+    AiObject_GC_Del,                    /* tp_free */
 };
 
 AiObject none = {
-    INIT_AiObject_HEAD(&type_noneobject)
+    INIT_AiObject_HEAD(&AiType_None)
 };
 
 AiObject notimplemented = {
-    INIT_AiObject_HEAD(&type_notimplementedobject)
+    INIT_AiObject_HEAD(&AiType_NotImplemented)
 };
 
 void object_dealloc(AiObject *ob) {

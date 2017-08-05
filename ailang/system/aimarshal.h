@@ -60,7 +60,7 @@ AicFile;
 typedef unsigned short mode_t;
 typedef __time64_t time_t;
 
-AiAPI_FUNC(void) write_compiled_module(AiCodeObject *co, char *path, struct stat *srcstat, time_t mtime);
+AiAPI_FUNC(void) Marshal_Write_Compiled_Module(AiCodeObject *co, char *path, struct stat *srcstat, time_t mtime);
 AiAPI_FUNC(void) write_object_to_file(AiObject *x, FILE *fp);
 AiAPI_FUNC(AiObject *) write_object_to_string(AiObject *x);
 AiAPI_FUNC(AiObject *) read_object_from_file(FILE *fp);

@@ -1,7 +1,9 @@
 #include "../ailang.h"
 
-AiTypeObject type_methoddescrobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+static AiDescrObject *descr_new(AiTypeObject *descrtype, AiTypeObject *type, char *name);
+
+AiTypeObject AiType_MethodDescr = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "method_descriptor",                    /* tp_name */
     sizeof(AiMethodDescrObject),            /* tp_basicsize */
     0,                                      /* tp_itemsize */
@@ -19,7 +21,7 @@ AiTypeObject type_methoddescrobject = {
 
     0,                                      /* tp_getattr */
     0,                                      /* tp_setattr */
-    0,//object_generic_getattr,                 /* tp_getattro */
+    0,//AiObject_Generic_Getattr,                 /* tp_getattro */
     0,                                      /* tp_setattro */
 
     0,                                      /* tp_flags */
@@ -36,8 +38,8 @@ AiTypeObject type_methoddescrobject = {
     0,                                      /* tp_descr_set */
 };
 
-AiTypeObject type_classmethoddescrobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_ClassMethodDescr = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "classmethod_descriptor",               /* tp_name */
     sizeof(AiMethodDescrObject),            /* tp_basicsize */
     0,                                      /* tp_itemsize */
@@ -55,7 +57,7 @@ AiTypeObject type_classmethoddescrobject = {
 
     0,                                      /* tp_getattr */
     0,                                      /* tp_setattr */
-    0,//object_generic_getattr,                 /* tp_getattro */
+    0,//AiObject_Generic_Getattr,                 /* tp_getattro */
     0,                                      /* tp_setattro */
 
     0,                                      /* tp_flags */
@@ -72,8 +74,8 @@ AiTypeObject type_classmethoddescrobject = {
     0,                                      /* tp_descr_set */
 };
 
-AiTypeObject type_memberdescrobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_MemberDescr = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "member_descriptor",                    /* tp_name */
     sizeof(AiMemberDescrObject),            /* tp_basicsize */
     0,                                      /* tp_itemsize */
@@ -91,7 +93,7 @@ AiTypeObject type_memberdescrobject = {
 
     0,                                      /* tp_getattr */
     0,                                      /* tp_setattr */
-    0,//object_generic_getattr,                 /* tp_getattro */
+    0,//AiObject_Generic_Getattr,                 /* tp_getattro */
     0,                                      /* tp_setattro */
 
     0,                                      /* tp_flags */
@@ -108,8 +110,8 @@ AiTypeObject type_memberdescrobject = {
     0,//(descrsetfunc)member_set,               /* tp_descr_set */
 };
 
-AiTypeObject type_getsetdescr = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_GetSetDescr = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "getset_descriptor",                    /* tp_name */
     sizeof(AiGetSetDescrObject),            /* tp_basicsize */
     0,                                      /* tp_itemsize */
@@ -127,7 +129,7 @@ AiTypeObject type_getsetdescr = {
 
     0,                                      /* tp_getattr */
     0,                                      /* tp_setattr */
-    0,//object_generic_getattr,                 /* tp_getattro */
+    0,//AiObject_Generic_Getattr,                 /* tp_getattro */
     0,                                      /* tp_setattro */
 
     0,                                      /* tp_flags */
@@ -144,8 +146,8 @@ AiTypeObject type_getsetdescr = {
     0,//(descrsetfunc)getset_set,               /* tp_descr_set */
 };
 
-AiTypeObject type_wrapperdescrobject = {
-    INIT_AiVarObject_HEAD(&type_typeobject, 0)
+AiTypeObject AiType_WrapperDescr = {
+    INIT_AiVarObject_HEAD(&AiType_Type, 0)
     "wrapper_descriptor",                   /* tp_name */
     sizeof(AiWrapperDescrObject),           /* tp_basicsize*/
     0,                                      /* tp_itemsize */
@@ -163,7 +165,7 @@ AiTypeObject type_wrapperdescrobject = {
 
     0,                                      /* tp_getattr */
     0,                                      /* tp_setattr */
-    0,//object_generic_getattr,                 /* tp_getattro */
+    0,//AiObject_Generic_Getattr,                 /* tp_getattro */
     0,                                      /* tp_setattro */
 
     0,                                      /* tp_flags */
@@ -180,12 +182,18 @@ AiTypeObject type_wrapperdescrobject = {
     0,                                      /* tp_descr_set */
 };
 
-AiObject *descr_newwrapper(AiTypeObject *type, struct wrapperbase *base, void *wrapped) {
+AiObject *AiDescr_NewWrapper(AiTypeObject *type, struct wrapperbase *base, void *wrapped) {
     AiWrapperDescrObject *descr;
-    descr = (AiWrapperDescrObject *)descr_new(&type_wrapperdescrobject, type, base->name);
+    descr = (AiWrapperDescrObject *)descr_new(&AiType_WrapperDescr, type, base->name);
     if (descr) {
         descr->d_base = base;
         descr->d_wrapped = wrapped;
     }
     return (AiObject *)descr;
+}
+
+AiDescrObject *descr_new(AiTypeObject *descrtype, AiTypeObject *type, char *name) {
+    AiDescrObject *descr;
+    descr = (AiDescrObject *)AiType_Generic_Alloc(descrtype, 0);
+    // TODO
 }
