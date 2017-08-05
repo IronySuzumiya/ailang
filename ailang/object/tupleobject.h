@@ -6,11 +6,12 @@
 
 typedef struct _tupleobject {
     AiVarObject_HEAD
-    AiObject **ob_item;
+    AiObject *ob_item[1];
 }
 AiTupleObject;
 
-#define CHECK_TYPE_TUPLE(ob) CHECK_TYPE(ob, &AiType_Tuple)
+#define CHECK_TYPE_TUPLE(ob) CHECK_FAST_SUBCLASS(ob, SUBCLASS_TUPLE)
+#define CHECK_EXACT_TYPE_TUPLE(ob) CHECK_TYPE(ob, &AiType_Tuple)
 #define TUPLE_GETITEM(op, i) (((AiTupleObject *)(op))->ob_item[i])
 #define TUPLE_SETITEM(op, i, v) (TUPLE_GETITEM(op, i) = (AiObject *)(v))
 #define TUPLE_SIZE OB_SIZE

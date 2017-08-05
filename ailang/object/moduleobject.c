@@ -1,7 +1,7 @@
 #include "../ailang.h"
 
 AiTypeObject AiType_Module = {
-    INIT_AiVarObject_HEAD(&AiType_Type, 0)
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "module",
 
 };
@@ -9,7 +9,7 @@ AiTypeObject AiType_Module = {
 AiObject *AiModule_New(char *name) {
     AiModuleObject *m;
     AiObject *namestr;
-    m = AiObject_GC_New(AiModuleObject);
+    m = AiMem_Alloc(sizeof(AiModuleObject));
     namestr = AiString_From_String(name);
     m->md_dict = AiDict_New();
     // TODO

@@ -6,7 +6,7 @@ static void frame_dealloc(AiFrameObject *f);
 static AiObject *builtin_object;
 
 AiTypeObject AiType_Frame = {
-    INIT_AiVarObject_HEAD(&AiType_Type, 0)
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "frame",                            /* tp_name */
     sizeof(AiFrameObject),              /* tp_basicsize */
     sizeof(AiObject *),                 /* tp_itemsize */
@@ -68,8 +68,7 @@ AiFrameObject *AiFrame_New(AiThreadState *tstate, AiCodeObject *code,
     nfrees = TUPLE_SIZE(code->co_freevars);
 
     extras = code->co_stacksize + code->co_nlocals + ncells + nfrees;
-    f = AiMem_Alloc(sizeof(AiFrameObject) + extras - 1);
-    INIT_AiVarObject(f, &AiType_Frame, extras);
+    f = AiVarObject_NEW(AiFrameObject, &AiType_Frame, max(extras - 1, 0));
 
     f->f_code = code;
     INC_REFCNT(code);

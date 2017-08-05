@@ -19,7 +19,7 @@ static AiMappingMethods dict_as_mapping = {
 };
 
 AiTypeObject AiType_Dict = {
-    INIT_AiVarObject_HEAD(&AiType_Type, 0)
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "dict",                                     /* tp_name */
     sizeof(AiDictObject),                       /* tp_basesize */
     0,                                          /* tp_itemsize */
@@ -159,9 +159,7 @@ AiObject *AiDict_New() {
         }
     }
     else {
-        mp = AiObject_GC_New(AiDictObject);
-        AiMem_Set(mp, 0, sizeof(AiDictObject));
-        INIT_AiObject(mp, &AiType_Dict);
+        mp = AiObject_NEW(AiDictObject, &AiType_Dict);
         EMPTY_TO_MINSIZE(mp);
     }
     mp->ma_lookup = (lookupfunc)AiDict_Lookup_String;

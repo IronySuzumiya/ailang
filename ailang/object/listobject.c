@@ -24,7 +24,7 @@ static AiSequenceMethods list_as_sequence = {
 };
 
 AiTypeObject AiType_List = {
-    INIT_AiVarObject_HEAD(&AiType_Type, 0)
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "list",                             /* tp_name */
     sizeof(AiListObject),               /* tp_basesize */
     0,                                  /* tp_itemsize */
@@ -72,8 +72,7 @@ AiObject * AiList_New(ssize_t size) {
         INIT_REFCNT(list);
     }
     else {
-        list = AiObject_GC_New(AiListObject);
-        INIT_AiVarObject(list, &AiType_List, 0);
+        list = AiVarObject_NEW(AiListObject, &AiType_List, 0);
     }
     if (size <= 0) {
         list->ob_item = NULL;

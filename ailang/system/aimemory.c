@@ -83,3 +83,16 @@ void mem_copy(void *dst, void *src, ssize_t size) {
 void mem_set(void *p, int val, ssize_t size) {
     memset(p, val, (size_t)size);
 }
+
+AiObject *AiObject_Init(AiObject *ob, AiTypeObject *type) {
+    OB_TYPE(ob) = type;
+    INIT_REFCNT(ob);
+    return ob;
+}
+
+AiVarObject *AiVarObject_Init(AiVarObject *ob, AiTypeObject *type, ssize_t size) {
+    OB_SIZE(ob) = size;
+    OB_TYPE(ob) = type;
+    INIT_REFCNT(ob);
+    return ob;
+}

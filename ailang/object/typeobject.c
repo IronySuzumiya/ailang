@@ -1,5 +1,15 @@
 #include "../ailang.h"
 
+static void init_slotdefs(void);
+static void **slotptr(AiTypeObject *type, int offset);
+static int add_operators(AiTypeObject *type);
+
+static int AiObject_SlotCompare(AiObject *self, AiObject *other);
+static int half_compare(AiObject *self, AiObject *other);
+
+static void type_dealloc(AiTypeObject *type);
+static void type_print(AiTypeObject *ob, FILE *stream);
+
 #define TPSLOT(NAME, SLOT, FUNCTION, WRAPPER, DOC) \
     { NAME, offsetof(AiTypeObject, SLOT), (void *)(FUNCTION), WRAPPER, DOC }
 
@@ -173,75 +183,8 @@ static slotdef slotdefs[] = {
     { NULL }
 };
 
-static void type_dealloc(AiTypeObject *type);
-static void type_print(AiTypeObject *ob, FILE *stream);
-
-static void init_slotdefs() {
-    static int initialized = 0;
-    if (initialized)
-        return;
-
-    for (slotdef *p = slotdefs; p->name; ++p) {
-        AiObject *str = AiString_From_String(p->name);
-        AiString_Intern((AiStringObject **)&str);
-        p->name_strobj = str;
-    }
-
-    initialized = 1;
-}
-
-static void **slotptr(AiTypeObject *type, int offset) {
-    char *ptr;
-
-    if ((size_t)offset >= offsetof(AiHeapTypeObject, as_sequence)) {
-        ptr = (char *)type->tp_as_sequence;
-        offset -= offsetof(AiHeapTypeObject, as_sequence);
-    }
-    else if ((size_t)offset >= offsetof(AiHeapTypeObject, as_mapping)) {
-        ptr = (char *)type->tp_as_mapping;
-        offset -= offsetof(AiHeapTypeObject, as_mapping);
-    }
-    else if ((size_t)offset >= offsetof(AiHeapTypeObject, as_number)) {
-        ptr = (char *)type->tp_as_number;
-        offset -= offsetof(AiHeapTypeObject, as_number);
-    }
-    else {
-        ptr = (char *)type;
-    }
-    if (ptr) {
-        ptr += offset;
-    }
-    return (void **)ptr;
-}
-
-static int add_operators(AiTypeObject *type) {
-    AiDictObject *dict = (AiDictObject *)type->tp_dict;
-    AiObject *descr;
-    void **ptr;
-
-    init_slotdefs();
-    for (slotdef *p = slotdefs; p->name; ++p) {
-        if (p->wrapper) {
-            ptr = slotptr(type, p->offset);
-            if (ptr && *ptr && AiDict_GetItem(dict, p->name_strobj)
-                && *ptr == AiObject_Unhashable) {
-                AiDict_SetItem(dict, p->name_strobj, NONE);
-            }
-        }
-        else {
-            descr = AiDescr_NewWrapper(type, p, *ptr);
-            AiDict_SetItem(dict, p->name_strobj, descr);
-            DEC_REFCNT(descr);
-        }
-    }
-    if (type->tp_new) {
-        add_tp_new_wrapper(type);
-    }
-    return 0;
-}
-
 AiTypeObject AiType_Type = {
-    INIT_AiVarObject_HEAD(&AiType_Type, 0)
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "type",                             /* tp_name */
     sizeof(AiHeapTypeObject),           /* tp_basicsize */
     0,//sizeof(AiMemberDef),            /* tp_itemsize */
@@ -353,24 +296,92 @@ int AiType_Ready(AiTypeObject *type) {
     return 0;
 }
 
-void type_dealloc(AiTypeObject *type) {
-    AiHeapTypeObject *et;
-
-    assert(type->tp_flags & HEAP_TYPE);
-    et = (AiHeapTypeObject *)type;
-    XDEC_REFCNT(type->tp_base);
-    XDEC_REFCNT(type->tp_dict);
-    XDEC_REFCNT(type->tp_bases);
-    XDEC_REFCNT(type->tp_mro);
-    XDEC_REFCNT(type->tp_cache);
-    XDEC_REFCNT(type->tp_subclasses);
-    XDEC_REFCNT(et->ht_name);
-    XDEC_REFCNT(et->ht_slots);
-    OB_FREE(type);
+AiObject *AiType_Generic_Alloc(AiTypeObject *type, ssize_t nitems) {
+    AiObject *obj;
+    
 }
 
-void type_print(AiTypeObject *ob, FILE *stream) {
-    fputs("<type 'type'>", stream);
+void init_slotdefs() {
+    static int initialized = 0;
+    if (initialized)
+        return;
+
+    for (slotdef *p = slotdefs; p->name; ++p) {
+        AiObject *str = AiString_From_String(p->name);
+        AiString_Intern((AiStringObject **)&str);
+        p->name_strobj = str;
+    }
+
+    initialized = 1;
+}
+
+void **slotptr(AiTypeObject *type, int offset) {
+    char *ptr;
+
+    if ((size_t)offset >= offsetof(AiHeapTypeObject, as_sequence)) {
+        ptr = (char *)type->tp_as_sequence;
+        offset -= offsetof(AiHeapTypeObject, as_sequence);
+    }
+    else if ((size_t)offset >= offsetof(AiHeapTypeObject, as_mapping)) {
+        ptr = (char *)type->tp_as_mapping;
+        offset -= offsetof(AiHeapTypeObject, as_mapping);
+    }
+    else if ((size_t)offset >= offsetof(AiHeapTypeObject, as_number)) {
+        ptr = (char *)type->tp_as_number;
+        offset -= offsetof(AiHeapTypeObject, as_number);
+    }
+    else {
+        ptr = (char *)type;
+    }
+    if (ptr) {
+        ptr += offset;
+    }
+    return (void **)ptr;
+}
+
+int add_operators(AiTypeObject *type) {
+    AiDictObject *dict = (AiDictObject *)type->tp_dict;
+    AiObject *descr;
+    void **ptr;
+
+    init_slotdefs();
+    for (slotdef *p = slotdefs; p->name; ++p) {
+        if (p->wrapper) {
+            ptr = slotptr(type, p->offset);
+            if (ptr && *ptr && AiDict_GetItem(dict, p->name_strobj)
+                && *ptr == AiObject_Unhashable) {
+                AiDict_SetItem(dict, p->name_strobj, NONE);
+            }
+        }
+        else {
+            descr = AiDescr_NewWrapper(type, p, *ptr);
+            AiDict_SetItem(dict, p->name_strobj, descr);
+            DEC_REFCNT(descr);
+        }
+    }
+    if (type->tp_new) {
+        add_tp_new_wrapper(type);
+    }
+    return 0;
+}
+
+int AiObject_SlotCompare(AiObject *self, AiObject *other) {
+    int c;
+
+    if (OB_TYPE(self)->tp_compare == AiObject_SlotCompare) {
+        c = half_compare(self, other);
+        if (c <= 1)
+            return c;
+    }
+    if (OB_TYPE(other)->tp_compare == AiObject_SlotCompare) {
+        c = half_compare(other, self);
+        if (c < -1)
+            return -2;
+        if (c <= 1)
+            return -c;
+    }
+    return (void *)self < (void *)other ? -1 :
+        (void *)self >(void *)other ? 1 : 0;
 }
 
 int half_compare(AiObject *self, AiObject *other) {
@@ -379,7 +390,7 @@ int half_compare(AiObject *self, AiObject *other) {
     ssize_t c;
 
     func = lookup_method(self, "__cmp__", &cmp_str);
-    if(func) {
+    if (func) {
         args = AiTuple_Pack(1, other);
         if (!args) {
             res = NULL;
@@ -403,21 +414,22 @@ int half_compare(AiObject *self, AiObject *other) {
     return 2;
 }
 
-int AiObject_SlotCompare(AiObject *self, AiObject *other) {
-    int c;
+void type_dealloc(AiTypeObject *type) {
+    AiHeapTypeObject *et;
 
-    if (OB_TYPE(self)->tp_compare == AiObject_SlotCompare) {
-        c = half_compare(self, other);
-        if (c <= 1)
-            return c;
-    }
-    if (OB_TYPE(other)->tp_compare == AiObject_SlotCompare) {
-        c = half_compare(other, self);
-        if (c < -1)
-            return -2;
-        if (c <= 1)
-            return -c;
-    }
-    return (void *)self < (void *)other ? -1 :
-        (void *)self > (void *)other ? 1 : 0;
+    assert(type->tp_flags & HEAP_TYPE);
+    et = (AiHeapTypeObject *)type;
+    XDEC_REFCNT(type->tp_base);
+    XDEC_REFCNT(type->tp_dict);
+    XDEC_REFCNT(type->tp_bases);
+    XDEC_REFCNT(type->tp_mro);
+    XDEC_REFCNT(type->tp_cache);
+    XDEC_REFCNT(type->tp_subclasses);
+    XDEC_REFCNT(et->ht_name);
+    XDEC_REFCNT(et->ht_slots);
+    OB_FREE(type);
+}
+
+void type_print(AiTypeObject *ob, FILE *stream) {
+    fputs("<type 'type'>", stream);
 }

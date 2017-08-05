@@ -57,7 +57,7 @@ static AiNumberMethods int_as_number = {
 };
 
 AiTypeObject AiType_Int = {
-    INIT_AiVarObject_HEAD(&AiType_Type, 0)
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "int",                          /* tp_name */
     sizeof(AiIntObject),            /* tp_basicsize */
     0,                              /* tp_itemsize */
@@ -110,7 +110,7 @@ AiObject *AiInt_From_Long(long ival) {
         }
         v = free_list;
         free_list = (AiIntObject *)v->ob_type;
-        INIT_AiObject(v, &AiType_Int);
+        AiObject_INIT(v, &AiType_Int);
         v->ob_ival = ival;
         return (AiObject *)v;
     }
@@ -125,7 +125,7 @@ int AiInt_Init() {
         }
         v = free_list;
         free_list = (AiIntObject *)v->ob_type;
-        INIT_AiObject(v, &AiType_Int);
+        AiObject_INIT(v, &AiType_Int);
         v->ob_ival = i;
         small_intobject_buf[SMALL_INTOBJECT_INDEX(i)] = v;
     }
@@ -375,7 +375,7 @@ AiObject *int_invert(AiIntObject *ob) {
 
 AiIntObject *fill_free_list() {
     AiIntObject *p, *q;
-    p = AiObject_GC_New(AiIntBlock);
+    p = AiMem_Alloc(sizeof(AiIntBlock));
     if (!p) {
         return NULL;
     }

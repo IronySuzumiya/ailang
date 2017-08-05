@@ -15,7 +15,7 @@ static AiObject *string_str(AiStringObject *a);
 static ssize_t string_length(AiStringObject *a);
 
 AiTypeObject AiType_BaseString = {
-    INIT_AiVarObject_HEAD(&AiType_Type, 0)
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "basestring",                   /* tp_name */
     0,                              /* tp_basesize */
     0,                              /* tp_itemsize */
@@ -65,7 +65,7 @@ static AiSequenceMethods string_as_sequence = {
 };
 
 AiTypeObject AiType_String = {
-    INIT_AiVarObject_HEAD(&AiType_Type, 0)
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "string",                                   /* tp_name */
     STRING_OBJECT_SIZE,                         /* tp_basicsize */
     sizeof(char),                               /* tp_itemsize */
@@ -213,8 +213,7 @@ AiObject *_AiString_From_StringAndSize(char *sval, ssize_t size) {
         return (AiObject *)a;
     }
     else {
-        a = AiMem_Alloc(sizeof(AiStringObject) + size);
-        INIT_AiVarObject(a, &AiType_String, size);
+        a = AiVarObject_NEW(AiStringObject, &AiType_String, size);
         a->ob_shash = -1;
         a->ob_sstate = SSTATE_NOT_INTERNED;
         if (sval)
@@ -309,8 +308,7 @@ AiObject *string_concat(AiStringObject *lhs, AiStringObject *rhs) {
         AiStringObject *a;
         ssize_t size = STRING_LEN(lhs) + STRING_LEN(rhs);
 
-        a = (AiStringObject *)AiMem_Alloc(sizeof(AiStringObject) + size);
-        INIT_AiVarObject(a, &AiType_String, size);
+        a = AiVarObject_NEW(AiStringObject, &AiType_String, size);
         a->ob_shash = -1;
         a->ob_sstate = SSTATE_NOT_INTERNED;
 

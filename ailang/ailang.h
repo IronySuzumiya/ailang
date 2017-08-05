@@ -16,11 +16,12 @@
 #include <Windows.h>
 
 #include "aiconfig.h"
+
 #include "system\aiopcode.h"
-#include "system\aimemory.h"
 
 #include "object\object.h"
 #include "object\abstract.h"
+#include "system\aimemory.h"
 
 #include "aicore\aistate.h"
 #include "aicore\method.h"

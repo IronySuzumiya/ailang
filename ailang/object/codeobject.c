@@ -5,7 +5,7 @@ static void intern_strings(AiObject *tuple);
 static int intern_string_constants(AiObject *tuple);
 
 AiTypeObject AiType_Code = {
-    INIT_AiVarObject_HEAD(&AiType_Type, 0)
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "code",                             /* tp_name */
     sizeof(AiCodeObject),               /* tp_basicsize */
     0,                                  /* tp_itemsize */
@@ -58,8 +58,7 @@ AiObject *AiCode_New(int argcount, int nlocals, int stacksize, int flags,
     intern_strings(cellvars);
     intern_string_constants(consts);
 
-    co = AiObject_GC_New(AiCodeObject);
-    INIT_AiObject(co, &AiType_Code);
+    co = AiObject_NEW(AiCodeObject, &AiType_Code);
 
     co->co_argcount = argcount;
     co->co_nlocals = nlocals;

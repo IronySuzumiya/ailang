@@ -1,21 +1,21 @@
 #include "../ailang.h"
 
 static AiObject _runtime_exception = {
-    INIT_AiObject_HEAD(&AiType_Exception)
+    AiObject_HEAD_INIT(&AiType_Exception)
 };
 
 static AiObject _type_error = {
-    INIT_AiObject_HEAD(&AiType_Exception)
+    AiObject_HEAD_INIT(&AiType_Exception)
 };
 
 AiTypeObject AiType_BaseException = {
-    INIT_AiVarObject_HEAD(NULL, 0)
+    AiVarObject_HEAD_INIT(NULL, 0)
     EXC_MODULE_NAME "BaseException",    /* tp_name */
     
 };
 
 AiTypeObject AiType_Exception = {
-    INIT_AiVarObject_HEAD(&AiType_Type, 0)
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "exception",
 };
 

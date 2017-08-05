@@ -18,8 +18,8 @@
 #define OB_TYPENAME(ob)     (OB_TYPE(ob)->tp_name)
 #define OB_DEALLOC(ob)      (OB_TYPE(ob)->tp_dealloc((AiObject *)(ob)))
 
-#define INIT_AiObject_HEAD(type)            1, type,
-#define INIT_AiVarObject_HEAD(type, size)   INIT_AiObject_HEAD(type) size,
+#define AiObject_HEAD_INIT(type)            1, type,
+#define AiVarObject_HEAD_INIT(type, size)   AiObject_HEAD_INIT(type) size,
 
 #define INIT_REFCNT(ob)     (OB_REFCNT(ob) = 1)
 #define INC_REFCNT(ob)      (++OB_REFCNT(ob))
@@ -32,17 +32,6 @@
 #define XDEC_REFCNT(ob)             \
     if(!ob);                        \
     else DEC_REFCNT(ob)
-
-#define INIT_AiObject(ob, type)     \
-    WRAP(                           \
-        OB_TYPE(ob) = (type);       \
-        INIT_REFCNT(ob);            \
-    )
-#define INIT_AiVarObject(ob, type, size)    \
-    WRAP(                                   \
-        INIT_AiObject(ob, type);            \
-        OB_SIZE(ob) = (size);               \
-    )
 
 #define CHECK_TYPE(ob, type)        \
     ((ob)->ob_type == (type))
@@ -231,5 +220,6 @@ AiAPI_DATA(AiObject) notimplemented;
 
 AiAPI_DATA(AiTypeObject) AiType_Type;
 AiAPI_FUNC(int) AiType_Ready(AiTypeObject *type);
+AiAPI_FUNC(AiObject *) AiType_Generic_Alloc(AiTypeObject *type, ssize_t nitems);
 
 #endif

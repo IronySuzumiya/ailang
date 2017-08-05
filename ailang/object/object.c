@@ -3,17 +3,17 @@
 static void object_dealloc(AiObject *ob);
 
 AiTypeObject AiType_None = {
-    INIT_AiVarObject_HEAD(&AiType_Type, 0)
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "nonetype",                     /* tp_name */
 };
 
 AiTypeObject AiType_NotImplemented = {
-    INIT_AiVarObject_HEAD(&AiType_Type, 0)
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "NotImplemented",
 };
 
 AiTypeObject AiType_BaseObject = {
-    INIT_AiVarObject_HEAD(&AiType_Type, 0)
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "object",                           /* tp_name */
     sizeof(AiObject),                   /* tp_basicsize */
     0,                                  /* tp_itemsize */
@@ -54,11 +54,11 @@ AiTypeObject AiType_BaseObject = {
 };
 
 AiObject none = {
-    INIT_AiObject_HEAD(&AiType_None)
+    AiObject_HEAD_INIT(&AiType_None)
 };
 
 AiObject notimplemented = {
-    INIT_AiObject_HEAD(&AiType_NotImplemented)
+    AiObject_HEAD_INIT(&AiType_NotImplemented)
 };
 
 void object_dealloc(AiObject *ob) {

@@ -1,7 +1,6 @@
 #include "../ailang.h"
 
 static AiObject *tuple_slice(AiTupleObject *tp, ssize_t start, ssize_t end);
-static int tuple_resize(AiTupleObject *tp, ssize_t newsize);
 static void tuple_dealloc(AiTupleObject *tp);
 static void tuple_print(AiTupleObject *tp, FILE *stream);
 static long tuple_hash(AiTupleObject *v);
@@ -21,7 +20,7 @@ static AiSequenceMethods tuple_as_sequence = {
 };
 
 AiTypeObject AiType_Tuple = {
-    INIT_AiVarObject_HEAD(&AiType_Type, 0)
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "tuple",                            /* tp_name */
     sizeof(AiTupleObject),              /* tp_basicsize */
     sizeof(AiObject *),                 /* tp_itemsize */
@@ -71,17 +70,12 @@ AiObject *AiTuple_New(ssize_t size) {
     else if (size < NUMBER_FREE_TUPLES_MAX && (tp = free_tuples[size])) {
         free_tuples[size] = (AiTupleObject *)tp->ob_type;
         --number_free_tuples[size];
-        INIT_AiVarObject(tp, &AiType_Tuple, size);
+        AiVarObject_INIT(tp, &AiType_Tuple, size);
     }
     else {
-        tp = AiObject_GC_New(AiTupleObject);
-        INIT_AiVarObject(tp, &AiType_Tuple, size);
-        tp->ob_item = AiMem_Alloc(size * sizeof(AiObject *));
+        tp = AiVarObject_NEW(AiTupleObject, &AiType_Tuple, max(size - 1, 0));
     }
-    for (ssize_t i = 0; i < size; ++i) {
-        tp->ob_item[i] = 0;
-    }
-
+    AiMem_Set(tp->ob_item, 0, size * sizeof(AiObject *));
     if (size == 0) {
         free_tuples[0] = tp;
         ++number_free_tuples[0];
@@ -141,11 +135,6 @@ AiObject *tuple_slice(AiTupleObject *tp, ssize_t start, ssize_t end) {
     }
 }
 
-int tuple_resize(AiTupleObject *tp, ssize_t newsize) {
-    FATAL_ERROR("not implemented yet");
-    return 0;
-}
-
 AiObject *AiTuple_Pack(ssize_t argc, ...) {
     AiObject *r;
     va_list vargs;
@@ -173,13 +162,12 @@ void tuple_dealloc(AiTupleObject *tp) {
             XDEC_REFCNT(tp->ob_item[i]);
         }
     }
-    if (CHECK_TYPE_TUPLE(tp) && size < NUMBER_FREE_TUPLES_MAX) {
+    if (CHECK_EXACT_TYPE_TUPLE(tp) && size < NUMBER_FREE_TUPLES_MAX) {
         ++number_free_tuples[size];
         tp->ob_type = (AiTypeObject *)free_tuples[size];
         free_tuples[size] = tp;
     }
     else {
-        AiMem_Free(tp->ob_item);
         OB_FREE(tp);
     }
 }
