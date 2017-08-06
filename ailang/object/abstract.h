@@ -39,5 +39,6 @@ AiAPI_FUNC(AiObject *) AiObject_Generic_Getiter(AiObject *sq);
 AiAPI_FUNC(ssize_t) AiSequence_Getsize(AiObject *sq);
 AiAPI_FUNC(AiObject *) AiSequence_Getitem(AiObject *sq, ssize_t index);
 AiAPI_FUNC(int) AiSequence_Contains(AiObject *sq, AiObject *item);
+AiAPI_FUNC(AiObject *) AiObject_Call(AiObject *func, AiObject *arg, AiObject *kw);
 
 #endif

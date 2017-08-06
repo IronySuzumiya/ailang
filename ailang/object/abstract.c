@@ -101,3 +101,19 @@ int AiSequence_Contains(AiObject *sq, AiObject *item) {
         return -1;
     }
 }
+
+AiObject *AiObject_Call(AiObject *func, AiObject *arg, AiObject *kw) {
+    ternaryfunc call;
+    AiObject *result;
+
+    if (call = func->ob_type->tp_call) {
+        result = (*call)(func, arg, kw);
+        if (!result) {
+            RUNTIME_EXCEPTION("NULL result in AiObject_Call");
+        }
+    }
+    else {
+        RUNTIME_EXCEPTION("'%s' object is not callable", func->ob_type->tp_name);
+    }
+    return result;
+}

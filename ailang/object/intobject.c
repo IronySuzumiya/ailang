@@ -30,6 +30,14 @@ static AiIntBlock *block_list;
 static AiIntObject *free_list;
 static AiIntObject *small_intobject_buf[SMALL_INTOBJECT_BUF_SIZE];
 
+static AiMethodDef int_methods[] = {
+    { NULL }
+};
+
+static AiGetSetDef int_getset[] = {
+    { NULL }
+};
+
 static AiNumberMethods int_as_number = {
     (binaryfunc)int_add,
     (binaryfunc)int_sub,
@@ -83,9 +91,9 @@ AiTypeObject AiType_Int = {
     0,                              /* tp_iter */
     0,                              /* tp_iternext */
 
-    0,//int_methods,                    /* tp_methods */
+    int_methods,                    /* tp_methods */
     0,                              /* tp_members */
-    0,//int_getset,                     /* tp_getset */
+    int_getset,                     /* tp_getset */
     0,                              /* tp_base */
     0,                              /* tp_dict */
     0,                              /* tp_descr_get */

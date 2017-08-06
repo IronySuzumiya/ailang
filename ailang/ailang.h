@@ -24,8 +24,8 @@
 #include "system\aimemory.h"
 
 #include "aicore\aistate.h"
-#include "aicore\method.h"
-#include "aicore\member.h"
+#include "aicore\aimethod.h"
+#include "aicore\aimember.h"
 
 #include "object\descrobject.h"
 

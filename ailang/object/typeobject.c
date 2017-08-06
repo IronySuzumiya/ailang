@@ -7,13 +7,21 @@ static int add_getset(AiTypeObject *type, AiGetSetDef *gsp);
 static int add_subclass(AiTypeObject *base, AiTypeObject *type);
 static void inherit_special(AiTypeObject *type, AiTypeObject *base);
 
+static AiObject *lookup_method(AiObject *self, char *attrstr, AiObject **attrobj);
+
 static void init_slotdefs(void);
 static void **slotptr(AiTypeObject *type, int offset);
-//static int AiObject_SlotCompare(AiObject *self, AiObject *other);
-//static int half_compare(AiObject *self, AiObject *other);
+static int AiObject_SlotCompare(AiObject *self, AiObject *other);
+static int half_compare(AiObject *self, AiObject *other);
+
+static AiObject *wrap_cmpfunc(AiObject *self, AiObject *args, void *wrapped);
+
+static int check_num_args(AiObject *ob, int n);
 
 static void type_dealloc(AiTypeObject *type);
 static void type_print(AiTypeObject *ob, FILE *stream);
+static AiObject *type_call(AiTypeObject *type, AiObject *args, AiObject *kwds);
+static AiObject *type_new(AiTypeObject *metatype, AiObject *args, AiObject *kwds);
 
 #define TPSLOT(NAME, SLOT, FUNCTION, WRAPPER, DOC) \
     { NAME, offsetof(AiTypeObject, SLOT), (void *)(FUNCTION), WRAPPER, DOC }
@@ -61,9 +69,9 @@ static slotdef slotdefs[] = {
     TPSLOT("__setattr__", tp_setattr, NULL, NULL, ""),
 
     TPSLOT("__delattr__", tp_setattr, NULL, NULL, ""),
-    /*
-    TPSLOT("__cmp__", tp_compare, AiObject_SlotCompare, wrap_cmpfunc, "x.__cmp__(y) <==> cmp(x,y)"),
     
+    TPSLOT("__cmp__", tp_compare, AiObject_SlotCompare, wrap_cmpfunc, "x.__cmp__(y) <==> cmp(x,y)"),
+    /*
     TPSLOT("__hash__", tp_hash, slot_tp_hash, wrap_hashfunc, "x.__hash__() <==> hash(x)"),
 
     FLSLOT("__call__", tp_call, slot_tp_call, (wrapperfunc)wrap_call, "x.__call__(...) <==> x(...)", WRAPPER_FLAG_KEYWORDS),
@@ -202,7 +210,7 @@ AiTypeObject AiType_Type = {
     0,                                  /* tp_as_mapping */
 
     (hashfunc)Pointer_Hash,             /* tp_hash */
-    0,//(ternaryfunc)type_call,             /* tp_call */
+    (ternaryfunc)type_call,             /* tp_call */
     0,                                  /* tp_str */
 
     0,                                  /* tp_getattr */
@@ -225,30 +233,24 @@ AiTypeObject AiType_Type = {
     offsetof(AiTypeObject, tp_dict),    /* tp_dictoffset */
     0,//type_init,                          /* tp_init */
     0,                                  /* tp_alloc */
-    0,//type_new,                           /* tp_new */
+    type_new,                           /* tp_new */
     AiObject_GC_Del,                    /* tp_free */
     0,//tp_is_gc,                           /* tp_is_gc */
 };
 
 int AiType_Ready(AiTypeObject *type) {
-    AiObject *dict;
-    AiTypeObject *base;
-
-    base = type->tp_base;
-    if (!base && type != &AiType_BaseObject) {
-        base = type->tp_base = &AiType_BaseObject;
-        INC_REFCNT(base);
+    if (!type->tp_base && type != &AiType_BaseObject) {
+        type->tp_base = &AiType_BaseObject;
+        INC_REFCNT(type->tp_base);
     }
-    if (base && !base->tp_dict) {
-        AiType_Ready(base);
+    if (type->tp_base && !type->tp_base->tp_dict) {
+        AiType_Ready(type->tp_base);
     }
-    if (!OB_TYPE(type) && base) {
-        OB_TYPE(type) = OB_TYPE(base);
+    if (!OB_TYPE(type) && type->tp_base) {
+        OB_TYPE(type) = OB_TYPE(type->tp_base);
     }
-    dict = type->tp_dict;
-    if (!dict) {
-        dict = AiDict_New();
-        type->tp_dict = dict;
+    if (!type->tp_dict) {
+        type->tp_dict = AiDict_New();
     }
     add_operators(type);
     if (type->tp_methods) {
@@ -263,17 +265,17 @@ int AiType_Ready(AiTypeObject *type) {
     if (type->tp_base) {
         inherit_special(type, type->tp_base);
     }
-    if (base) {
+    if (type->tp_base) {
         if (!type->tp_as_number) {
-            type->tp_as_number = base->tp_as_number;
+            type->tp_as_number = type->tp_base->tp_as_number;
         }
         if (!type->tp_as_sequence) {
-            type->tp_as_sequence = base->tp_as_sequence;
+            type->tp_as_sequence = type->tp_base->tp_as_sequence;
         }
         if (!type->tp_as_mapping) {
-            type->tp_as_mapping = base->tp_as_mapping;
+            type->tp_as_mapping = type->tp_base->tp_as_mapping;
         }
-        add_subclass(base, type);
+        add_subclass(type->tp_base, type);
     }
     return 0;
 }
@@ -308,6 +310,17 @@ int AiType_IsSubclass(AiTypeObject *type, AiTypeObject *base) {
     return base == &AiType_BaseObject;
 }
 
+AiObject *_AiType_Lookup(AiTypeObject *type, AiObject *name) {
+    AiObject *res;
+
+    if (res = AiDict_GetItem((AiDictObject *)type->tp_dict, name)) {
+        return res;
+    }
+    else {
+        return AiDict_GetItem((AiDictObject *)type->tp_base->tp_dict, name);
+    }
+}
+
 int add_operators(AiTypeObject *type) {
     AiDictObject *dict = (AiDictObject *)type->tp_dict;
     AiObject *descr;
@@ -317,7 +330,7 @@ int add_operators(AiTypeObject *type) {
     for (slotdef *p = slotdefs; p->name; ++p) {
         if (p->wrapper) {
             ptr = slotptr(type, p->offset);
-            if (ptr && *ptr && AiDict_GetItem(dict, p->name_strobj)) {
+            if (ptr && *ptr && !AiDict_GetItem(dict, p->name_strobj)) {
                 if (*ptr == AiObject_Unhashable) {
                     AiDict_SetItem(dict, p->name_strobj, NONE);
                 }
@@ -439,6 +452,30 @@ void inherit_special(AiTypeObject *type, AiTypeObject *base) {
     }
 }
 
+AiObject *lookup_method(AiObject *self, char *attrstr, AiObject **attrobj) {
+    AiObject *res;
+
+    if (!*attrobj) {
+        AiObject *str = AiString_From_String(attrstr);
+        AiString_Intern((AiStringObject **)&str);
+        *attrobj = str;
+    }
+    res = _AiType_Lookup(OB_TYPE(self), *attrobj);
+    if (res) {
+        descrgetfunc f;
+        if (!(f = OB_TYPE(res)->tp_descr_get)) {
+            INC_REFCNT(res);
+        }
+        else {
+            res = f(res, self, (AiObject *)(OB_TYPE(self)));
+        }
+    }
+    else {
+        RUNTIME_EXCEPTION("no such attribute");
+    }
+    return res;
+}
+
 void init_slotdefs() {
     static int initialized = 0;
     if (initialized)
@@ -476,7 +513,7 @@ void **slotptr(AiTypeObject *type, int offset) {
     }
     return (void **)ptr;
 }
-/*
+
 int AiObject_SlotCompare(AiObject *self, AiObject *other) {
     int c;
 
@@ -504,13 +541,8 @@ int half_compare(AiObject *self, AiObject *other) {
     func = lookup_method(self, "__cmp__", &cmp_str);
     if (func) {
         args = AiTuple_Pack(1, other);
-        if (!args) {
-            res = NULL;
-        }
-        else {
-            res = AiObject_Call(func, args, NULL);
-            DEC_REFCNT(args);
-        }
+        res = AiObject_Call(func, args, NULL);
+        DEC_REFCNT(args);
         DEC_REFCNT(func);
         if (res != AiNotImplemented) {
             if (!res)
@@ -525,7 +557,46 @@ int half_compare(AiObject *self, AiObject *other) {
     }
     return 2;
 }
-*/
+
+AiObject *wrap_cmpfunc(AiObject *self, AiObject *args, void *wrapped) {
+    cmpfunc func = (cmpfunc)wrapped;
+    int res;
+    AiObject *other;
+    if (!check_num_args(args, 1)) {
+        return NULL;
+    }
+    else {
+        other = TUPLE_GETITEM(args, 0);
+        if (OB_TYPE(other)->tp_compare != func &&
+            !AiType_IsSubclass(OB_TYPE(other), OB_TYPE(self))) {
+            RUNTIME_EXCEPTION("%s.__cmp__(x,y) requires y to be a '%s', not a '%s'",
+                OB_TYPE(self)->tp_name, OB_TYPE(self)->tp_name,
+                OB_TYPE(other)->tp_name);
+            return NULL;
+        }
+        else {
+            res = (*func)(self, other);
+            return AiInt_From_Long((long)res);
+        }
+    }
+}
+
+int check_num_args(AiObject *ob, int n) {
+    if (CHECK_EXACT_TYPE_TUPLE(ob)) {
+        if (n == TUPLE_SIZE(ob)) {
+            return 1;
+        }
+        else {
+            RUNTIME_EXCEPTION("expected %d arguments, got %d", n, TUPLE_SIZE(ob));
+            return 0;
+        }
+    }
+    else {
+        RUNTIME_EXCEPTION("argument list is not a tuple");
+        return 0;
+    }
+}
+
 void type_dealloc(AiTypeObject *type) {
     AiHeapTypeObject *et;
 
@@ -541,4 +612,59 @@ void type_dealloc(AiTypeObject *type) {
 
 void type_print(AiTypeObject *ob, FILE *stream) {
     fputs("<type 'type'>", stream);
+}
+
+AiObject *type_call(AiTypeObject *type, AiObject *args, AiObject *kwds) {
+    AiObject *obj;
+    if (!type->tp_new) {
+        RUNTIME_EXCEPTION("cannot create '%s' instances", type->tp_name);
+        return NULL;
+    }
+    else {
+        obj = type->tp_new(type, args, kwds);
+        if (obj) {
+            if (type == &AiType_Type && CHECK_TYPE_TUPLE(args) && TUPLE_SIZE(args) == 1
+                && (!kwds || (CHECK_TYPE_DICT(kwds) && DICT_SIZE(kwds) == 0))) {
+                return obj;
+            }
+            else if (!AiType_IsSubclass(obj->ob_type, type)) {
+                return obj;
+            }
+            else {
+                type = obj->ob_type;
+                if (type->tp_init) {
+                    type->tp_init(obj, args, kwds);
+                    DEC_REFCNT(obj);
+                }
+            }
+        }
+        return obj;
+    }
+}
+
+AiObject *type_new(AiTypeObject *metatype, AiObject *args, AiObject *kwds) {
+    /* Special case: type(x) should return x->ob_type */
+    ssize_t nargs = TUPLE_SIZE(args);
+    ssize_t nkwds = kwds ? DICT_SIZE(kwds) : 0;
+    if (CHECK_EXACT_TYPE_TYPE(metatype) && nargs == 1 && nkwds == 0) {
+        AiObject *x = TUPLE_GETITEM(args, 0);
+        INC_REFCNT(OB_TYPE(x));
+        return (AiObject *)OB_TYPE(x);
+    }
+    else if (nargs + nkwds != 3) {
+        TYPE_ERROR("type() takes 1 or 3 arguments");
+        return NULL;
+    }
+    else {
+        if (!metatype->tp_base) {
+            metatype->tp_base = &AiType_BaseObject;
+        }
+        INC_REFCNT(metatype->tp_base);
+
+        AiObject *s = AiString_From_String("__slots__");
+        AiObject *slots = AiDict_GetItem((AiDictObject *)metatype->tp_dict, s);
+        DEC_REFCNT(s);
+
+        // TODO
+    }
 }

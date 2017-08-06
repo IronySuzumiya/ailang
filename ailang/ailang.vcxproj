@@ -140,8 +140,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="aicore\aistate.c" />
-    <ClCompile Include="aicore\member.c" />
-    <ClCompile Include="aicore\method.c" />
+    <ClCompile Include="aicore\aimember.c" />
+    <ClCompile Include="aicore\aimethod.c" />
     <ClCompile Include="object\abstract.c" />
     <ClCompile Include="object\boolobject.c" />
     <ClCompile Include="object\cellobject.c" />
@@ -168,8 +168,8 @@
   <ItemGroup>
     <ClInclude Include="aiconfig.h" />
     <ClInclude Include="aicore\aistate.h" />
-    <ClInclude Include="aicore\member.h" />
-    <ClInclude Include="aicore\method.h" />
+    <ClInclude Include="aicore\aimember.h" />
+    <ClInclude Include="aicore\aimethod.h" />
     <ClInclude Include="ailang.h" />
     <ClInclude Include="object\abstract.h" />
     <ClInclude Include="object\boolobject.h" />

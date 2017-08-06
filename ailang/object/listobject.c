@@ -10,9 +10,18 @@ static int list_contains(AiListObject *list, AiObject *item);
 static AiObject *list_str(AiListObject *list);
 static int list_insert(AiListObject *list, ssize_t index, AiObject *item);
 static int list_extend(AiListObject *fo, AiListObject *la);
+static AiObject *list_iter(AiObject *seq);
 
 static AiListObject *free_lists[NUMBER_FREE_LISTS_MAX];
 static int number_free_lists;
+
+static AiMethodDef list_methods[] = {
+    { "__getitem__", (AiCFunction)AiList_GetItem, METH_O },
+    { "append", (AiCFunction)list_append, METH_O },
+    { "insert", (AiCFunction)list_insert, METH_VARARGS },
+    { "extend", (AiCFunction)list_extend, METH_O },
+    { NULL }
+};
 
 static AiSequenceMethods list_as_sequence = {
     (lengthfunc)list_size,
@@ -47,10 +56,10 @@ AiTypeObject AiType_List = {
 
     SUBCLASS_LIST | BASE_TYPE,          /* tp_flags */
 
-    0,//list_iter,                          /* tp_iter */
+    list_iter,                          /* tp_iter */
     0,                                  /* tp_iternext */
 
-    0,//list_methods,                       /* tp_methods */
+    list_methods,                       /* tp_methods */
     0,                                  /* tp_members */
     0,                                  /* tp_getset */
     0,                                  /* tp_base */
@@ -93,7 +102,9 @@ int list_resize(AiListObject *list, ssize_t newsize) {
     }
     // The growth pattern is:  0, 4, 8, 16, 25, 35, 46, 58, 72, 88, ...
     new_allo = newsize + (newsize >> 3) + (newsize < 9 ? 3 : 6);
-    list->ob_item = AiMem_Realloc(list->ob_item, newsize);
+    list->ob_item = list->ob_item ?
+        AiMem_Realloc(list->ob_item, newsize * sizeof(AiObject *)) :
+        AiMem_Alloc(newsize * sizeof(AiObject *));
     LIST_SIZE(list) = newsize;
     list->allocated = new_allo;
     return 0;
@@ -302,4 +313,13 @@ int list_compare(AiListObject *lhs, AiListObject *rhs) {
         }
     }
     return LIST_SIZE(lhs) > LIST_SIZE(rhs) ? 1 : LIST_SIZE(lhs) < LIST_SIZE(rhs) ? -1 : 0;
+}
+
+AiObject *list_iter(AiObject *seq) {
+    AiSeqiterObject *it;
+    it = AiObject_NEW(AiSeqiterObject, &AiType_Seqiter);
+    it->it_index = 0;
+    INC_REFCNT(seq);
+    it->it_seq = (AiListObject *)seq;
+    return (AiObject *)it;
 }

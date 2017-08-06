@@ -11,6 +11,11 @@ static AiDictEntry *freeslot;
 static AiDictObject *free_dicts[NUMBER_FREE_DICTS_MAX];
 static int number_free_dicts;
 
+static AiMethodDef dict_methods[] = {
+    { "__getitem__", (AiCFunction)AiDict_GetItem, METH_O },
+    { NULL }
+};
+
 static AiMappingMethods dict_as_mapping = {
     (lengthfunc)dict_size,
     (binaryfunc)AiDict_GetItem,
@@ -31,7 +36,7 @@ AiTypeObject AiType_Dict = {
     0,                                          /* tp_as_sequence */
     &dict_as_mapping,                           /* tp_as_mapping */
 
-    0,//(hashfunc)AiObject_Unhashable,                /* tp_hash */
+    (hashfunc)AiObject_Unhashable,              /* tp_hash */
     0,                                          /* tp_call */
     (unaryfunc)dict_str,                        /* tp_str */
 
@@ -45,7 +50,7 @@ AiTypeObject AiType_Dict = {
     0,//(unaryfunc)dict_iter,                       /* tp_iter */
     0,                                          /* tp_iternext */
 
-    0,//dict_methods,                               /* tp_methods */
+    dict_methods,                               /* tp_methods */
     0,                                          /* tp_members */
     0,                                          /* tp_getset */
     0,                                          /* tp_base */

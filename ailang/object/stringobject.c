@@ -14,6 +14,11 @@ static int string_compare(AiStringObject *lhs, AiStringObject *rhs);
 static AiObject *string_str(AiStringObject *a);
 static ssize_t string_length(AiStringObject *a);
 
+static AiMethodDef string_methods[] = {
+    { "join", (AiCFunction)string_join, METH_O },
+    { NULL }
+};
+
 AiTypeObject AiType_BaseString = {
     AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "basestring",                   /* tp_name */
@@ -91,7 +96,7 @@ AiTypeObject AiType_String = {
     0,                                          /* tp_iter */
     0,                                          /* tp_iternext */
 
-    0,//string_methods,                             /* tp_methods */
+    string_methods,                             /* tp_methods */
     0,                                          /* tp_members */
     0,                                          /* tp_getset */
     &AiType_BaseString,                     /* tp_base */

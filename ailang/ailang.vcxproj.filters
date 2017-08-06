@@ -88,13 +88,13 @@
     <ClCompile Include="object\descrobject.c">
       <Filter>object</Filter>
     </ClCompile>
-    <ClCompile Include="aicore\member.c">
-      <Filter>aicore</Filter>
-    </ClCompile>
-    <ClCompile Include="aicore\method.c">
-      <Filter>aicore</Filter>
-    </ClCompile>
     <ClCompile Include="aicore\aistate.c">
+      <Filter>aicore</Filter>
+    </ClCompile>
+    <ClCompile Include="aicore\aimember.c">
+      <Filter>aicore</Filter>
+    </ClCompile>
+    <ClCompile Include="aicore\aimethod.c">
       <Filter>aicore</Filter>
     </ClCompile>
   </ItemGroup>
@@ -171,10 +171,10 @@
     <ClInclude Include="aicore\aistate.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="aicore\member.h">
+    <ClInclude Include="aicore\aimember.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="aicore\method.h">
+    <ClInclude Include="aicore\aimethod.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

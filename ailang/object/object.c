@@ -2,6 +2,14 @@
 
 static void object_dealloc(AiObject *ob);
 
+static AiMethodDef object_methods[] = {
+    { NULL }
+};
+
+static AiGetSetDef object_getsets[] = {
+    { NULL }
+};
+
 AiTypeObject AiType_None = {
     AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "nonetype",                     /* tp_name */
@@ -39,9 +47,9 @@ AiTypeObject AiType_BaseObject = {
     0,                                  /* tp_iter */
     0,                                  /* tp_iternext */
 
-    0,//object_methods,                     /* tp_methods */
+    object_methods,                     /* tp_methods */
     0,                                  /* tp_members */
-    0,//object_getsetlist,                  /* tp_getset */
+    object_getsets,                     /* tp_getset */
     0,                                  /* tp_base */
     0,                                  /* tp_dict */
     0,                                  /* tp_descr_get */

@@ -214,10 +214,12 @@ AiAPI_DATA(AiObject) notimplemented;
 
 #define CHECK_FAST_SUBCLASS(ob, base) ((ob)->ob_type->tp_flags & (base))
 #define CHECK_TYPE_TYPE(a) CHECK_FAST_SUBCLASS(a, SUBCLASS_TYPE)
+#define CHECK_EXACT_TYPE_TYPE(a) (OB_TYPE(a) == &AiType_Type)
 
 AiAPI_DATA(AiTypeObject) AiType_Type;
 AiAPI_FUNC(int) AiType_Ready(AiTypeObject *type);
 AiAPI_FUNC(AiObject *) AiType_Generic_Alloc(AiTypeObject *type, ssize_t nitems);
 AiAPI_FUNC(int) AiType_IsSubclass(AiTypeObject *type, AiTypeObject *base);
+AiAPI_FUNC(AiObject *) _AiType_Lookup(AiTypeObject *type, AiObject *name);
 
 #endif

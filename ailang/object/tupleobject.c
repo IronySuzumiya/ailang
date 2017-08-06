@@ -6,9 +6,14 @@ static void tuple_print(AiTupleObject *tp, FILE *stream);
 static long tuple_hash(AiTupleObject *v);
 static AiObject *tuple_str(AiTupleObject *tp);
 static int tuple_contains(AiTupleObject *tp, AiObject *item);
+static AiObject *tuple_iter(AiObject *seq);
 
 static AiTupleObject *free_tuples[NUMBER_FREE_TUPLES_MAX];
 static int number_free_tuples[NUMBER_FREE_TUPLES_MAX];
+
+static AiMethodDef tuple_methods[] = {
+    { NULL }
+};
 
 static AiSequenceMethods tuple_as_sequence = {
     (lengthfunc)tuple_size,
@@ -43,10 +48,10 @@ AiTypeObject AiType_Tuple = {
 
     SUBCLASS_TUPLE | BASE_TYPE,         /* tp_flags */
 
-    0,//tuple_iter,                         /* tp_iter */
+    tuple_iter,                         /* tp_iter */
     0,                                  /* tp_iternext */
 
-    0,//tuple_methods,                      /* tp_methods */
+    tuple_methods,                      /* tp_methods */
     0,                                  /* tp_members */
     0,                                  /* tp_getset */
     0,                                  /* tp_base */
@@ -263,4 +268,16 @@ int tuple_contains(AiTupleObject *tp, AiObject *item) {
         }
     }
     return 0;
+}
+
+AiObject *tuple_iter(AiObject *seq) {
+    AiSeqiterObject *it;
+
+    it = AiObject_NEW(AiSeqiterObject, &AiType_Seqiter);
+    it->it_index = 0;
+    INC_REFCNT(seq);
+
+    // TODO
+    it->it_seq = (AiListObject *)seq;
+    return (AiObject *)it;
 }
