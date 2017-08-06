@@ -1,11 +1,16 @@
 #include "../ailang.h"
 
+static int add_operators(AiTypeObject *type);
+static int add_members(AiTypeObject *type, AiMemberDef *mem);
+static int add_methods(AiTypeObject *type, AiMethodDef *meth);
+static int add_getset(AiTypeObject *type, AiGetSetDef *gsp);
+static int add_subclass(AiTypeObject *base, AiTypeObject *type);
+static void inherit_special(AiTypeObject *type, AiTypeObject *base);
+
 static void init_slotdefs(void);
 static void **slotptr(AiTypeObject *type, int offset);
-static int add_operators(AiTypeObject *type);
-
-static int AiObject_SlotCompare(AiObject *self, AiObject *other);
-static int half_compare(AiObject *self, AiObject *other);
+//static int AiObject_SlotCompare(AiObject *self, AiObject *other);
+//static int half_compare(AiObject *self, AiObject *other);
 
 static void type_dealloc(AiTypeObject *type);
 static void type_print(AiTypeObject *ob, FILE *stream);
@@ -187,7 +192,7 @@ AiTypeObject AiType_Type = {
     AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "type",                             /* tp_name */
     sizeof(AiHeapTypeObject),           /* tp_basicsize */
-    0,//sizeof(AiMemberDef),            /* tp_itemsize */
+    sizeof(AiMemberDef),                /* tp_itemsize */
     (destructor)type_dealloc,           /* tp_dealloc */
     (printfunc)type_print,              /* tp_print */
     0,                                  /* tp_compare */
@@ -226,7 +231,7 @@ AiTypeObject AiType_Type = {
 };
 
 int AiType_Ready(AiTypeObject *type) {
-    AiObject *dict, *bases;
+    AiObject *dict;
     AiTypeObject *base;
 
     base = type->tp_base;
@@ -239,16 +244,6 @@ int AiType_Ready(AiTypeObject *type) {
     }
     if (!OB_TYPE(type) && base) {
         OB_TYPE(type) = OB_TYPE(base);
-    }
-    bases = type->tp_bases;
-    if (!bases) {
-        if (!base) {
-            bases = AiTuple_New(0);
-        }
-        else {
-            bases = AiTuple_Pack(1, base);
-        }
-        type->tp_bases = bases;
     }
     dict = type->tp_dict;
     if (!dict) {
@@ -265,16 +260,8 @@ int AiType_Ready(AiTypeObject *type) {
     if (type->tp_getset) {
         add_getset(type, type->tp_getset);
     }
-    mro_internal(type);
     if (type->tp_base) {
         inherit_special(type, type->tp_base);
-    }
-    bases = type->tp_mro;
-    for (ssize_t i = 1; i < TUPLE_SIZE(bases); ++i) {
-        AiObject *b = TUPLE_GETITEM(bases, i);
-        if (CHECK_TYPE_TYPE(b)) {
-            inherit_slots(type, (AiTypeObject *)b);
-        }
     }
     if (base) {
         if (!type->tp_as_number) {
@@ -286,19 +273,170 @@ int AiType_Ready(AiTypeObject *type) {
         if (!type->tp_as_mapping) {
             type->tp_as_mapping = base->tp_as_mapping;
         }
-    }
-    for (ssize_t i = 0; i < TUPLE_SIZE(bases); ++i) {
-        AiObject *b = TUPLE_GETITEM(bases, i);
-        if (CHECK_TYPE_TYPE(b)) {
-            add_subclass((AiTypeObject *)b, type);
-        }
+        add_subclass(base, type);
     }
     return 0;
 }
 
 AiObject *AiType_Generic_Alloc(AiTypeObject *type, ssize_t nitems) {
     AiObject *obj;
-    
+    ssize_t size = _AiVarObject_SIZE(type, nitems + 1);
+
+    obj = (AiObject *)AiObject_Malloc(size);
+    AiMem_Set(obj, 0, size);
+    if (type->tp_flags & HEAP_TYPE) {
+        INC_REFCNT(type);
+    }
+    if (type->tp_itemsize) {
+        AiVarObject_INIT(obj, type, nitems);
+    }
+    else {
+        AiObject_INIT(obj, type);
+    }
+    return obj;
+}
+
+int AiType_IsSubclass(AiTypeObject *type, AiTypeObject *base) {
+    do {
+        if (type == base) {
+            return 1;
+        }
+        else {
+            type = type->tp_base;
+        }
+    } while (type);
+    return base == &AiType_BaseObject;
+}
+
+int add_operators(AiTypeObject *type) {
+    AiDictObject *dict = (AiDictObject *)type->tp_dict;
+    AiObject *descr;
+    void **ptr;
+
+    init_slotdefs();
+    for (slotdef *p = slotdefs; p->name; ++p) {
+        if (p->wrapper) {
+            ptr = slotptr(type, p->offset);
+            if (ptr && *ptr && AiDict_GetItem(dict, p->name_strobj)) {
+                if (*ptr == AiObject_Unhashable) {
+                    AiDict_SetItem(dict, p->name_strobj, NONE);
+                }
+                else {
+                    descr = AiDescr_NewWrapper(type, p, *ptr);
+                    AiDict_SetItem(dict, p->name_strobj, descr);
+                    DEC_REFCNT(descr);
+                }
+            }
+        }
+    }
+    if (type->tp_new) {
+        // TODO
+        //add_tp_new_wrapper(type);
+    }
+    return 0;
+}
+
+int add_members(AiTypeObject *type, AiMemberDef *mem) {
+    AiDictObject *dict = (AiDictObject *)type->tp_dict;
+
+    for (; mem->name; ++mem) {
+        AiObject *descr;
+        AiObject *namestr = AiString_From_String(mem->name);
+        if (!AiDict_GetItem(dict, namestr)) {
+            AiString_Intern((AiStringObject **)&namestr);
+            descr = AiDescr_NewMember(type, mem);
+            AiDict_SetItem(dict, namestr, descr);
+            DEC_REFCNT(descr);
+        }
+        DEC_REFCNT(namestr);
+    }
+    return 0;
+}
+
+int add_methods(AiTypeObject *type, AiMethodDef *meth) {
+    AiDictObject *dict = (AiDictObject *)type->tp_dict;
+
+    for (; meth->ml_name; ++meth) {
+        AiObject *descr;
+        AiObject *namestr = AiString_From_String(meth->ml_name);
+        if (!AiDict_GetItem(dict, namestr)) {
+            AiString_Intern((AiStringObject **)&namestr);
+            descr = AiDescr_NewMethod(type, meth);
+            AiDict_SetItem(dict, namestr, descr);
+            DEC_REFCNT(descr);
+        }
+        DEC_REFCNT(namestr);
+    }
+    return 0;
+}
+
+int add_getset(AiTypeObject *type, AiGetSetDef *gsp) {
+    AiDictObject *dict = (AiDictObject *)type->tp_dict;
+
+    for (; gsp->name; ++gsp) {
+        AiObject *descr;
+        AiObject *namestr = AiString_From_String(gsp->name);
+        if (!AiDict_GetItem(dict, namestr)) {
+            AiString_Intern((AiStringObject **)&namestr);
+            descr = AiDescr_NewGetSet(type, gsp);
+            AiDict_SetItem(dict, namestr, descr);
+            DEC_REFCNT(descr);
+        }
+        DEC_REFCNT(namestr);
+    }
+    return 0;
+}
+
+int add_subclass(AiTypeObject *base, AiTypeObject *type) {
+    AiObject *list;
+
+    // implement weakref in the future
+    list = base->tp_subclasses;
+    if (!list) {
+        base->tp_subclasses = list = AiList_New(0);
+    }
+    list_append((AiListObject *)list, (AiObject *)type);
+    return 0;
+}
+
+void inherit_special(AiTypeObject *type, AiTypeObject *base) {
+    if (!type->tp_basicsize) {
+        type->tp_basicsize = base->tp_basicsize;
+    }
+    if (base != &AiType_BaseObject || (type->tp_flags & HEAP_TYPE)) {
+        if (!type->tp_new) {
+            type->tp_new = base->tp_new;
+        }
+    }
+
+#define COPYVAL(SLOT)   \
+    if(!type->SLOT) type->SLOT = base->SLOT
+
+    COPYVAL(tp_itemsize);
+    if (AiType_IsSubclass(base, &AiType_BaseException)) {
+        type->tp_flags |= SUBCLASS_BASEEXC;
+    }
+    else if (AiType_IsSubclass(base, &AiType_Type)) {
+        type->tp_flags |= SUBCLASS_TYPE;
+    }
+    else if (AiType_IsSubclass(base, &AiType_Int)) {
+        type->tp_flags |= SUBCLASS_INT;
+    }/*
+    else if (AiType_IsSubclass(base, &AiType_Float)) {
+        type->tp_flags |= SUBCLASS_FLOAT;
+    }*/
+    else if (AiType_IsSubclass(base, &AiType_String)) {
+        type->tp_flags |= SUBCLASS_STRING;
+    }
+    else if (AiType_IsSubclass(base, &AiType_Tuple)) {
+        type->tp_flags |= SUBCLASS_TUPLE;
+    }
+    else if (AiType_IsSubclass(base, &AiType_List)) {
+        type->tp_flags |= SUBCLASS_LIST;
+    }
+    else if (AiType_IsSubclass(base, &AiType_Dict)) {
+        type->tp_flags |= SUBCLASS_DICT;
+    }
 }
 
 void init_slotdefs() {
@@ -338,33 +476,7 @@ void **slotptr(AiTypeObject *type, int offset) {
     }
     return (void **)ptr;
 }
-
-int add_operators(AiTypeObject *type) {
-    AiDictObject *dict = (AiDictObject *)type->tp_dict;
-    AiObject *descr;
-    void **ptr;
-
-    init_slotdefs();
-    for (slotdef *p = slotdefs; p->name; ++p) {
-        if (p->wrapper) {
-            ptr = slotptr(type, p->offset);
-            if (ptr && *ptr && AiDict_GetItem(dict, p->name_strobj)
-                && *ptr == AiObject_Unhashable) {
-                AiDict_SetItem(dict, p->name_strobj, NONE);
-            }
-        }
-        else {
-            descr = AiDescr_NewWrapper(type, p, *ptr);
-            AiDict_SetItem(dict, p->name_strobj, descr);
-            DEC_REFCNT(descr);
-        }
-    }
-    if (type->tp_new) {
-        add_tp_new_wrapper(type);
-    }
-    return 0;
-}
-
+/*
 int AiObject_SlotCompare(AiObject *self, AiObject *other) {
     int c;
 
@@ -413,7 +525,7 @@ int half_compare(AiObject *self, AiObject *other) {
     }
     return 2;
 }
-
+*/
 void type_dealloc(AiTypeObject *type) {
     AiHeapTypeObject *et;
 
@@ -421,9 +533,6 @@ void type_dealloc(AiTypeObject *type) {
     et = (AiHeapTypeObject *)type;
     XDEC_REFCNT(type->tp_base);
     XDEC_REFCNT(type->tp_dict);
-    XDEC_REFCNT(type->tp_bases);
-    XDEC_REFCNT(type->tp_mro);
-    XDEC_REFCNT(type->tp_cache);
     XDEC_REFCNT(type->tp_subclasses);
     XDEC_REFCNT(et->ht_name);
     XDEC_REFCNT(et->ht_slots);

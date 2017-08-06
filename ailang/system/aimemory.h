@@ -9,6 +9,7 @@
 #define AiMem_Realloc           mem_realloc
 #define AiMem_Copy              mem_copy
 #define AiMem_Set               mem_set
+#define AiObject_Malloc         mem_alloc
 #define AiObject_GC_Del         AiMem_Free
 #define AiObject_GC_Free        AiMem_Free
 

@@ -182,18 +182,41 @@ AiTypeObject AiType_WrapperDescr = {
     0,                                      /* tp_descr_set */
 };
 
-AiObject *AiDescr_NewWrapper(AiTypeObject *type, struct wrapperbase *base, void *wrapped) {
-    AiWrapperDescrObject *descr;
-    descr = (AiWrapperDescrObject *)descr_new(&AiType_WrapperDescr, type, base->name);
-    if (descr) {
-        descr->d_base = base;
-        descr->d_wrapped = wrapped;
-    }
-    return (AiObject *)descr;
-}
-
 AiDescrObject *descr_new(AiTypeObject *descrtype, AiTypeObject *type, char *name) {
     AiDescrObject *descr;
     descr = (AiDescrObject *)AiType_Generic_Alloc(descrtype, 0);
-    // TODO
+    XINC_REFCNT(type);
+    descr->d_type = type;
+    descr->d_name = AiString_From_String(name);
+    AiString_Intern((AiStringObject **)&descr->d_name);
+    return descr;
+}
+
+AiObject *AiDescr_NewWrapper(AiTypeObject *type, struct wrapperbase *base, void *wrapped) {
+    AiWrapperDescrObject *descr;
+    descr = (AiWrapperDescrObject *)descr_new(&AiType_WrapperDescr, type, base->name);
+    descr->d_base = base;
+    descr->d_wrapped = wrapped;
+    return (AiObject *)descr;
+}
+
+AiObject *AiDescr_NewMember(AiTypeObject *type, AiMemberDef *member) {
+    AiMemberDescrObject *descr;
+    descr = (AiMemberDescrObject *)descr_new(&AiType_MemberDescr, type, member->name);
+    descr->d_member = member;
+    return (AiObject *)descr;
+}
+
+AiObject *AiDescr_NewMethod(AiTypeObject *type, AiMethodDef *method) {
+    AiMethodDescrObject *descr;
+    descr = (AiMethodDescrObject *)descr_new(&AiType_MethodDescr, type, method->ml_name);
+    descr->d_method = method;
+    return (AiObject *)descr;
+}
+
+AiObject *AiDescr_NewGetSet(AiTypeObject *type, AiGetSetDef *getset) {
+    AiGetSetDescrObject *descr;
+    descr = (AiGetSetDescrObject *)descr_new(&AiType_GetSetDescr, type, getset->name);
+    descr->d_getset = getset;
+    return (AiObject *)descr;
 }

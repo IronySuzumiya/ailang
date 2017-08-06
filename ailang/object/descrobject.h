@@ -72,5 +72,8 @@ AiAPI_DATA(AiTypeObject) AiType_MemberDescr;
 AiAPI_DATA(AiTypeObject) AiType_GetSetDescr;
 AiAPI_DATA(AiTypeObject) AiType_WrapperDescr;
 AiAPI_FUNC(AiObject *) AiDescr_NewWrapper(AiTypeObject *type, struct wrapperbase *base, void *wrapped);
+AiAPI_FUNC(AiObject *) AiDescr_NewMember(AiTypeObject *type, AiMemberDef *member);
+AiAPI_FUNC(AiObject *) AiDescr_NewMethod(AiTypeObject *type, AiMethodDef *method);
+AiAPI_FUNC(AiObject *) AiDescr_NewGetSet(AiTypeObject *type, AiGetSetDef *getset);
 
 #endif

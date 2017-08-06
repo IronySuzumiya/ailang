@@ -172,9 +172,6 @@ typedef struct _typeobject {
     newfunc tp_new;
     freefunc tp_free;
     enquiry tp_is_gc;
-    AiObject *tp_bases;
-    AiObject *tp_mro;
-    AiObject *tp_cache;
     AiObject *tp_subclasses;
     destructor tp_del;
 }
@@ -221,5 +218,6 @@ AiAPI_DATA(AiObject) notimplemented;
 AiAPI_DATA(AiTypeObject) AiType_Type;
 AiAPI_FUNC(int) AiType_Ready(AiTypeObject *type);
 AiAPI_FUNC(AiObject *) AiType_Generic_Alloc(AiTypeObject *type, ssize_t nitems);
+AiAPI_FUNC(int) AiType_IsSubclass(AiTypeObject *type, AiTypeObject *base);
 
 #endif

@@ -1,6 +1,6 @@
 #include "../ailang.h"
 
-static int AiList_Resize(AiListObject *list, ssize_t newsize);
+static int list_resize(AiListObject *list, ssize_t newsize);
 static void list_dealloc(AiListObject *list);
 static void list_print(AiListObject *list, FILE *stream);
 static int list_compare(AiListObject *lhs, AiListObject *rhs);
@@ -86,7 +86,7 @@ AiObject * AiList_New(ssize_t size) {
     return (AiObject *)list;
 }
 
-int AiList_Resize(AiListObject *list, ssize_t newsize) {
+int list_resize(AiListObject *list, ssize_t newsize) {
     ssize_t old_allo = list->allocated, new_allo;
     if (newsize < old_allo && newsize >= old_allo / 2) {
         return 0;
@@ -211,7 +211,7 @@ AiObject *list_str(AiListObject *list) {
 int list_insert(AiListObject *list, ssize_t index, AiObject *item) {
     MAKE_INDEX_IN_RANGE(index, LIST_SIZE(list));
     if (index < LIST_SIZE(list)) {
-        AiList_Resize(list, LIST_SIZE(list) + 1);
+        list_resize(list, LIST_SIZE(list) + 1);
         for (ssize_t i = index + 1; i < LIST_SIZE(list); ++i) {
             list->ob_item[i] = list->ob_item[i - 1];
         }
@@ -226,7 +226,7 @@ int list_insert(AiListObject *list, ssize_t index, AiObject *item) {
 }
 
 int list_append(AiListObject *list, AiObject *item) {
-    AiList_Resize(list, LIST_SIZE(list) + 1);
+    list_resize(list, LIST_SIZE(list) + 1);
     list->ob_item[LIST_SIZE(list) - 1] = item;
     XINC_REFCNT(item);
     return 0;
@@ -235,7 +235,7 @@ int list_append(AiListObject *list, AiObject *item) {
 int list_extend(AiListObject *fo, AiListObject *la) {
     if (CHECK_TYPE_LIST(fo) && CHECK_TYPE_LIST(la)) {
         ssize_t fo_size = LIST_SIZE(fo), la_size = LIST_SIZE(la);
-        AiList_Resize(fo, fo_size + la_size);
+        list_resize(fo, fo_size + la_size);
         for (ssize_t i = 0; i < la_size; ++i) {
             fo->ob_item[fo_size + i] = la->ob_item[i];
             XINC_REFCNT(la->ob_item[i]);
