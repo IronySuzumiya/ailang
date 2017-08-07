@@ -34,10 +34,6 @@ static AiMethodDef int_methods[] = {
     { NULL }
 };
 
-static AiGetSetDef int_getset[] = {
-    { NULL }
-};
-
 static AiNumberMethods int_as_number = {
     (binaryfunc)int_add,
     (binaryfunc)int_sub,
@@ -81,8 +77,6 @@ AiTypeObject AiType_Int = {
     0,                              /* tp_call */
     (unaryfunc)int_str,             /* tp_str */
 
-    0,                              /* tp_getattr */
-    0,                              /* tp_setattr */
     0,//AiObject_Generic_Getattr,         /* tp_getattro */
     0,                              /* tp_setattro */
 
@@ -93,12 +87,11 @@ AiTypeObject AiType_Int = {
 
     int_methods,                    /* tp_methods */
     0,                              /* tp_members */
-    int_getset,                     /* tp_getset */
+
     0,                              /* tp_base */
     0,                              /* tp_dict */
     0,                              /* tp_descr_get */
     0,                              /* tp_descr_set */
-    0,                              /* tp_dictoffset */
     0,                              /* tp_init */
     0,                              /* tp_alloc */
     0,//int_new,                        /* tp_new */

@@ -6,18 +6,14 @@ static AiMethodDef object_methods[] = {
     { NULL }
 };
 
-static AiGetSetDef object_getsets[] = {
-    { NULL }
-};
-
 AiTypeObject AiType_None = {
     AiVarObject_HEAD_INIT(&AiType_Type, 0)
-    "nonetype",                     /* tp_name */
+    "nonetype",                         /* tp_name */
 };
 
 AiTypeObject AiType_NotImplemented = {
     AiVarObject_HEAD_INIT(&AiType_Type, 0)
-    "NotImplemented",
+    "NotImplemented",                   /* tp_name */
 };
 
 AiTypeObject AiType_BaseObject = {
@@ -37,8 +33,6 @@ AiTypeObject AiType_BaseObject = {
     0,                                  /* tp_call */
     0,//object_str,                         /* tp_str */
 
-    0,                                  /* tp_getattr */
-    0,                                  /* tp_setattr */
     0,//AiObject_Generic_Getattr,             /* tp_getattro */
     0,//AiObject_Generic_Setattr,             /* tp_setattro */
 
@@ -49,12 +43,11 @@ AiTypeObject AiType_BaseObject = {
 
     object_methods,                     /* tp_methods */
     0,                                  /* tp_members */
-    object_getsets,                     /* tp_getset */
+
     0,                                  /* tp_base */
     0,                                  /* tp_dict */
     0,                                  /* tp_descr_get */
     0,                                  /* tp_descr_set */
-    0,                                  /* tp_dictoffset */
     0,//object_init,                        /* tp_init */
     0,//AiType_Generic_Alloc,                 /* tp_alloc */
     0,//object_new,                         /* tp_new */

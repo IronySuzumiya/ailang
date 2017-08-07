@@ -21,8 +21,6 @@ AiTypeObject AiType_Code = {
     0,                                  /* tp_call */
     0,                                  /* tp_str */
 
-    0,                                  /* tp_getattr */
-    0,                                  /* tp_setattr */
     0,//AiObject_Generic_Getattr,             /* tp_getattro */
     0,                                  /* tp_setattro */
 
@@ -33,12 +31,11 @@ AiTypeObject AiType_Code = {
 
     0,                                  /* tp_methods */
     0,//code_memberlist,                    /* tp_members */
-    0,                                  /* tp_getset */
+
     0,                                  /* tp_base */
     0,                                  /* tp_dict */
     0,                                  /* tp_descr_get */
     0,                                  /* tp_descr_set */
-    0,                                  /* tp_dictoffset */
     0,                                  /* tp_init */
     0,                                  /* tp_alloc */
     0,//code_new,                           /* tp_new */

@@ -22,8 +22,6 @@ AiTypeObject AiType_Frame = {
     0,                                  /* tp_call */
     0,                                  /* tp_str */
 
-    0,                                  /* tp_getattr */
-    0,                                  /* tp_setattr */
     0,//AiObject_Generic_Getattr,             /* tp_getattro */
     0,//AiObject_Generic_Setattr,             /* tp_setattro */
 
@@ -34,7 +32,6 @@ AiTypeObject AiType_Frame = {
 
     0,//frame_methods,                      /* tp_methods */
     0,//frame_memberlist,                   /* tp_members */
-    0,//frame_getsetlist,                   /* tp_getset */
 };
 
 AiFrameObject *AiFrame_New(AiThreadState *tstate, AiCodeObject *code,

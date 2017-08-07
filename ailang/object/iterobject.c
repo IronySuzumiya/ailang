@@ -21,8 +21,6 @@ AiTypeObject AiType_Seqiter = {
     0,                                  /* tp_call */
     0,                                  /* tp_str */
 
-    0,                                  /* tp_getattr */
-    0,                                  /* tp_setattr */
     0,//AiObject_Generic_Getattr,             /* tp_getattro */
     0,                                  /* tp_setattro */
 
@@ -30,6 +28,7 @@ AiTypeObject AiType_Seqiter = {
 
     (unaryfunc)iter_iter,               /* tp_iter */
     (unaryfunc)seqiter_iternext,           /* tp_iternext */
+
     0,//iter_methods,                       /* tp_methods */
 };
 

@@ -19,8 +19,6 @@ AiTypeObject AiType_Function = {
     0,//function_call,                      /* tp_call */
     0,                                  /* tp_str */
 
-    0,                                  /* tp_getattr */
-    0,                                  /* tp_setattr */
     0,//AiObject_Generic_Getattr,             /* tp_getattro */
     0,//AiObject_Generic_Setattr,             /* tp_setattro */
 
@@ -31,13 +29,11 @@ AiTypeObject AiType_Function = {
 
     0,                                  /* tp_methods */
     0,//function_memberlist,                /* tp_members */
-    0,//function_getsetlist,                /* tp_getset */
+
     0,                                  /* tp_base */
     0,                                  /* tp_dict */
     0,//function_descr_get,                 /* tp_descr_get */
     0,                                  /* tp_descr_set */
-    offsetof(
-        AiFunctionObject, func_dict),   /* tp_dictoffset */
     0,                                  /* tp_init */
     0,                                  /* tp_alloc */
     0,//function_new,                       /* tp_new */

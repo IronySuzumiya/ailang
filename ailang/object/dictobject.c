@@ -40,8 +40,6 @@ AiTypeObject AiType_Dict = {
     0,                                          /* tp_call */
     (unaryfunc)dict_str,                        /* tp_str */
 
-    0,                                          /* tp_getattr */
-    0,                                          /* tp_setattr */
     0,//AiObject_Generic_Getattr,                     /* tp_getattro */
     0,                                          /* tp_setattro */
 
@@ -52,12 +50,11 @@ AiTypeObject AiType_Dict = {
 
     dict_methods,                               /* tp_methods */
     0,                                          /* tp_members */
-    0,                                          /* tp_getset */
+
     0,                                          /* tp_base */
     0,                                          /* tp_dict */
     0,                                          /* tp_descr_get */
     0,                                          /* tp_descr_set */
-    0,                                          /* tp_dictoffset */
     0,//dict_init,                                  /* tp_init */
     0,//AiType_Generic_Alloc,                         /* tp_alloc */
     0,//dict_New,                                   /* tp_new */

@@ -36,8 +36,6 @@ AiTypeObject AiType_BaseString = {
     0,                              /* tp_call */
     0,                              /* tp_str */
 
-    0,                              /* tp_getattr */
-    0,                              /* tp_setattr */
     0,                              /* tp_getattro */
     0,                              /* tp_setattro */
 
@@ -48,12 +46,11 @@ AiTypeObject AiType_BaseString = {
 
     0,                              /* tp_methods */
     0,                              /* tp_members */
-    0,                              /* tp_getset */
+
     //&AiBaseObject,                  /* tp_base */
     0,                              /* tp_dict */
     0,                              /* tp_descr_get */
     0,                              /* tp_descr_set*/
-    0,                              /* tp_dictoffset */
     0,                              /* tp_init */
     0,                              /* tp_alloc */
     //basestring_new,                 /* tp_new */
@@ -86,8 +83,6 @@ AiTypeObject AiType_String = {
     0,                                          /* tp_call */
     (unaryfunc)string_str,                      /* tp_str */
 
-    0,                                          /* tp_getattr */
-    0,                                          /* tp_setattr */
     0,                                          /* tp_getattro */
     0,                                          /* tp_setattro */
 
@@ -98,12 +93,11 @@ AiTypeObject AiType_String = {
 
     string_methods,                             /* tp_methods */
     0,                                          /* tp_members */
-    0,                                          /* tp_getset */
+
     &AiType_BaseString,                     /* tp_base */
     0,                                          /* tp_dict */
     0,                                          /* tp_descr_get */
     0,                                          /* tp_descr_set */
-    0,                                          /* tp_dictoffset */
     0,                                          /* tp_init */
     0,                                          /* tp_alloc */
     0,//string_new,                                 /* tp_new */

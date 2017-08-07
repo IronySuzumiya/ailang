@@ -45,12 +45,10 @@ AiTypeObject AiType_List = {
     &list_as_sequence,                  /* tp_as_sequence */
     0,                                  /* tp_as_mapping */
 
-    (hashfunc)AiObject_Unhashable,        /* tp_hash */
+    (hashfunc)AiObject_Unhashable,      /* tp_hash */
     0,                                  /* tp_call */
     (unaryfunc)list_str,                /* tp_str */
 
-    0,                                  /* tp_getattr */
-    0,                                  /* tp_setattr */
     0,//AiObject_Generic_Getattr,             /* tp_getattro */
     0,                                  /* tp_setattro */
 
@@ -61,12 +59,11 @@ AiTypeObject AiType_List = {
 
     list_methods,                       /* tp_methods */
     0,                                  /* tp_members */
-    0,                                  /* tp_getset */
+
     0,                                  /* tp_base */
     0,                                  /* tp_dict */
     0,                                  /* tp_descr_get */
     0,                                  /* tp_descr_set */
-    0,                                  /* tp_dictoffset */
     0,//(initproc)list_init,                /* tp_init */
     0,//AiType_Generic_Alloc,                 /* tp_alloc */
     0,//type_generic_new                    /* tp_new */

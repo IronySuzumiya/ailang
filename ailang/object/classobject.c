@@ -17,8 +17,6 @@ AiTypeObject AiType_Class = {
     AiInstance_New,                     /* tp_call */
     0,//class_str,                          /* tp_str */
 
-    0,                                  /* tp_getattr */
-    0,                                  /* tp_setattr */
     0,//(getattrofunc)class_getattr,        /* tp_getattro */
     0,//(setattrofunc)class_setattr,        /* tp_setattro */
 
@@ -29,12 +27,11 @@ AiTypeObject AiType_Class = {
 
     0,                                  /* tp_methods */
     0,                                  /* tp_members */
-    0,                                  /* tp_getset */
+
     0,                                  /* tp_base */
     0,                                  /* tp_dict */
     0,                                  /* tp_descr_get */
     0,                                  /* tp_descr_set */
-    0,                                  /* tp_dictoffset */
     0,                                  /* tp_init */
     0,                                  /* tp_alloc */
     0,//class_new,                          /* tp_new */
@@ -57,8 +54,6 @@ AiTypeObject AiType_Instance = {
     0,//instance_call,                      /* tp_call */
     0,//(unaryfunc)instance_str,            /* tp_str */
 
-    0,                                  /* tp_getattr */
-    0,                                  /* tp_setattr */
     0,//(getattrofunc)instance_getattr,     /* tp_getattro */
     0,//(setattrofunc)instance_setattr,     /* tp_setattro */
 
@@ -69,13 +64,11 @@ AiTypeObject AiType_Instance = {
 
     0,                                  /* tp_methods */
     0,                                  /* tp_members */
-    0,                                  /* tp_getset */
 
     0,                                  /* tp_base */
     0,                                  /* tp_dict */
     0,                                  /* tp_descr_get */
     0,                                  /* tp_descr_set */
-    0,                                  /* tp_dictoffset */
     0,                                  /* tp_init */
     0,                                  /* tp_alloc */
     0,//instance_new,                       /* tp_new */
@@ -98,8 +91,6 @@ AiTypeObject AiType_Method = {
     0,//instancemethod_call,                /* tp_call */
     0,                                  /* tp_str */
 
-    0,                                  /* tp_getattr */
-    0,                                  /* tp_setattr */
     0,//instancemethod_getattr,             /* tp_getattro */
     0,//AiObject_Generic_Setattr,           /* tp_setattro */
 
@@ -110,13 +101,24 @@ AiTypeObject AiType_Method = {
 
     0,                                  /* tp_methods */
     0,//instancemethod_memberlist,          /* tp_members */
-    0,//instancemethod_getset,              /* tp_getset */
+
     0,                                  /* tp_base */
     0,                                  /* tp_dict */
     0,//instancemethod_descr_get,           /* tp_descr_get */
     0,                                  /* tp_descr_set */
-    0,                                  /* tp_dictoffset */
     0,                                  /* tp_init */
     0,                                  /* tp_alloc */
     0,//instancemethod_new,                 /* tp_new */
 };
+
+AiObject *AiClass_New(AiObject *base, AiObject *dict, AiObject *name) {
+
+}
+
+AiObject *AiInstance_New(AiObject *klass, AiObject *arg, AiObject *kw) {
+
+}
+
+AiObject *AiMethod_New(AiObject *func, AiObject *self, AiObject *klass) {
+
+}

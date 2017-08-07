@@ -149,8 +149,6 @@ typedef struct _typeobject {
     ternaryfunc tp_call;
     unaryfunc tp_str;
 
-    getattrfunc tp_getattr;
-    setattrfunc tp_setattr;
     getattrofunc tp_getattro;
     setattrofunc tp_setattro;
 
@@ -161,17 +159,14 @@ typedef struct _typeobject {
 
     struct _methoddef *tp_methods;
     struct _memberdef *tp_members;
-    struct _getsetdef *tp_getset;
     struct _typeobject *tp_base;
     AiObject *tp_dict;
     descrgetfunc tp_descr_get;
     descrsetfunc tp_descr_set;
-    ssize_t tp_dictoffset;
     initproc tp_init;
     allocfunc tp_alloc;
     newfunc tp_new;
     freefunc tp_free;
-    enquiry tp_is_gc;
     AiObject *tp_subclasses;
     destructor tp_del;
 }

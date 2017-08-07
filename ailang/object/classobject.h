@@ -45,8 +45,5 @@ AiAPI_DATA(AiTypeObject) AiType_Class, AiType_Instance, AiType_Method;
 AiAPI_FUNC(AiObject *) AiClass_New(AiObject *, AiObject *, AiObject *);
 AiAPI_FUNC(AiObject *) AiInstance_New(AiObject *, AiObject *, AiObject *);
 AiAPI_FUNC(AiObject *) AiMethod_New(AiObject *, AiObject *, AiObject *);
-AiAPI_FUNC(AiObject *) AiMethod_Function(AiObject *);
-AiAPI_FUNC(AiObject *) AiMethod_Self(AiObject *);
-AiAPI_FUNC(AiObject *) AiMethod_Class(AiObject *);
 
 #endif

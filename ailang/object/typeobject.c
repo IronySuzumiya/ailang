@@ -3,11 +3,8 @@
 static int add_operators(AiTypeObject *type);
 static int add_members(AiTypeObject *type, AiMemberDef *mem);
 static int add_methods(AiTypeObject *type, AiMethodDef *meth);
-static int add_getset(AiTypeObject *type, AiGetSetDef *gsp);
 static int add_subclass(AiTypeObject *base, AiTypeObject *type);
 static void inherit_special(AiTypeObject *type, AiTypeObject *base);
-
-static int add_tp_new_wrapper(AiTypeObject *type);
 
 static AiObject *lookup_method(AiObject *self, char *attrstr, AiObject **attrobj);
 
@@ -17,8 +14,6 @@ static int AiObject_SlotCompare(AiObject *self, AiObject *other);
 static int half_compare(AiObject *self, AiObject *other);
 
 static AiObject *wrap_cmpfunc(AiObject *self, AiObject *args, void *wrapped);
-
-static AiObject *tp_new_wrapper(AiObject *self, AiObject *args, AiObject *kwds);
 
 static int check_num_args(AiObject *ob, int n);
 static void subtype_dealloc(AiObject *self);
@@ -67,14 +62,6 @@ static AiObject *type_new(AiTypeObject *metatype, AiObject *args, AiObject *kwds
 typedef struct wrapperbase slotdef;
 
 static slotdef slotdefs[] = {
-    TPSLOT("__str__", tp_print, NULL, NULL, ""),
-
-    TPSLOT("__getattr__", tp_getattr, NULL, NULL, ""),
-
-    TPSLOT("__setattr__", tp_setattr, NULL, NULL, ""),
-
-    TPSLOT("__delattr__", tp_setattr, NULL, NULL, ""),
-    
     TPSLOT("__cmp__", tp_compare, AiObject_SlotCompare, wrap_cmpfunc, "x.__cmp__(y) <==> cmp(x,y)"),
     /*
     TPSLOT("__hash__", tp_hash, slot_tp_hash, wrap_hashfunc, "x.__hash__() <==> hash(x)"),
@@ -200,11 +187,6 @@ static slotdef slotdefs[] = {
     { NULL }
 };
 
-static AiMethodDef tp_new_methoddef[] = {
-    { "__new__", (AiCFunction)tp_new_wrapper, METH_VARARGS | METH_KEYWORDS },
-    { NULL }
-};
-
 AiTypeObject AiType_Type = {
     AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "type",                             /* tp_name */
@@ -222,8 +204,6 @@ AiTypeObject AiType_Type = {
     (ternaryfunc)type_call,             /* tp_call */
     0,                                  /* tp_str */
 
-    0,                                  /* tp_getattr */
-    0,                                  /* tp_setattr */
     0,//(getattrofunc)type_getattro,        /* tp_getattro */
     0,//(setattrofunc)type_setattro,        /* tp_setattro */
 
@@ -234,17 +214,15 @@ AiTypeObject AiType_Type = {
 
     0,//type_methods,                       /* tp_methods */
     0,//type_members,                       /* tp_members */
-    0,//type_getset,                        /* tp_getset */
+
     0,                                  /* tp_base */
     0,                                  /* tp_dict */
     0,                                  /* tp_descr_get */
     0,                                  /* tp_descr_set */
-    offsetof(AiTypeObject, tp_dict),    /* tp_dictoffset */
     0,//type_init,                          /* tp_init */
     0,                                  /* tp_alloc */
     type_new,                           /* tp_new */
     AiObject_GC_Del,                    /* tp_free */
-    0,//tp_is_gc,                           /* tp_is_gc */
 };
 
 int AiType_Ready(AiTypeObject *type) {
@@ -267,9 +245,6 @@ int AiType_Ready(AiTypeObject *type) {
     }
     if (type->tp_members) {
         add_members(type, type->tp_members);
-    }
-    if (type->tp_getset) {
-        add_getset(type, type->tp_getset);
     }
     if (type->tp_base) {
         inherit_special(type, type->tp_base);
@@ -388,23 +363,6 @@ int add_methods(AiTypeObject *type, AiMethodDef *meth) {
     return 0;
 }
 
-int add_getset(AiTypeObject *type, AiGetSetDef *gsp) {
-    AiDictObject *dict = (AiDictObject *)type->tp_dict;
-
-    for (; gsp->name; ++gsp) {
-        AiObject *descr;
-        AiObject *namestr = AiString_From_String(gsp->name);
-        if (!AiDict_GetItem(dict, namestr)) {
-            AiString_Intern((AiStringObject **)&namestr);
-            descr = AiDescr_NewGetSet(type, gsp);
-            AiDict_SetItem(dict, namestr, descr);
-            DEC_REFCNT(descr);
-        }
-        DEC_REFCNT(namestr);
-    }
-    return 0;
-}
-
 int add_subclass(AiTypeObject *base, AiTypeObject *type) {
     AiObject *list;
 
@@ -455,19 +413,6 @@ void inherit_special(AiTypeObject *type, AiTypeObject *base) {
     else if (AiType_IsSubclass(base, &AiType_Dict)) {
         type->tp_flags |= SUBCLASS_DICT;
     }
-}
-
-int add_tp_new_wrapper(AiTypeObject *type) {
-    AiObject *func;
-    AiObject *str = AiString_From_String("__new__");
-
-    if (!AiDict_GetItem((AiDictObject *)type->tp_dict, str)) {
-        func = AiCFunction_New(tp_new_methoddef, (AiObject *)type);
-        AiDict_SetItem((AiDictObject *)type->tp_dict, str, func);
-    }
-    DEC_REFCNT(func);
-    DEC_REFCNT(str);
-    return 0;
 }
 
 AiObject *lookup_method(AiObject *self, char *attrstr, AiObject **attrobj) {
@@ -597,37 +542,6 @@ AiObject *wrap_cmpfunc(AiObject *self, AiObject *args, void *wrapped) {
             return AiInt_From_Long((long)res);
         }
     }
-}
-
-AiObject *tp_new_wrapper(AiObject *self, AiObject *args, AiObject *kwds) {
-    AiTypeObject *type, *subtype;
-    AiObject *arg0, *res;
-
-    if (!self || !CHECK_TYPE_TYPE(self)) {
-        FATAL_ERROR("__new__ called with non-type 'self'");
-        return NULL;
-    }
-    type = (AiTypeObject *)self;
-    if (!CHECK_TYPE_TUPLE(args) || TUPLE_SIZE(args) < 1) {
-        TYPE_ERROR("%s.__new__(): not enough arguments", type->tp_name);
-        return NULL;
-    }
-    arg0 = TUPLE_GETITEM(args, 0);
-    if (!CHECK_TYPE_TYPE(arg0)) {
-        TYPE_ERROR("%s.__new__(X): X is not a type object (%s)",
-            type->tp_name, OB_TYPE(arg0)->tp_name);
-        return NULL;
-    }
-    subtype = (AiTypeObject *)arg0;
-    if (!AiType_IsSubclass(subtype, type)) {
-        TYPE_ERROR("%s.__new__(%s): %s is not a subtype of %s",
-            type->tp_name, subtype->tp_name, subtype->tp_name, type->tp_name);
-        return NULL;
-    }
-    args = AiTuple_Slice((AiTupleObject *)args, 1, TUPLE_SIZE(args));
-    res = type->tp_new(subtype, args, kwds);
-    DEC_REFCNT(args);
-    return res;
 }
 
 int check_num_args(AiObject *ob, int n) {

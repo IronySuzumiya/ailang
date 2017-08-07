@@ -20,8 +20,6 @@ AiTypeObject AiType_Cell = {
     0,                                  /* tp_call */
     0,                                  /* tp_str */
 
-    0,                                  /* tp_getattr */
-    0,                                  /* tp_setattr */
     0,//AiObject_Generic_Getattr,             /* tp_getattro */
     0,                                  /* tp_setattro */
 
@@ -32,7 +30,6 @@ AiTypeObject AiType_Cell = {
 
     0,                                  /* tp_methods */
     0,                                  /* tp_members */
-    0,//cell_getsetlist,                    /* tp_getset */
 };
 
 AiObject *AiCell_New(AiObject *ob) {

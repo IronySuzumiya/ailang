@@ -4,17 +4,6 @@
 
 #include "../aiconfig.h"
 
-typedef AiObject *(*getter)(AiObject *, void *);
-typedef int(*setter)(AiObject *, AiObject *, void *);
-
-typedef struct _getsetdef {
-    char *name;
-    getter get;
-    setter set;
-    void *closure;
-}
-AiGetSetDef;
-
 typedef AiObject *(*wrapperfunc)(AiObject *self, AiObject *args, void *wrapped);
 typedef AiObject *(*wrapperfunc_kwds)(AiObject *self, AiObject *args,
                                         void *wrapped, AiObject *kwds);
@@ -53,12 +42,6 @@ typedef struct _memberdescrobject {
 }
 AiMemberDescrObject;
 
-typedef struct _getsetdescrobject {
-    AiDescr_HEAD
-    AiGetSetDef *d_getset;
-}
-AiGetSetDescrObject;
-
 typedef struct _wrapperdescrobject {
     AiDescr_HEAD
     struct wrapperbase *d_base;
@@ -74,6 +57,5 @@ AiAPI_DATA(AiTypeObject) AiType_WrapperDescr;
 AiAPI_FUNC(AiObject *) AiDescr_NewWrapper(AiTypeObject *type, struct wrapperbase *base, void *wrapped);
 AiAPI_FUNC(AiObject *) AiDescr_NewMember(AiTypeObject *type, AiMemberDef *member);
 AiAPI_FUNC(AiObject *) AiDescr_NewMethod(AiTypeObject *type, AiMethodDef *method);
-AiAPI_FUNC(AiObject *) AiDescr_NewGetSet(AiTypeObject *type, AiGetSetDef *getset);
 
 #endif
