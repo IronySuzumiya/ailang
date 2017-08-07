@@ -145,6 +145,7 @@
     <ClCompile Include="object\abstract.c" />
     <ClCompile Include="object\boolobject.c" />
     <ClCompile Include="object\cellobject.c" />
+    <ClCompile Include="object\classobject.c" />
     <ClCompile Include="object\codeobject.c" />
     <ClCompile Include="object\descrobject.c" />
     <ClCompile Include="object\dictobject.c" />
@@ -174,6 +175,7 @@
     <ClInclude Include="object\abstract.h" />
     <ClInclude Include="object\boolobject.h" />
     <ClInclude Include="object\cellobject.h" />
+    <ClInclude Include="object\classobject.h" />
     <ClInclude Include="object\codeobject.h" />
     <ClInclude Include="object\descrobject.h" />
     <ClInclude Include="object\dictobject.h" />

@@ -277,6 +277,39 @@ int AiDict_DelItem(AiDictObject *mp, AiObject *key) {
     return 0;
 }
 
+int AiDict_Merge(AiDictObject *dist, AiDictObject *src, int override) {
+    AiDictEntry *entry;
+
+    if (dist == src || DICT_SIZE(src) == 0) {
+        return 0;
+    }
+    else {
+        if (DICT_SIZE(dist) == 0) {
+            override = 1;
+        }
+        if ((dist->ma_fill + DICT_SIZE(src)) * 3 >= (dist->ma_mask + 1) * 2) {
+            dict_resize(dist, (DICT_SIZE(dist) + DICT_SIZE(src)) * 2);
+        }
+        for (ssize_t i = 0; i < src->ma_mask; ++i) {
+            entry = &src->ma_table[i];
+            if (entry->me_value && (override || !AiDict_GetItem(dist, entry->me_key))) {
+                INC_REFCNT(entry->me_key);
+                INC_REFCNT(entry->me_value);
+                AiDict_Insert(dist, entry->me_key, (long)entry->me_hash, entry->me_value);
+            }
+        }
+    }
+
+    return 0;
+}
+
+AiObject *AiDict_Copy(AiDictObject *o) {
+    AiObject *copy;
+    copy = AiDict_New();
+    AiDict_Merge((AiDictObject *)copy, o, 1);
+    return copy;
+}
+
 AiObject *dict_str(AiDictObject *mp) {
     AiDictEntry *ep;
     ssize_t used = DICT_SIZE(mp);

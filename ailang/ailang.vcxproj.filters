@@ -97,6 +97,9 @@
     <ClCompile Include="aicore\aimethod.c">
       <Filter>aicore</Filter>
     </ClCompile>
+    <ClCompile Include="object\classobject.c">
+      <Filter>object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="object\abstract.h">
@@ -175,6 +178,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="aicore\aimethod.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="object\classobject.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

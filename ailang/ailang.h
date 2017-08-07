@@ -20,6 +20,7 @@
 #include "system\aiopcode.h"
 
 #include "object\object.h"
+#include "object\classobject.h"
 #include "object\abstract.h"
 #include "system\aimemory.h"
 

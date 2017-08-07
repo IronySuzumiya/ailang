@@ -13,6 +13,7 @@ enum why_code {
 static enum why_code do_raise(AiObject *type, AiObject *value, AiObject *tb);
 static AiObject *call_function(AiObject ***pp_stack, int oparg);
 static AiObject *fast_function(AiObject *func, AiObject ***pp_stack, int n, int na, int nk);
+static AiObject *build_class(AiObject *methods, AiObject *base, AiObject *name);
 
 AiObject *Eval_Frame(AiFrameObject *f) {
     AiObject **stack_pointer;
@@ -395,6 +396,28 @@ AiObject *Eval_Frame(AiFrameObject *f) {
                 }
             }
             PUSH(x);
+            break;
+
+        case LOAD_LOCALS:
+            if (x = f->f_locals) {
+                INC_REFCNT(x);
+                PUSH(x);
+                continue;
+            }
+            else {
+                RUNTIME_EXCEPTION("no locals");
+                break;
+            }
+
+        case BUILD_CLASS:
+            u = POP();
+            v = POP();
+            w = POP();
+            x = build_class(u, v, w);
+            PUSH(x);
+            DEC_REFCNT(u);
+            DEC_REFCNT(v);
+            DEC_REFCNT(w);
             break;
 
         case BINARY_ADD:
@@ -1003,4 +1026,12 @@ AiObject *fast_function(AiObject *func, AiObject ***pp_stack, int n, int na, int
         NULL, (*pp_stack) - n, na,
         (*pp_stack) - 2 * nk, nk, d, nd,
         FUNCTION_GETCLOSURE(func));
+}
+
+AiObject *build_class(AiObject *methods, AiObject *base, AiObject *name) {
+    AiObject *result, *args;
+    args = AiTuple_Pack(3, name, base, methods);
+    result = AiObject_Call((AiObject *)&AiType_Type, args, NULL);
+    DEC_REFCNT(args);
+    return result;
 }

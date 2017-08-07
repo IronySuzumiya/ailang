@@ -428,10 +428,10 @@ void inherit_special(AiTypeObject *type, AiTypeObject *base) {
     COPYVAL(tp_itemsize);
     if (AiType_IsSubclass(base, &AiType_BaseException)) {
         type->tp_flags |= SUBCLASS_BASEEXC;
-    }
+    }/*
     else if (AiType_IsSubclass(base, &AiType_Type)) {
         type->tp_flags |= SUBCLASS_TYPE;
-    }
+    }*/
     else if (AiType_IsSubclass(base, &AiType_Int)) {
         type->tp_flags |= SUBCLASS_INT;
     }/*
@@ -646,7 +646,18 @@ AiObject *type_new(AiTypeObject *metatype, AiObject *args, AiObject *kwds) {
     /* Special case: type(x) should return x->ob_type */
     ssize_t nargs = TUPLE_SIZE(args);
     ssize_t nkwds = kwds ? DICT_SIZE(kwds) : 0;
-    if (CHECK_EXACT_TYPE_TYPE(metatype) && nargs == 1 && nkwds == 0) {
+    AiObject *name;
+    AiObject *slots;
+    AiDictObject *dict;
+    AiTypeObject *type, *base;
+    AiHeapTypeObject *et;
+
+    if (!CHECK_EXACT_TYPE_TYPE(metatype)) {
+        FATAL_ERROR("user defined metaclass not supported now");
+        return NULL;
+    }
+
+    if (nargs == 1 && nkwds == 0) {
         AiObject *x = TUPLE_GETITEM(args, 0);
         INC_REFCNT(OB_TYPE(x));
         return (AiObject *)OB_TYPE(x);
@@ -656,15 +667,34 @@ AiObject *type_new(AiTypeObject *metatype, AiObject *args, AiObject *kwds) {
         return NULL;
     }
     else {
-        if (!metatype->tp_base) {
-            metatype->tp_base = &AiType_BaseObject;
-        }
-        INC_REFCNT(metatype->tp_base);
+        // name <- args[0] | kwds['name']
+        // base <- args[1] | kwds['base']
+        // dict <- args[2] | kwds['dict']
+        // slots <- dict['__slots__']
 
-        AiObject *s = AiString_From_String("__slots__");
-        AiObject *slots = AiDict_GetItem((AiDictObject *)metatype->tp_dict, s);
-        DEC_REFCNT(s);
 
-        // TODO
+        // many many problems here
+        type = (AiTypeObject *)metatype->tp_alloc(metatype, 0);
+        et = (AiHeapTypeObject *)type;
+        INC_REFCNT(name);
+        et->ht_name = name;
+        et->ht_slots = slots;
+        type->tp_flags = HEAP_TYPE | BASE_TYPE;
+        type->tp_as_number = &et->as_number;
+        type->tp_as_sequence = &et->as_sequence;
+        type->tp_as_mapping = &et->as_mapping;
+        type->tp_name = STRING_AS_CSTRING(name);
+        type->tp_base = base;
+        INC_REFCNT(base);
+        type->tp_dict = AiDict_Copy(dict);
+        type->tp_basicsize = base->tp_basicsize;
+        type->tp_itemsize = base->tp_itemsize;
+        type->tp_members = AiHeapType_GET_MEMBERS(et);
+        type->tp_dealloc = subtype_dealloc;
+        type->tp_alloc = AiType_Generic_Alloc;
+        type->tp_free = AiObject_GC_Del;
+
+        AiType_Ready(type);
+        return (AiObject *)type;
     }
 }
