@@ -216,6 +216,9 @@ AiAPI_DATA(AiObject) notimplemented;
 #define CHECK_TYPE_TYPE(a) CHECK_FAST_SUBCLASS(a, SUBCLASS_TYPE)
 #define CHECK_EXACT_TYPE_TYPE(a) (OB_TYPE(a) == &AiType_Type)
 
+#define AiHeapType_GET_MEMBERS(etype)   \
+    ((AiMemberDef *)(((char *)etype) + OB_TYPE(etype)->tp_basicsize))
+
 AiAPI_DATA(AiTypeObject) AiType_Type;
 AiAPI_FUNC(int) AiType_Ready(AiTypeObject *type);
 AiAPI_FUNC(AiObject *) AiType_Generic_Alloc(AiTypeObject *type, ssize_t nitems);

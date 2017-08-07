@@ -1,6 +1,5 @@
 #include "../ailang.h"
 
-static AiObject *tuple_slice(AiTupleObject *tp, ssize_t start, ssize_t end);
 static void tuple_dealloc(AiTupleObject *tp);
 static void tuple_print(AiTupleObject *tp, FILE *stream);
 static long tuple_hash(AiTupleObject *v);
@@ -20,7 +19,7 @@ static AiSequenceMethods tuple_as_sequence = {
     0,
     (ssizeargfunc)AiTuple_GetItem,
     (sqsetitemfunc)AiTuple_SetItem,
-    (ssize2argfunc)tuple_slice,
+    (ssize2argfunc)AiTuple_Slice,
     (enquiry2)tuple_contains,
 };
 
@@ -113,7 +112,7 @@ int AiTuple_SetItem(AiTupleObject *tp, ssize_t index, AiObject *newitem) {
     }
 }
 
-AiObject *tuple_slice(AiTupleObject *tp, ssize_t start, ssize_t end) {
+AiObject *AiTuple_Slice(AiTupleObject *tp, ssize_t start, ssize_t end) {
     AiTupleObject *np;
     MAKE_INDEX_IN_RANGE(start, TUPLE_SIZE(tp));
     MAKE_INDEX_IN_RANGE(end, TUPLE_SIZE(tp));

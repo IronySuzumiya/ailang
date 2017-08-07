@@ -22,6 +22,7 @@ AiAPI_DATA(AiTypeObject) AiType_Tuple;
 AiAPI_FUNC(AiObject *) AiTuple_New(ssize_t size);
 AiAPI_FUNC(AiObject *) AiTuple_GetItem(AiTupleObject *tp, ssize_t index);
 AiAPI_FUNC(int) AiTuple_SetItem(AiTupleObject *tp, ssize_t index, AiObject *newitem);
+AiAPI_FUNC(AiObject *) AiTuple_Slice(AiTupleObject *tp, ssize_t start, ssize_t end);
 AiAPI_FUNC(AiObject *) AiTuple_Pack(ssize_t argc, ...);
 AiAPI_FUNC(ssize_t) tuple_size(AiTupleObject *tp);
 
