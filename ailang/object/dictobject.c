@@ -295,6 +295,14 @@ AiObject *AiDict_GetItem_WithString(AiDictObject *dict, char *str) {
     return r;
 }
 
+int AiDict_SetItem_WithString(AiDictObject *dict, char *key, AiObject *value) {
+    AiObject *stro = AiString_From_String(key);
+    int r;
+    r = AiDict_SetItem(dict, stro, value);
+    DEC_REFCNT(stro);
+    return r;
+}
+
 AiObject *dict_str(AiDictObject *mp) {
     AiDictEntry *ep;
     ssize_t used = DICT_SIZE(mp);

@@ -36,7 +36,7 @@ int AiType_Ready(AiTypeObject *type) {
     if (!type->tp_dict) {
         type->tp_dict = AiDict_New();
     }
-    inherit(type, type->tp_base);
+    type->tp_dict = AiDict_Copy((AiDictObject *)type->tp_base->tp_dict);
     if (!type->tp_as_number) {
         type->tp_as_number = type->tp_base->tp_as_number;
     }
@@ -72,5 +72,5 @@ void type_dealloc(AiTypeObject *type) {
 }
 
 AiObject *type_call(AiTypeObject *type, AiObject *args, AiObject *kwds) {
-    
+    return NULL;
 }

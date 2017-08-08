@@ -62,6 +62,7 @@ AiAPI_FUNC(int) AiDict_DelItem(AiDictObject *mp, AiObject *key);
 AiAPI_FUNC(int) AiDict_Merge(AiDictObject *dist, AiDictObject *src, int override);
 AiAPI_FUNC(AiObject *) AiDict_Copy(AiDictObject *o);
 AiAPI_FUNC(AiObject *) AiDict_GetItem_WithString(AiDictObject *dict, char *str);
+AiAPI_FUNC(int) AiDict_SetItem_WithString(AiDictObject *dict, char *key, AiObject *value);
 
 AiAPI_FUNC(int) AiDict_ClearAllMemory(void);
 

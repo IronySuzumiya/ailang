@@ -1,6 +1,7 @@
 #include "../ailang.h"
 
 static void function_dealloc(AiFunctionObject *func);
+static void cfunction_dealloc(AiCFunctionObject *func);
 
 AiTypeObject AiType_Function = {
     AiVarObject_HEAD_INIT(&AiType_Type, 0)
@@ -27,7 +28,6 @@ AiTypeObject AiType_Function = {
 
 AiObject *AiFunction_New(AiObject *code, AiObject *globals) {
     static AiObject *__name__ = NULL;
-    AiObject *doc;
     AiObject *consts;
     AiObject *module;
     AiFunctionObject *func = AiObject_NEW(AiFunctionObject, &AiType_Function);
@@ -87,6 +87,35 @@ int AiFunction_SetClosure(AiFunctionObject *func, AiObject *closure) {
     return 0;
 }
 
+AiTypeObject AiType_CFunction = {
+    AiVarObject_HEAD_INIT(&AiType_Type, 0)
+    "function",                         /* tp_name */
+    sizeof(AiCFunctionObject),          /* tp_basicsize */
+    0,                                  /* tp_itemsize */
+
+    (destructor)cfunction_dealloc,      /* tp_dealloc */
+    0,                                  /* tp_compare */
+    0,                                  /* tp_hash */
+    0,//cfunction_call,                     /* tp_call */
+    0,                                  /* tp_str */
+    0,                                  /* tp_iter */
+    0,                                  /* tp_iternext */
+
+    0,                                  /* tp_as_number */
+    0,                                  /* tp_as_sequence */
+    0,                                  /* tp_as_mapping */
+
+    0,                                  /* tp_base */
+    0,                                  /* tp_dict */
+    0,//cfunction_new,                      /* tp_new */
+};
+
+AiObject *AiCFunction_New(AiCFunction func) {
+    AiCFunctionObject *f = (AiCFunctionObject *)AiObject_NEW(AiCFunctionObject, &AiType_CFunction);
+    f->func = func;
+    return (AiObject *)f;
+}
+
 void function_dealloc(AiFunctionObject *func) {
     // ignore weakrefs yet
     DEC_REFCNT(func->func_code);
@@ -96,5 +125,9 @@ void function_dealloc(AiFunctionObject *func) {
     XDEC_REFCNT(func->func_defaults);
     XDEC_REFCNT(func->func_dict);
     XDEC_REFCNT(func->func_closure);
+    AiObject_Del(func);
+}
+
+void cfunction_dealloc(AiCFunctionObject *func) {
     AiObject_Del(func);
 }

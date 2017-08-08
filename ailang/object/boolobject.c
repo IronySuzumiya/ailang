@@ -86,13 +86,14 @@ AiObject *AiBool_From_Long(long ival) {
         RETURN_FALSE;
 }
 
-AiObject *AiBool_Ready(void) {
+int AiBool_Ready(void) {
     AiObject *funco;
     AiType_Bool.tp_dict = AiDict_New();
     for (AiSlotDef *slot = bool_slots; slot; ++slot) {
         funco = AiCFunction_New(slot->func);
-        AiDict_SetItem((AiDictObject *)AiType_Bool.tp_dict, slot->name, funco);
+        AiDict_SetItem_WithString((AiDictObject *)AiType_Bool.tp_dict, slot->name, funco);
     }
+    return 0;
 }
 
 AiObject *bool_and(AiBoolObject *lhs, AiBoolObject *rhs) {
@@ -142,24 +143,28 @@ AiObject *bool_str(AiBoolObject *ob) {
 }
 
 AiObject *bool_new(AiTypeObject *type, AiObject *args, AiObject *kw) {
-    AiIntObject *i = TUPLE_GETITEM(args, 0);
-    return AiBool_From_Long(i);
+    AiIntObject *i = (AiIntObject *)TUPLE_GETITEM(args, 0);
+    if (i->ob_ival) {
+        RETURN_TRUE;
+    }
+    else {
+        RETURN_FALSE;
+    }
 }
 
 AiObject *bool_and_wrapper(AiObject *args, AiObject *kwds) {
-    AiBoolObject *lhs = TUPLE_GETITEM(args, 0);
-    AiBoolObject *rhs = TUPLE_GETITEM(args, 1);
+    AiBoolObject *lhs = (AiBoolObject *)TUPLE_GETITEM(args, 0);
+    AiBoolObject *rhs = (AiBoolObject *)TUPLE_GETITEM(args, 1);
     return bool_and(lhs, rhs);
 }
 
 AiObject *bool_or_wrapper(AiObject *args, AiObject *kwds) {
-    AiBoolObject *lhs = TUPLE_GETITEM(args, 0);
-    AiBoolObject *rhs = TUPLE_GETITEM(args, 1);
+    AiBoolObject *lhs = (AiBoolObject *)TUPLE_GETITEM(args, 0);
+    AiBoolObject *rhs = (AiBoolObject *)TUPLE_GETITEM(args, 1);
     return bool_or(lhs, rhs);
 }
 
 AiObject *bool_not_wrapper(AiObject *args, AiObject *kwds) {
-    AiBoolObject *lhs = TUPLE_GETITEM(args, 0);
-    AiBoolObject *rhs = TUPLE_GETITEM(args, 1);
-    return bool_not(lhs, rhs);
+    AiBoolObject *op = (AiBoolObject *)TUPLE_GETITEM(args, 0);
+    return bool_not(op);
 }

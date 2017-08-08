@@ -175,7 +175,7 @@ AiCFunctionObject;
 
 typedef struct _slotdef {
     char *name;
-    AiCFunction *func;
+    AiCFunction func;
 }
 AiSlotDef;
 

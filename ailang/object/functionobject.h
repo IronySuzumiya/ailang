@@ -32,4 +32,7 @@ AiAPI_FUNC(AiObject *) AiFunction_New(AiObject *code, AiObject *globals);
 AiAPI_FUNC(int) AiFunction_SetDefaults(AiFunctionObject *func, AiObject *defaults);
 AiAPI_FUNC(int) AiFunction_SetClosure(AiFunctionObject *func, AiObject *closure);
 
+AiAPI_DATA(AiTypeObject) AiType_CFunction;
+AiAPI_FUNC(AiObject *) AiCFunction_New(AiCFunction func);
+
 #endif
