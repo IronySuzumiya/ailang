@@ -9,50 +9,30 @@ static AiObject *string_getitem(AiStringObject *a, ssize_t index);
 static AiObject *string_slice(AiStringObject *a, ssize_t start, ssize_t end);
 static int string_contains(AiStringObject *a, AiStringObject *sub);
 static void string_dealloc(AiStringObject *a);
-static void string_print(AiStringObject *a, FILE *stream);
 static int string_compare(AiStringObject *lhs, AiStringObject *rhs);
 static AiObject *string_str(AiStringObject *a);
 static ssize_t string_length(AiStringObject *a);
-
-static AiMethodDef string_methods[] = {
-    { "join", (AiCFunction)string_join, METH_O },
-    { NULL }
-};
 
 AiTypeObject AiType_BaseString = {
     AiVarObject_HEAD_INIT(&AiType_Type, 0)
     "basestring",                   /* tp_name */
     0,                              /* tp_basesize */
     0,                              /* tp_itemsize */
+
     0,                              /* tp_dealloc */
-    0,                              /* tp_print */
     0,                              /* tp_compare */
+    0,                              /* tp_hash */
+    0,                              /* tp_call */
+    0,                              /* tp_str */
+    0,                              /* tp_iter */
+    0,                              /* tp_iternext */
 
     0,                              /* tp_as_number */
     0,                              /* tp_as_sequence */
     0,                              /* tp_as_mapping */
 
-    0,                              /* tp_hash */
-    0,                              /* tp_call */
-    0,                              /* tp_str */
-
-    0,                              /* tp_getattro */
-    0,                              /* tp_setattro */
-
-    BASE_TYPE,                      /* tp_flags */
-
-    0,                              /* tp_iter */
-    0,                              /* tp_iternext */
-
-    0,                              /* tp_methods */
-    0,                              /* tp_members */
-
     //&AiBaseObject,                  /* tp_base */
     0,                              /* tp_dict */
-    0,                              /* tp_descr_get */
-    0,                              /* tp_descr_set*/
-    0,                              /* tp_init */
-    0,                              /* tp_alloc */
     //basestring_new,                 /* tp_new */
 };
 
@@ -71,37 +51,24 @@ AiTypeObject AiType_String = {
     "string",                                   /* tp_name */
     STRING_OBJECT_SIZE,                         /* tp_basicsize */
     sizeof(char),                               /* tp_itemsize */
+
     (destructor)string_dealloc,                 /* tp_dealloc */
-    (printfunc)string_print,                    /* tp_print */
     (cmpfunc)string_compare,                    /* tp_compare */
+    (hashfunc)string_hash,                      /* tp_hash */
+    0,                                          /* tp_call */
+    (unaryfunc)string_str,                      /* tp_str */
+    0,                                          /* tp_iter */
+    0,                                          /* tp_iternext */
 
     0,                                          /* tp_as_number */
     &string_as_sequence,                        /* tp_as_sequence */
     0,                                          /* tp_as_mapping */
 
-    (hashfunc)string_hash,                      /* tp_hash */
-    0,                                          /* tp_call */
-    (unaryfunc)string_str,                      /* tp_str */
-
-    0,                                          /* tp_getattro */
-    0,                                          /* tp_setattro */
-
-    SUBCLASS_STRING | BASE_TYPE,                /* tp_flags */
-
-    0,                                          /* tp_iter */
-    0,                                          /* tp_iternext */
-
-    string_methods,                             /* tp_methods */
-    0,                                          /* tp_members */
-
-    &AiType_BaseString,                     /* tp_base */
+    &AiType_BaseString,                         /* tp_base */
     0,                                          /* tp_dict */
-    0,                                          /* tp_descr_get */
-    0,                                          /* tp_descr_set */
-    0,                                          /* tp_init */
-    0,                                          /* tp_alloc */
     0,//string_new,                                 /* tp_new */
-    AiObject_GC_Del,                            /* tp_free */
+    0,                                          /* tp_init */
+    AiObject_Del,                               /* tp_free */
 };
 
 AiStringObject *nullstring;
@@ -155,7 +122,7 @@ AiObject *string_join(AiStringObject *split, AiObject *iter) {
     ssize_t size;
     char *p;
 
-    if (CHECK_TYPE_STRING(split)) {
+    if (CHECK_EXACT_TYPE_STRING(split)) {
         intersize = STRING_LEN(split);
     }
     else {
@@ -163,15 +130,15 @@ AiObject *string_join(AiStringObject *split, AiObject *iter) {
         return NULL;
     }
 
-    if (CHECK_TYPE_LIST(list)) {
+    if (CHECK_EXACT_TYPE_LIST(list)) {
         if (list->ob_item && LIST_SIZE(list) > 0) {
-            if (!CHECK_TYPE_STRING(list->ob_item[0])) {
+            if (!CHECK_EXACT_TYPE_STRING(list->ob_item[0])) {
                 RUNTIME_EXCEPTION("sequence item 0: only string expected");
                 return NULL;
             }
             size = STRING_LEN(list->ob_item[0]);
             for (ssize_t i = 1; i < LIST_SIZE(list); ++i) {
-                if (!CHECK_TYPE_STRING(list->ob_item[i])) {
+                if (!CHECK_EXACT_TYPE_STRING(list->ob_item[i])) {
                     RUNTIME_EXCEPTION("sequence item %d: only string expected", i);
                     return NULL;
                 }
@@ -255,12 +222,6 @@ void string_dealloc(AiStringObject *a) {
     OB_FREE(a);
 }
 
-void string_print(AiStringObject *a, FILE *stream) {
-    fputc('\'', stream);
-    fputs(STRING_AS_CSTRING(a), stream);
-    fputc('\'', stream);
-}
-
 int string_compare(AiStringObject *lhs, AiStringObject *rhs) {
     return string_hash(lhs) == string_hash(rhs)
         && strcmp(STRING_AS_CSTRING(lhs), STRING_AS_CSTRING(rhs));
@@ -289,7 +250,7 @@ long string_hash(AiStringObject *a) {
 }
 
 AiObject *string_str(AiStringObject *a) {
-    if (CHECK_TYPE_STRING(a)) {
+    if (CHECK_EXACT_TYPE_STRING(a)) {
         INC_REFCNT(a);
         return (AiObject *)a;
     }
@@ -299,11 +260,11 @@ AiObject *string_str(AiStringObject *a) {
 }
 
 ssize_t string_length(AiStringObject *a) {
-    return CHECK_TYPE_STRING(a) ? STRING_LEN(a) : a->ob_type->tp_as_sequence->sq_length((AiObject *)a);
+    return CHECK_EXACT_TYPE_STRING(a) ? STRING_LEN(a) : a->ob_type->tp_as_sequence->sq_length((AiObject *)a);
 }
 
 AiObject *string_concat(AiStringObject *lhs, AiStringObject *rhs) {
-    if (CHECK_TYPE_STRING(lhs) && CHECK_TYPE_STRING(rhs)) {
+    if (CHECK_EXACT_TYPE_STRING(lhs) && CHECK_EXACT_TYPE_STRING(rhs)) {
         AiStringObject *a;
         ssize_t size = STRING_LEN(lhs) + STRING_LEN(rhs);
 
@@ -355,7 +316,7 @@ AiObject *string_slice(AiStringObject *a, ssize_t start, ssize_t end) {
 }
 
 int string_contains(AiStringObject *a, AiStringObject *sub) {
-    if (CHECK_TYPE_STRING(a) && CHECK_TYPE_STRING(sub)) {
+    if (CHECK_EXACT_TYPE_STRING(a) && CHECK_EXACT_TYPE_STRING(sub)) {
         return strstr(STRING_AS_CSTRING(a), STRING_AS_CSTRING(sub)) != NULL;
     }
     else {
@@ -365,7 +326,7 @@ int string_contains(AiStringObject *a, AiStringObject *sub) {
 }
 
 void string_resize(AiStringObject **a, ssize_t newsize) {
-    if (CHECK_TYPE_STRING(*a)) {
+    if (CHECK_EXACT_TYPE_STRING(*a)) {
         switch (CHECK_STRING_INTERNED(*a))
         {
         case SSTATE_NOT_INTERNED:

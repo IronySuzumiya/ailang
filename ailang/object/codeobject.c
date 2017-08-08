@@ -9,35 +9,21 @@ AiTypeObject AiType_Code = {
     "code",                             /* tp_name */
     sizeof(AiCodeObject),               /* tp_basicsize */
     0,                                  /* tp_itemsize */
+
     (destructor)code_dealloc,           /* tp_dealloc */
-    0,                                  /* tp_print */
     0,                                  /* tp_compare */
-    
+    0,//(hashfunc)code_hash,                /* tp_hash */
+    0,                                  /* tp_call */
+    0,                                  /* tp_str */
+    0,                                  /* tp_iter */
+    0,                                  /* tp_iternext */
+
     0,                                  /* tp_as_number */
     0,                                  /* tp_as_sequence */
     0,                                  /* tp_as_mapping */
 
-    0,//(hashfunc)code_hash,                /* tp_hash */
-    0,                                  /* tp_call */
-    0,                                  /* tp_str */
-
-    0,//AiObject_Generic_Getattr,             /* tp_getattro */
-    0,                                  /* tp_setattro */
-
-    0,                                  /* tp_flags */
-    
-    0,                                  /* tp_iter */
-    0,                                  /* tp_iternext */
-
-    0,                                  /* tp_methods */
-    0,//code_memberlist,                    /* tp_members */
-
     0,                                  /* tp_base */
     0,                                  /* tp_dict */
-    0,                                  /* tp_descr_get */
-    0,                                  /* tp_descr_set */
-    0,                                  /* tp_init */
-    0,                                  /* tp_alloc */
     0,//code_new,                           /* tp_new */
 };
 
@@ -112,7 +98,7 @@ int intern_string_constants(AiObject *tuple) {
 
     while (--i >= 0) {
         v = TUPLE_GETITEM(tuple, i);
-        if (CHECK_TYPE_STRING(v)) {
+        if (CHECK_EXACT_TYPE_STRING(v)) {
             AiObject *w = v;
             AiString_Intern((AiStringObject **)&v);
             if (w != v) {
@@ -120,7 +106,7 @@ int intern_string_constants(AiObject *tuple) {
                 modified = 1;
             }
         }
-        else if (CHECK_TYPE_TUPLE(v)) {
+        else if (CHECK_EXACT_TYPE_TUPLE(v)) {
             intern_string_constants(v);
         }
     }
@@ -138,5 +124,5 @@ void code_dealloc(AiCodeObject *co) {
     XDEC_REFCNT(co->co_filename);
     XDEC_REFCNT(co->co_name);
     XDEC_REFCNT(co->co_lnotab);
-    AiObject_GC_Del(co);
+    AiObject_Del(co);
 }

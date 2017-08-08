@@ -30,7 +30,7 @@ enum stringobject_sstate {
 #define NULL_STRING (AiString_From_String(""))
 
 #define STRING_EQUAL(lhs, rhs)                                      \
-    CHECK_TYPE_STRING(lhs) && CHECK_TYPE_STRING(rhs)                \
+    CHECK_EXACT_TYPE_STRING(lhs) && CHECK_EXACT_TYPE_STRING(rhs)    \
         && !strcmp(STRING_AS_CSTRING(lhs), STRING_AS_CSTRING(rhs))
 
 #define STRING_OBJECT_SIZE (offsetof(AiStringObject, ob_sval) + 1)

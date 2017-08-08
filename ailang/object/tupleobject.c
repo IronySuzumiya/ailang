@@ -1,7 +1,6 @@
 #include "../ailang.h"
 
 static void tuple_dealloc(AiTupleObject *tp);
-static void tuple_print(AiTupleObject *tp, FILE *stream);
 static long tuple_hash(AiTupleObject *v);
 static AiObject *tuple_str(AiTupleObject *tp);
 static int tuple_contains(AiTupleObject *tp, AiObject *item);
@@ -9,10 +8,6 @@ static AiObject *tuple_iter(AiObject *seq);
 
 static AiTupleObject *free_tuples[NUMBER_FREE_TUPLES_MAX];
 static int number_free_tuples[NUMBER_FREE_TUPLES_MAX];
-
-static AiMethodDef tuple_methods[] = {
-    { NULL }
-};
 
 static AiSequenceMethods tuple_as_sequence = {
     (lengthfunc)tuple_size,
@@ -28,37 +23,24 @@ AiTypeObject AiType_Tuple = {
     "tuple",                            /* tp_name */
     sizeof(AiTupleObject),              /* tp_basicsize */
     sizeof(AiObject *),                 /* tp_itemsize */
+
     (destructor)tuple_dealloc,          /* tp_dealloc */
-    (printfunc)tuple_print,             /* tp_print */
     0,                                  /* tp_compare */
+    (hashfunc)tuple_hash,               /* tp_hash */
+    0,                                  /* tp_call */
+    (unaryfunc)tuple_str,               /* tp_str */
+    tuple_iter,                         /* tp_iter */
+    0,                                  /* tp_iternext */
 
     0,                                  /* tp_as_number */
     &tuple_as_sequence,                 /* tp_as_sequence */
     0,                                  /* tp_as_mapping */
 
-    (hashfunc)tuple_hash,               /* tp_hash */
-    0,                                  /* tp_call */
-    (unaryfunc)tuple_str,               /* tp_str */
-
-    0,//AiObject_Generic_Getattr,             /* tp_getattro */
-    0,                                  /* tp_setattro */
-
-    SUBCLASS_TUPLE | BASE_TYPE,         /* tp_flags */
-
-    tuple_iter,                         /* tp_iter */
-    0,                                  /* tp_iternext */
-
-    tuple_methods,                      /* tp_methods */
-    0,                                  /* tp_members */
-
     0,                                  /* tp_base */
     0,                                  /* tp_dict */
-    0,                                  /* tp_descr_get */
-    0,                                  /* tp_descr_set */
-    0,                                  /* tp_init */
-    0,                                  /* tp_alloc */
     0,//AiTuple_New,                          /* tp_new */
-    AiObject_GC_Del,                    /* tp_free */
+    0,                                  /* tp_init */
+    AiObject_Del,                       /* tp_free */
 };
 
 AiObject *AiTuple_New(ssize_t size) {
@@ -152,7 +134,8 @@ AiObject *AiTuple_Pack(ssize_t argc, ...) {
 }
 
 ssize_t tuple_size(AiTupleObject *tp) {
-    return CHECK_TYPE_TUPLE(tp) ? TUPLE_SIZE(tp) : tp->ob_type->tp_as_sequence->sq_length((AiObject *)tp);
+    return CHECK_EXACT_TYPE_TUPLE(tp) ?
+        TUPLE_SIZE(tp) : tp->ob_type->tp_as_sequence->sq_length((AiObject *)tp);
 }
 
 void tuple_dealloc(AiTupleObject *tp) {
@@ -171,20 +154,6 @@ void tuple_dealloc(AiTupleObject *tp) {
     else {
         OB_FREE(tp);
     }
-}
-
-void tuple_print(AiTupleObject *tp, FILE *stream) {
-    fputs("(", stream);
-    if (tp->ob_item && TUPLE_SIZE(tp) > 0) {
-        for (ssize_t i = 0; i < TUPLE_SIZE(tp) - 1; ++i) {
-            if (!tp->ob_item[i])
-                continue;
-            OB_PRINT(tp->ob_item[i], stream);
-            fputs(", ", stream);
-        }
-        OB_PRINT(tp->ob_item[TUPLE_SIZE(tp) - 1], stream);
-    }
-    fputs(")", stream);
 }
 
 long tuple_hash(AiTupleObject *v) {

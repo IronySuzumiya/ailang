@@ -10,28 +10,18 @@ AiTypeObject AiType_Frame = {
     "frame",                            /* tp_name */
     sizeof(AiFrameObject),              /* tp_basicsize */
     sizeof(AiObject *),                 /* tp_itemsize */
+
     (destructor)frame_dealloc,          /* tp_dealloc */
-    0,                                  /* tp_print */
     0,                                  /* tp_compare */
+    0,                                  /* tp_hash */
+    0,                                  /* tp_call */
+    0,                                  /* tp_str */
+    0,                                  /* tp_iter */
+    0,                                  /* tp_iternext */
 
     0,                                  /* tp_as_number */
     0,                                  /* tp_as_sequence */
     0,                                  /* tp_as_mapping */
-
-    0,                                  /* tp_hash */
-    0,                                  /* tp_call */
-    0,                                  /* tp_str */
-
-    0,//AiObject_Generic_Getattr,             /* tp_getattro */
-    0,//AiObject_Generic_Setattr,             /* tp_setattro */
-
-    0,                                  /* tp_flags */
-
-    0,                                  /* tp_iter */
-    0,                                  /* tp_iternext */
-
-    0,//frame_methods,                      /* tp_methods */
-    0,//frame_memberlist,                   /* tp_members */
 };
 
 AiFrameObject *AiFrame_New(AiThreadState *tstate, AiCodeObject *code,
@@ -48,7 +38,7 @@ AiFrameObject *AiFrame_New(AiThreadState *tstate, AiCodeObject *code,
                 builtins = AiModule_Getdict((AiModuleObject *)builtins);
                 INC_REFCNT(builtins);
             }
-            else if (!CHECK_TYPE_DICT(builtins)) {
+            else if (!CHECK_EXACT_TYPE_DICT(builtins)) {
                 builtins = AiDict_New();
             }
         }
@@ -135,5 +125,5 @@ void frame_dealloc(AiFrameObject *f) {
     OB_CLEAR(f->f_locals);
     DEC_REFCNT(f->f_code);
 
-    AiObject_GC_Del(f);
+    AiObject_Del(f);
 }

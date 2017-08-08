@@ -4,17 +4,11 @@ static AiObject *dict_str(AiDictObject *mp);
 static ssize_t dict_size(AiDictObject *mp);
 static int dict_resize(AiDictObject *mp, ssize_t minused);
 static void dict_dealloc(AiDictObject *mp);
-static void dict_print(AiDictObject *mp, FILE *stream);
 
 static AiObject *dummy;
 static AiDictEntry *freeslot;
 static AiDictObject *free_dicts[NUMBER_FREE_DICTS_MAX];
 static int number_free_dicts;
-
-static AiMethodDef dict_methods[] = {
-    { "__getitem__", (AiCFunction)AiDict_GetItem, METH_O },
-    { NULL }
-};
 
 static AiMappingMethods dict_as_mapping = {
     (lengthfunc)dict_size,
@@ -28,37 +22,24 @@ AiTypeObject AiType_Dict = {
     "dict",                                     /* tp_name */
     sizeof(AiDictObject),                       /* tp_basesize */
     0,                                          /* tp_itemsize */
+
     (destructor)dict_dealloc,                   /* tp_dealloc */
-    (printfunc)dict_print,                      /* tp_print */
     0,                                          /* tp_compare */
+    (hashfunc)AiObject_Unhashable,              /* tp_hash */
+    0,                                          /* tp_call */
+    (unaryfunc)dict_str,                        /* tp_str */
+    0,//(unaryfunc)dict_iter,                       /* tp_iter */
+    0,                                          /* tp_iternext */
 
     0,                                          /* tp_as_number */
     0,                                          /* tp_as_sequence */
     &dict_as_mapping,                           /* tp_as_mapping */
 
-    (hashfunc)AiObject_Unhashable,              /* tp_hash */
-    0,                                          /* tp_call */
-    (unaryfunc)dict_str,                        /* tp_str */
-
-    0,//AiObject_Generic_Getattr,                     /* tp_getattro */
-    0,                                          /* tp_setattro */
-
-    SUBCLASS_DICT | BASE_TYPE,                  /* tp_flags */
-
-    0,//(unaryfunc)dict_iter,                       /* tp_iter */
-    0,                                          /* tp_iternext */
-
-    dict_methods,                               /* tp_methods */
-    0,                                          /* tp_members */
-
     0,                                          /* tp_base */
     0,                                          /* tp_dict */
-    0,                                          /* tp_descr_get */
-    0,                                          /* tp_descr_set */
-    0,//dict_init,                                  /* tp_init */
-    0,//AiType_Generic_Alloc,                         /* tp_alloc */
     0,//dict_New,                                   /* tp_new */
-    AiObject_GC_Del,                            /* tp_free */
+    0,//dict_init,                                  /* tp_init */
+    AiObject_Del,                            /* tp_free */
 };
 
 AiObject *dummy;
@@ -109,7 +90,7 @@ AiDictEntry *AiDict_Lookup_String(AiDictObject *mp, AiStringObject *key, long ha
     size_t i = (size_t)(hash & mask);
     AiDictEntry *ep = &mp->ma_table[i];
 
-    if (!CHECK_TYPE_STRING(key)) {
+    if (!CHECK_EXACT_TYPE_STRING(key)) {
         mp->ma_lookup = AiDict_Lookup;
         return AiDict_Lookup(mp, (AiObject *)key, hash);
     }
@@ -171,7 +152,7 @@ AiObject *AiDict_New() {
 AiObject *AiDict_GetItem(AiDictObject *mp, AiObject *key) {
     long hash;
 
-    if (CHECK_TYPE_STRING(key)) {
+    if (CHECK_EXACT_TYPE_STRING(key)) {
         hash = ((AiStringObject *)key)->ob_shash;
         if (hash == -1) {
             hash = string_hash((AiStringObject *)key);
@@ -192,7 +173,7 @@ int AiDict_SetItem(AiDictObject *mp, AiObject *key, AiObject *value) {
     long hash;
     ssize_t used;
 
-    if (CHECK_TYPE_STRING(key)) {
+    if (CHECK_EXACT_TYPE_STRING(key)) {
         hash = ((AiStringObject *)key)->ob_shash;
         if (hash == -1) {
             hash = string_hash((AiStringObject *)key);
@@ -250,7 +231,7 @@ int AiDict_DelItem(AiDictObject *mp, AiObject *key) {
     AiDictEntry *ep;
     AiObject *old_key, *old_value;
 
-    if (!CHECK_TYPE_STRING(key)
+    if (!CHECK_EXACT_TYPE_STRING(key)
         || (hash = ((AiStringObject *)key)->ob_shash) == -1) {
         hash = OBJECT_HASH(key);
         if (hash == -1) {
@@ -305,6 +286,13 @@ AiObject *AiDict_Copy(AiDictObject *o) {
     copy = AiDict_New();
     AiDict_Merge((AiDictObject *)copy, o, 1);
     return copy;
+}
+
+AiObject *AiDict_GetItem_WithString(AiDictObject *dict, char *str) {
+    AiObject *stro = AiString_From_String(str);
+    AiObject *r = AiDict_GetItem(dict, stro);
+    DEC_REFCNT(stro);
+    return r;
 }
 
 AiObject *dict_str(AiDictObject *mp) {
@@ -508,29 +496,4 @@ void dict_dealloc(AiDictObject *mp) {
     else {
         OB_FREE(mp);
     }
-}
-
-void dict_print(AiDictObject *mp, FILE *stream) {
-    AiDictEntry *ep;
-    ssize_t used = DICT_SIZE(mp);
-
-    fputs("{", stream);
-    for (ep = mp->ma_table; used > 1; ++ep) {
-        if (ep->me_key && ep->me_value) {
-            --used;
-            OB_PRINT(ep->me_key, stream);
-            fputs(": ", stream);
-            OB_PRINT(ep->me_value, stream);
-            fputs(", ", stream);
-        }
-    }
-    for (; ; ++ep) {
-        if (ep->me_key && ep->me_value) {
-            OB_PRINT(ep->me_key, stream);
-            fputs(": ", stream);
-            OB_PRINT(ep->me_value, stream);
-            break;
-        }
-    }
-    fputs("}", stream);
 }

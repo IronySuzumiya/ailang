@@ -7,35 +7,21 @@ AiTypeObject AiType_Function = {
     "function",                         /* tp_name */
     sizeof(AiFunctionObject),           /* tp_basicsize */
     0,                                  /* tp_itemsize */
+
     (destructor)function_dealloc,       /* tp_dealloc */
-    0,                                  /* tp_print */
     0,                                  /* tp_compare */
+    0,                                  /* tp_hash */
+    0,//function_call,                      /* tp_call */
+    0,                                  /* tp_str */
+    0,                                  /* tp_iter */
+    0,                                  /* tp_iternext */
 
     0,                                  /* tp_as_number */
     0,                                  /* tp_as_sequence */
     0,                                  /* tp_as_mapping */
 
-    0,                                  /* tp_hash */
-    0,//function_call,                      /* tp_call */
-    0,                                  /* tp_str */
-
-    0,//AiObject_Generic_Getattr,             /* tp_getattro */
-    0,//AiObject_Generic_Setattr,             /* tp_setattro */
-
-    0,                                  /* tp_flags */
-
-    0,                                  /* tp_iter */
-    0,                                  /* tp_iternext */
-
-    0,                                  /* tp_methods */
-    0,//function_memberlist,                /* tp_members */
-
     0,                                  /* tp_base */
     0,                                  /* tp_dict */
-    0,//function_descr_get,                 /* tp_descr_get */
-    0,                                  /* tp_descr_set */
-    0,                                  /* tp_init */
-    0,                                  /* tp_alloc */
     0,//function_new,                       /* tp_new */
 };
 
@@ -46,7 +32,6 @@ AiObject *AiFunction_New(AiObject *code, AiObject *globals) {
     AiObject *module;
     AiFunctionObject *func = AiObject_NEW(AiFunctionObject, &AiType_Function);
 
-    func->func_weakreflist = NULL;
     func->func_code = code;
     INC_REFCNT(code);
     func->func_globals = globals;
@@ -56,17 +41,6 @@ AiObject *AiFunction_New(AiObject *code, AiObject *globals) {
     func->func_defaults = NULL;
     func->func_closure = NULL;
     consts = ((AiCodeObject *)code)->co_consts;
-    if (tuple_size((AiTupleObject *)consts) >= 1) {
-        doc = AiTuple_GetItem((AiTupleObject *)consts, 0);
-        if (!CHECK_TYPE_STRING(doc)) {
-            doc = NONE;
-        }
-    }
-    else {
-        doc = NONE;
-    }
-    INC_REFCNT(doc);
-    func->func_doc = doc;
     func->func_dict = NULL;
     func->func_module = NULL;
     if (!__name__) {
@@ -85,7 +59,7 @@ int AiFunction_SetDefaults(AiFunctionObject *func, AiObject *defaults) {
     if (defaults == NONE) {
         defaults = NULL;
     }
-    else if (defaults && CHECK_TYPE_TUPLE(defaults)) {
+    else if (defaults && CHECK_EXACT_TYPE_TUPLE(defaults)) {
         INC_REFCNT(defaults);
     }
     else {
@@ -101,7 +75,7 @@ int AiFunction_SetClosure(AiFunctionObject *func, AiObject *closure) {
     if (closure == NONE) {
         closure = NULL;
     }
-    else if (closure && CHECK_TYPE_TUPLE(closure)) {
+    else if (closure && CHECK_EXACT_TYPE_TUPLE(closure)) {
         INC_REFCNT(closure);
     }
     else {
@@ -120,8 +94,7 @@ void function_dealloc(AiFunctionObject *func) {
     XDEC_REFCNT(func->func_module);
     DEC_REFCNT(func->func_name);
     XDEC_REFCNT(func->func_defaults);
-    XDEC_REFCNT(func->func_doc);
     XDEC_REFCNT(func->func_dict);
     XDEC_REFCNT(func->func_closure);
-    AiObject_GC_Del(func);
+    AiObject_Del(func);
 }

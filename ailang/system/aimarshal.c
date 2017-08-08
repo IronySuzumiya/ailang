@@ -108,12 +108,12 @@ void w_object(AiObject *v, AicFile *p) {
     else if (v == AiTRUE) {
         w_byte(TYPE_TRUE, p);
     }
-    else if (CHECK_TYPE_INT(v)) {
+    else if (CHECK_EXACT_TYPE_INT(v)) {
         long x = INT_AS_CLONG(v);
         w_byte(TYPE_INT, p);
         w_long(x, p);
     }
-    else if (CHECK_TYPE_STRING(v)) {
+    else if (CHECK_EXACT_TYPE_STRING(v)) {
         if (p->strings && CHECK_STRING_INTERNED(v)) {
             AiObject *o = AiDict_GetItem((AiDictObject *)p->strings, v);
             if (o) {
@@ -134,7 +134,7 @@ void w_object(AiObject *v, AicFile *p) {
             w_pstring(STRING_AS_CSTRING(v), STRING_LEN(v), p);
         }
     }
-    else if (CHECK_TYPE_LIST(v)) {
+    else if (CHECK_EXACT_TYPE_LIST(v)) {
         ssize_t n;
         w_byte(TYPE_LIST, p);
         n = LIST_SIZE(v);
@@ -143,7 +143,7 @@ void w_object(AiObject *v, AicFile *p) {
             w_object(AiList_GetItem((AiListObject *)v, i), p);
         }
     }
-    else if (CHECK_TYPE_DICT(v)) {
+    else if (CHECK_EXACT_TYPE_DICT(v)) {
         AiDictObject *mp = (AiDictObject *)v;
         AiDictEntry *ep;
         ssize_t fill = mp->ma_fill;

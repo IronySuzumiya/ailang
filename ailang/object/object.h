@@ -138,37 +138,22 @@ typedef struct _typeobject {
     ssize_t tp_itemsize;
 
     destructor tp_dealloc;
-    printfunc tp_print;
     cmpfunc tp_compare;
+    hashfunc tp_hash;
+    ternaryfunc tp_call;
+    unaryfunc tp_str;
+    unaryfunc tp_iter;
+    unaryfunc tp_iternext;
 
     AiNumberMethods *tp_as_number;
     AiSequenceMethods *tp_as_sequence;
     AiMappingMethods *tp_as_mapping;
 
-    hashfunc tp_hash;
-    ternaryfunc tp_call;
-    unaryfunc tp_str;
-
-    getattrofunc tp_getattro;
-    setattrofunc tp_setattro;
-
-    long tp_flags;
-
-    unaryfunc tp_iter;
-    unaryfunc tp_iternext;
-
-    struct _methoddef *tp_methods;
-    struct _memberdef *tp_members;
     struct _typeobject *tp_base;
     AiObject *tp_dict;
-    descrgetfunc tp_descr_get;
-    descrsetfunc tp_descr_set;
-    initproc tp_init;
-    allocfunc tp_alloc;
     newfunc tp_new;
+    initproc tp_init;
     freefunc tp_free;
-    AiObject *tp_subclasses;
-    destructor tp_del;
 }
 AiTypeObject;
 
@@ -177,10 +162,22 @@ typedef struct _heaptypeobject {
     AiNumberMethods as_number;
     AiMappingMethods as_mapping;
     AiSequenceMethods as_sequence;
-    AiObject *ht_name;
-    AiObject *ht_slots;
 }
 AiHeapTypeObject;
+
+typedef AiObject *(*AiCFunction)(AiObject *, AiObject *);
+
+typedef struct _Cfunctionobject {
+    AiObject_HEAD
+    AiCFunction func;
+}
+AiCFunctionObject;
+
+typedef struct _slotdef {
+    char *name;
+    AiCFunction *func;
+}
+AiSlotDef;
 
 #define CHECK_TYPE_NONE(a) CHECK_TYPE(a, &AiType_None)
 #define NONE (&none)
@@ -195,20 +192,6 @@ AiAPI_DATA(AiTypeObject) AiType_BaseObject;
 AiAPI_DATA(AiObject) none;
 AiAPI_DATA(AiObject) notimplemented;
 
-#define SUBCLASS_INT        (1L<<0)
-#define SUBCLASS_FLOAT      (1L<<1)
-#define SUBCLASS_LIST       (1L<<2)
-#define SUBCLASS_TUPLE      (1L<<3)
-#define SUBCLASS_STRING     (1L<<4)
-#define SUBCLASS_DICT       (1L<<5)
-#define SUBCLASS_BASEEXC    (1L<<6)
-#define SUBCLASS_TYPE       (1L<<7)
-
-#define BASE_TYPE           (1L<<8)
-#define HEAP_TYPE           (1L<<9)
-
-#define CHECK_FAST_SUBCLASS(ob, base) ((ob)->ob_type->tp_flags & (base))
-#define CHECK_TYPE_TYPE(a) CHECK_FAST_SUBCLASS(a, SUBCLASS_TYPE)
 #define CHECK_EXACT_TYPE_TYPE(a) (OB_TYPE(a) == &AiType_Type)
 
 #define AiHeapType_GET_MEMBERS(etype)   \
@@ -217,7 +200,5 @@ AiAPI_DATA(AiObject) notimplemented;
 AiAPI_DATA(AiTypeObject) AiType_Type;
 AiAPI_FUNC(int) AiType_Ready(AiTypeObject *type);
 AiAPI_FUNC(AiObject *) AiType_Generic_Alloc(AiTypeObject *type, ssize_t nitems);
-AiAPI_FUNC(int) AiType_IsSubclass(AiTypeObject *type, AiTypeObject *base);
-AiAPI_FUNC(AiObject *) _AiType_Lookup(AiTypeObject *type, AiObject *name);
 
 #endif

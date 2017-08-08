@@ -10,8 +10,8 @@
 #define AiMem_Copy              mem_copy
 #define AiMem_Set               mem_set
 #define AiObject_Malloc         mem_alloc
-#define AiObject_GC_Del         AiMem_Free
-#define AiObject_GC_Free        AiMem_Free
+#define AiObject_Del            AiMem_Free
+#define AiObject_Free           AiMem_Free
 
 #define AiObject_INIT(ob, type)     \
     (OB_TYPE(ob) = (type), INIT_REFCNT(ob), (ob))

@@ -20,15 +20,9 @@
 #include "system\aiopcode.h"
 
 #include "object\object.h"
-#include "object\classobject.h"
 #include "object\abstract.h"
 #include "system\aimemory.h"
-
-#include "aicore\aistate.h"
-#include "aicore\aimethod.h"
-#include "aicore\aimember.h"
-
-#include "object\descrobject.h"
+#include "system\aistate.h"
 
 #include "object\intobject.h"
 #include "object\boolobject.h"

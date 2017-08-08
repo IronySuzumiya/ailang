@@ -30,10 +30,6 @@ static AiIntBlock *block_list;
 static AiIntObject *free_list;
 static AiIntObject *small_intobject_buf[SMALL_INTOBJECT_BUF_SIZE];
 
-static AiMethodDef int_methods[] = {
-    { NULL }
-};
-
 static AiNumberMethods int_as_number = {
     (binaryfunc)int_add,
     (binaryfunc)int_sub,
@@ -65,35 +61,21 @@ AiTypeObject AiType_Int = {
     "int",                          /* tp_name */
     sizeof(AiIntObject),            /* tp_basicsize */
     0,                              /* tp_itemsize */
+
     (destructor)int_dealloc,        /* tp_dealloc */
-    (printfunc)int_print,           /* tp_print */
     (cmpfunc)int_compare,           /* tp_compare */
+    (hashfunc)int_hash,             /* tp_hash */
+    0,                              /* tp_call */
+    (unaryfunc)int_str,             /* tp_str */
+    0,                              /* tp_iter */
+    0,                              /* tp_iternext */
 
     &int_as_number,                 /* tp_as_number */
     0,                              /* tp_as_sequence */
     0,                              /* tp_as_mapping */
 
-    (hashfunc)int_hash,             /* tp_hash */
-    0,                              /* tp_call */
-    (unaryfunc)int_str,             /* tp_str */
-
-    0,//AiObject_Generic_Getattr,         /* tp_getattro */
-    0,                              /* tp_setattro */
-
-    SUBCLASS_INT | BASE_TYPE,       /* tp_flags */
-
-    0,                              /* tp_iter */
-    0,                              /* tp_iternext */
-
-    int_methods,                    /* tp_methods */
-    0,                              /* tp_members */
-
     0,                              /* tp_base */
     0,                              /* tp_dict */
-    0,                              /* tp_descr_get */
-    0,                              /* tp_descr_set */
-    0,                              /* tp_init */
-    0,                              /* tp_alloc */
     0,//int_new,                        /* tp_new */
 };
 
@@ -216,7 +198,7 @@ AiObject *int_mul(AiIntObject *lhs, AiIntObject *rhs) {
 }
 
 AiObject *int_div(AiIntObject *lhs, AiIntObject *rhs) {
-    if (CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs)) {
+    if (CHECK_EXACT_TYPE_INT(lhs) && CHECK_EXACT_TYPE_INT(rhs)) {
         if (rhs->ob_ival) {
             return AiInt_From_Long(lhs->ob_ival / rhs->ob_ival);
         }
@@ -232,7 +214,7 @@ AiObject *int_div(AiIntObject *lhs, AiIntObject *rhs) {
 }
 
 AiObject *int_mod(AiIntObject *lhs, AiIntObject *rhs) {
-    if (CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs)) {
+    if (CHECK_EXACT_TYPE_INT(lhs) && CHECK_EXACT_TYPE_INT(rhs)) {
         if (rhs->ob_ival) {
             return AiInt_From_Long(lhs->ob_ival % rhs->ob_ival);
         }
@@ -248,7 +230,7 @@ AiObject *int_mod(AiIntObject *lhs, AiIntObject *rhs) {
 }
 
 AiObject *int_pow(AiIntObject *lhs, AiIntObject *rhs) {
-    if (CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs)) {
+    if (CHECK_EXACT_TYPE_INT(lhs) && CHECK_EXACT_TYPE_INT(rhs)) {
         return AiInt_From_Long((long)pow(lhs->ob_ival, rhs->ob_ival));
     }
     else {
@@ -258,7 +240,7 @@ AiObject *int_pow(AiIntObject *lhs, AiIntObject *rhs) {
 }
 
 AiObject *int_pos(AiIntObject *ob) {
-    if (CHECK_TYPE_INT(ob)) {
+    if (CHECK_EXACT_TYPE_INT(ob)) {
         return AiInt_From_Long(ob->ob_ival);
     }
     else {
@@ -268,7 +250,7 @@ AiObject *int_pos(AiIntObject *ob) {
 }
 
 AiObject *int_neg(AiIntObject *ob) {
-    if (CHECK_TYPE_INT(ob)) {
+    if (CHECK_EXACT_TYPE_INT(ob)) {
         return AiInt_From_Long(-ob->ob_ival);
     }
     else {
@@ -278,7 +260,7 @@ AiObject *int_neg(AiIntObject *ob) {
 }
 
 AiObject *int_abs(AiIntObject *ob) {
-    if (CHECK_TYPE_INT(ob)) {
+    if (CHECK_EXACT_TYPE_INT(ob)) {
         return AiInt_From_Long(ob->ob_ival >= 0 ? ob->ob_ival : -ob->ob_ival);
     }
     else {
@@ -288,7 +270,7 @@ AiObject *int_abs(AiIntObject *ob) {
 }
 
 int int_nonzero(AiIntObject *ob) {
-    if (CHECK_TYPE_INT(ob)) {
+    if (CHECK_EXACT_TYPE_INT(ob)) {
         return ob->ob_ival ? 1 : 0;
     }
     else {

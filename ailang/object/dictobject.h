@@ -48,6 +48,9 @@ AiDictObject;
 
 #define DICT_SIZE(ob) (((AiDictObject *)(ob))->ma_used)
 
+#define DICT_GETITEM(dict, key) AiDict_GetItem((AiDictObject *)(dict), (key))
+#define DICT_GETITEM_WITHSTRING(dict, str) AiDict_GetItem_WithString((AiDictObject *)(dict), (str))
+
 AiAPI_DATA(AiTypeObject) AiType_Dict;
 AiAPI_FUNC(AiDictEntry *) AiDict_Lookup(AiDictObject *mp, AiObject *key, long hash);
 AiAPI_FUNC(AiDictEntry *) AiDict_Lookup_String(AiDictObject *mp, AiStringObject *key, long hash);
@@ -58,6 +61,7 @@ AiAPI_FUNC(int) AiDict_Insert(AiDictObject *mp, AiObject *key, long hash, AiObje
 AiAPI_FUNC(int) AiDict_DelItem(AiDictObject *mp, AiObject *key);
 AiAPI_FUNC(int) AiDict_Merge(AiDictObject *dist, AiDictObject *src, int override);
 AiAPI_FUNC(AiObject *) AiDict_Copy(AiDictObject *o);
+AiAPI_FUNC(AiObject *) AiDict_GetItem_WithString(AiDictObject *dict, char *str);
 
 AiAPI_FUNC(int) AiDict_ClearAllMemory(void);
 

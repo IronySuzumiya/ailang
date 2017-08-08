@@ -26,14 +26,13 @@ typedef struct _intblock {
 }
 AiIntBlock;
 
-#define CHECK_TYPE_INT(a) CHECK_FAST_SUBCLASS(a, SUBCLASS_INT)
 #define CHECK_EXACT_TYPE_INT(a) CHECK_TYPE(a, &AiType_Int)
 
 #define INT_UNARY_WITH_CHECK(ob, op)                                \
-    (CHECK_TYPE_INT(ob) ? AiInt_From_Long(op (ob)->ob_ival) : NULL)
+    (CHECK_EXACT_TYPE_INT(ob) ? AiInt_From_Long(op (ob)->ob_ival) : NULL)
 
 #define INT_BINARY_WITH_CHECK(lhs, rhs, op)                         \
-    (CHECK_TYPE_INT(lhs) && CHECK_TYPE_INT(rhs) ?                   \
+    (CHECK_EXACT_TYPE_INT(lhs) && CHECK_EXACT_TYPE_INT(rhs) ?       \
         AiInt_From_Long((lhs)->ob_ival op (rhs)->ob_ival) : NULL)
 
 #define INT_TO_CSTRING_BUFFER_SIZE 33

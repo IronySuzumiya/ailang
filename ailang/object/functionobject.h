@@ -10,10 +10,8 @@ typedef struct _functionobject {
     AiObject *func_globals;
     AiObject *func_defaults;
     AiObject *func_closure;
-    AiObject *func_doc;
     AiObject *func_name;
     AiObject *func_dict;
-    AiObject *func_weakreflist;
     AiObject *func_module;
 }
 AiFunctionObject;

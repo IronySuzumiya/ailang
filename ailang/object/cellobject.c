@@ -8,28 +8,9 @@ AiTypeObject AiType_Cell = {
     "cell",                             /* tp_name */
     sizeof(AiCellObject),               /* tp_basesize */
     0,                                  /* tp_itemsize */
+
     (destructor)cell_dealloc,           /* tp_dealloc */
-    0,                                  /* tp_print */
     (cmpfunc)cell_compare,              /* tp_compare */
-
-    0,                                  /* tp_as_number */
-    0,                                  /* tp_as_sequence */
-    0,                                  /* tp_as_mapping */
-
-    0,                                  /* tp_hash */
-    0,                                  /* tp_call */
-    0,                                  /* tp_str */
-
-    0,//AiObject_Generic_Getattr,             /* tp_getattro */
-    0,                                  /* tp_setattro */
-
-    0,                                  /* tp_flags */
-
-    0,                                  /* tp_iter */
-    0,                                  /* tp_iternext */
-
-    0,                                  /* tp_methods */
-    0,                                  /* tp_members */
 };
 
 AiObject *AiCell_New(AiObject *ob) {
@@ -64,7 +45,7 @@ int AiCell_Set(AiCellObject *cell, AiObject *ob) {
 
 void cell_dealloc(AiCellObject *cell) {
     XDEC_REFCNT(CELL_GET(cell));
-    AiObject_GC_Del(cell);
+    AiObject_Del(cell);
 }
 
 int cell_compare(AiCellObject *lhs, AiCellObject *rhs) {

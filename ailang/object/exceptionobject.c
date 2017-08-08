@@ -67,7 +67,7 @@ int AiExceptionClass_Check(AiObject *exception) {
 }
 
 int AiException_Matches(AiObject *err, AiObject *exc) {
-    if (CHECK_TYPE_TUPLE(exc)) {
+    if (CHECK_EXACT_TYPE_TUPLE(exc)) {
         for (ssize_t i = 0; i < TUPLE_SIZE(exc); ++i) {
             if (AiException_Matches(err, TUPLE_GETITEM(exc, i))) {
                 return 1;

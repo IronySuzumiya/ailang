@@ -17,9 +17,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="aicore">
-      <UniqueIdentifier>{d00a58e8-3160-422f-b582-b3b636a5b4d8}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\test.c">
@@ -85,20 +82,8 @@
     <ClCompile Include="system\aimarshal.c">
       <Filter>system</Filter>
     </ClCompile>
-    <ClCompile Include="object\descrobject.c">
-      <Filter>object</Filter>
-    </ClCompile>
-    <ClCompile Include="aicore\aistate.c">
-      <Filter>aicore</Filter>
-    </ClCompile>
-    <ClCompile Include="aicore\aimember.c">
-      <Filter>aicore</Filter>
-    </ClCompile>
-    <ClCompile Include="aicore\aimethod.c">
-      <Filter>aicore</Filter>
-    </ClCompile>
-    <ClCompile Include="object\classobject.c">
-      <Filter>object</Filter>
+    <ClCompile Include="system\aistate.c">
+      <Filter>system</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -168,19 +153,7 @@
     <ClInclude Include="object\tupleobject.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="object\descrobject.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="aicore\aistate.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="aicore\aimember.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="aicore\aimethod.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="object\classobject.h">
+    <ClInclude Include="system\aistate.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

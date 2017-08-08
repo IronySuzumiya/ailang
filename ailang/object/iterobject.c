@@ -9,27 +9,14 @@ AiTypeObject AiType_Seqiter = {
     "iterator",                         /* tp_name */
     sizeof(AiSeqiterObject),               /* tp_basicsize */
     0,                                  /* tp_itemsize */
+
     (destructor)iter_dealloc,           /* tp_dealloc */
-    0,                                  /* tp_print */
     0,                                  /* tp_compare */
-
-    0,                                  /* tp_as_number */
-    0,                                  /* tp_as_sequence */
-    0,                                  /* tp_as_mapping */
-
     0,                                  /* tp_hash */
     0,                                  /* tp_call */
     0,                                  /* tp_str */
-
-    0,//AiObject_Generic_Getattr,             /* tp_getattro */
-    0,                                  /* tp_setattro */
-
-    0,                                  /* tp_flags */
-
     (unaryfunc)iter_iter,               /* tp_iter */
     (unaryfunc)seqiter_iternext,           /* tp_iternext */
-
-    0,//iter_methods,                       /* tp_methods */
 };
 
 AiObject *AiSeqiter_New(AiObject *seq) {

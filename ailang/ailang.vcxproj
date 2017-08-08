@@ -139,15 +139,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="aicore\aistate.c" />
-    <ClCompile Include="aicore\aimember.c" />
-    <ClCompile Include="aicore\aimethod.c" />
     <ClCompile Include="object\abstract.c" />
     <ClCompile Include="object\boolobject.c" />
     <ClCompile Include="object\cellobject.c" />
-    <ClCompile Include="object\classobject.c" />
     <ClCompile Include="object\codeobject.c" />
-    <ClCompile Include="object\descrobject.c" />
     <ClCompile Include="object\dictobject.c" />
     <ClCompile Include="object\exceptionobject.c" />
     <ClCompile Include="object\frameobject.c" />
@@ -164,20 +159,16 @@
     <ClCompile Include="system\aieval.c" />
     <ClCompile Include="system\aimemory.c" />
     <ClCompile Include="system\aimarshal.c" />
+    <ClCompile Include="system\aistate.c" />
     <ClCompile Include="test\test.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aiconfig.h" />
-    <ClInclude Include="aicore\aistate.h" />
-    <ClInclude Include="aicore\aimember.h" />
-    <ClInclude Include="aicore\aimethod.h" />
     <ClInclude Include="ailang.h" />
     <ClInclude Include="object\abstract.h" />
     <ClInclude Include="object\boolobject.h" />
     <ClInclude Include="object\cellobject.h" />
-    <ClInclude Include="object\classobject.h" />
     <ClInclude Include="object\codeobject.h" />
-    <ClInclude Include="object\descrobject.h" />
     <ClInclude Include="object\dictobject.h" />
     <ClInclude Include="object\exceptionobject.h" />
     <ClInclude Include="object\frameobject.h" />
@@ -194,6 +185,7 @@
     <ClInclude Include="system\aimemory.h" />
     <ClInclude Include="system\aiopcode.h" />
     <ClInclude Include="system\aimarshal.h" />
+    <ClInclude Include="system\aistate.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

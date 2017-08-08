@@ -2,7 +2,6 @@
 
 static int list_resize(AiListObject *list, ssize_t newsize);
 static void list_dealloc(AiListObject *list);
-static void list_print(AiListObject *list, FILE *stream);
 static int list_compare(AiListObject *lhs, AiListObject *rhs);
 static ssize_t list_size(AiListObject *list);
 static AiObject *list_slice(AiListObject *list, ssize_t start, ssize_t end);
@@ -14,14 +13,6 @@ static AiObject *list_iter(AiObject *seq);
 
 static AiListObject *free_lists[NUMBER_FREE_LISTS_MAX];
 static int number_free_lists;
-
-static AiMethodDef list_methods[] = {
-    { "__getitem__", (AiCFunction)AiList_GetItem, METH_O },
-    { "append", (AiCFunction)list_append, METH_O },
-    { "insert", (AiCFunction)list_insert, METH_VARARGS },
-    { "extend", (AiCFunction)list_extend, METH_O },
-    { NULL }
-};
 
 static AiSequenceMethods list_as_sequence = {
     (lengthfunc)list_size,
@@ -37,37 +28,24 @@ AiTypeObject AiType_List = {
     "list",                             /* tp_name */
     sizeof(AiListObject),               /* tp_basesize */
     0,                                  /* tp_itemsize */
+
     (destructor)list_dealloc,           /* tp_dealloc */
-    (printfunc)list_print,              /* tp_print */
     (cmpfunc)list_compare,              /* tp_compare */
+    (hashfunc)AiObject_Unhashable,      /* tp_hash */
+    0,                                  /* tp_call */
+    (unaryfunc)list_str,                /* tp_str */
+    list_iter,                          /* tp_iter */
+    0,                                  /* tp_iternext */
 
     0,                                  /* tp_as_number */
     &list_as_sequence,                  /* tp_as_sequence */
     0,                                  /* tp_as_mapping */
 
-    (hashfunc)AiObject_Unhashable,      /* tp_hash */
-    0,                                  /* tp_call */
-    (unaryfunc)list_str,                /* tp_str */
-
-    0,//AiObject_Generic_Getattr,             /* tp_getattro */
-    0,                                  /* tp_setattro */
-
-    SUBCLASS_LIST | BASE_TYPE,          /* tp_flags */
-
-    list_iter,                          /* tp_iter */
-    0,                                  /* tp_iternext */
-
-    list_methods,                       /* tp_methods */
-    0,                                  /* tp_members */
-
     0,                                  /* tp_base */
     0,                                  /* tp_dict */
-    0,                                  /* tp_descr_get */
-    0,                                  /* tp_descr_set */
-    0,//(initproc)list_init,                /* tp_init */
-    0,//AiType_Generic_Alloc,                 /* tp_alloc */
     0,//type_generic_new                    /* tp_new */
-    AiObject_GC_Del,                    /* tp_free */
+    0,//(initproc)list_init,                /* tp_init */
+    AiObject_Del,                       /* tp_free */
 };
 
 AiObject * AiList_New(ssize_t size) {
@@ -241,7 +219,7 @@ int list_append(AiListObject *list, AiObject *item) {
 }
 
 int list_extend(AiListObject *fo, AiListObject *la) {
-    if (CHECK_TYPE_LIST(fo) && CHECK_TYPE_LIST(la)) {
+    if (CHECK_EXACT_TYPE_LIST(fo) && CHECK_EXACT_TYPE_LIST(la)) {
         ssize_t fo_size = LIST_SIZE(fo), la_size = LIST_SIZE(la);
         list_resize(fo, fo_size + la_size);
         for (ssize_t i = 0; i < la_size; ++i) {
@@ -264,7 +242,7 @@ int AiList_ClearAllMemory() {
 }
 
 ssize_t list_size(AiListObject *list) {
-    return CHECK_TYPE_LIST(list) ? LIST_SIZE(list) : list->ob_type->tp_as_sequence->sq_length((AiObject *)list);
+    return CHECK_EXACT_TYPE_LIST(list) ? LIST_SIZE(list) : list->ob_type->tp_as_sequence->sq_length((AiObject *)list);
 }
 
 void list_dealloc(AiListObject *list) {
@@ -280,20 +258,6 @@ void list_dealloc(AiListObject *list) {
     else {
         OB_FREE(list);
     }
-}
-
-void list_print(AiListObject *list, FILE *stream) {
-    fputs("[", stream);
-    if (list->ob_item && LIST_SIZE(list) > 0) {
-        for (ssize_t i = 0; i < LIST_SIZE(list) - 1; ++i) {
-            if (!list->ob_item[i])
-                continue;
-            OB_PRINT(list->ob_item[i], stream);
-            fputs(", ", stream);
-        }
-        OB_PRINT(list->ob_item[LIST_SIZE(list) - 1], stream);
-    }
-    fputs("]", stream);
 }
 
 int list_compare(AiListObject *lhs, AiListObject *rhs) {

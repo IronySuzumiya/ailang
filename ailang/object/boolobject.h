@@ -19,5 +19,6 @@ AiAPI_DATA(AiTypeObject) AiType_Bool;
 AiAPI_DATA(AiBoolObject *) aitrue;
 AiAPI_DATA(AiBoolObject *) aifalse;
 AiAPI_FUNC(AiObject *) AiBool_From_Long(long ival);
+AiAPI_FUNC(AiObject *) AiBool_Ready(void);
 
 #endif

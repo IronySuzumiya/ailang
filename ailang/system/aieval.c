@@ -283,7 +283,7 @@ AiObject *Eval_Frame(AiFrameObject *f) {
 
         case END_FINALLY:
             v = POP();
-            if (CHECK_TYPE_INT(v)) {
+            if (CHECK_EXACT_TYPE_INT(v)) {
                 why = INT_AS_CLONG(v);
                 if (why == WHY_RETURN
                     || why == WHY_CONTINUE) {
@@ -291,7 +291,7 @@ AiObject *Eval_Frame(AiFrameObject *f) {
                 }
                 DEC_REFCNT(v);
             }
-            else if (AiExceptionClass_Check(v) || CHECK_TYPE_STRING(v)) {
+            else if (AiExceptionClass_Check(v) || CHECK_EXACT_TYPE_STRING(v)) {
                 w = POP();
                 u = POP();
                 AiException_Restore(v, w, u);
@@ -817,7 +817,7 @@ AiObject *Eval_Code(AiCodeObject *co, AiObject *globals, AiObject *locals,
             keyword = kws[2 * i];
             value = kws[2 * i + 1];
             kw_found = 0;
-            if (!keyword || !CHECK_TYPE_STRING(keyword)) {
+            if (!keyword || !CHECK_EXACT_TYPE_STRING(keyword)) {
                 TYPE_ERROR("function '%s' keywords must be strings",
                     STRING_AS_CSTRING(co->co_name));
                 goto fail;
@@ -955,7 +955,7 @@ enum why_code do_raise(AiObject *type, AiObject *value, AiObject *tb) {
     if (!value) {
         value = GET_NONE();
     }
-    while (CHECK_TYPE_TUPLE(type) && TUPLE_SIZE(type) > 0) {
+    while (CHECK_EXACT_TYPE_TUPLE(type) && TUPLE_SIZE(type) > 0) {
         AiObject *tmp = type;
         type = TUPLE_GETITEM(type, 0);
         INC_REFCNT(type);
@@ -1016,7 +1016,7 @@ AiObject *fast_function(AiObject *func, AiObject ***pp_stack, int n, int na, int
         return retval;
     }
     else if (argdefs) {
-        if (!CHECK_TYPE_TUPLE(argdefs)) {
+        if (!CHECK_EXACT_TYPE_TUPLE(argdefs)) {
             FATAL_ERROR("argdefaults should be given as a tuple");
         }
         d = &TUPLE_GETITEM(argdefs, 0);
